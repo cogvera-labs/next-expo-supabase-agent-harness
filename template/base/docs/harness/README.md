@@ -5,6 +5,21 @@ citation in the codebase. It explains **why** each enforcement mechanism exists,
 script implements it**, and **where the honest limits are**. The per-gate reference lives
 in [gates-catalog.md](./gates-catalog.md).
 
+## Start here
+
+- **First run:** [the first-run runbook](../runbooks/first-run.md) goes from `init` to the
+  first Claude Code turn that ends green.
+- **Local development:** [the local-development runbook](../runbooks/local-development.md)
+  starts the database, the web app and the mobile app in order, with a port table.
+- **Enforcement tiers:** [enforcement-tiers.md](./enforcement-tiers.md) says where each
+  enforcement layer stops and what stands in for it.
+- **Gates catalog:** [gates-catalog.md](./gates-catalog.md) gives each gate a section: the
+  code that runs it, what it checks and how to watch it fail.
+- **Upgrades:** [the upgrade runbook](../runbooks/harness-upgrade.md) covers what to do
+  after an `update`: the version-ramped checks and the notes for each release.
+- **Decisions:** the architecture decision records are in [`docs/adr/`](../adr/), starting
+  with [org-scoped tenancy](../adr/20260201-org-scoped-tenancy.md), the authorization model.
+
 ## The gate is the enforcement
 
 The one-sentence thesis: **quality is a deterministic gate, not a request.** Memory files
@@ -464,8 +479,13 @@ Doctrine notes for the citations:
   bearer token and can send any request it likes; the OS keychain, the app scheme, and
   store review are containment, never authorization. THE authorization boundary is
   **RLS at the database**, not a code wrapper: every exposed table is `ENABLE` +
-  `FORCE ROW LEVEL SECURITY` with `owner_id = (select auth.uid())` policies, and
-  `auth.uid()` reads the request's `request.jwt.claims`. The DAL
+  `FORCE ROW LEVEL SECURITY`, and a tenant table's per-operation policies scope it by
+  `org_id` through the membership helpers: `org_id = ANY((SELECT
+  private.member_org_ids())::uuid[])` to read, the `private.member_ranks()` rank floor to
+  write, never a per-user `owner_id = (SELECT auth.uid())` scope
+  ([org-scoped tenancy](../adr/20260201-org-scoped-tenancy.md); the `tenancy` gate holds
+  the forms). The helpers resolve the caller from `auth.uid()`, which reads the request's
+  `request.jwt.claims`. The DAL
   (`packages/verticals/<name>/src/data/*.ts`) reaches Postgres only through a
   request-scoped supabase-js client built from the caller's JWT — PostgREST, never a raw
   SQL wrapper — and re-parses every row against the vertical's zod contract at its EXIT
@@ -523,17 +543,22 @@ database on the first `pnpm db:up` or on `pnpm db:reset`, and a stopped stack ke
 data. When nothing either suite reads has changed since its last green run, it prints
 `rls-isolation: STAMPED` instead (see Stamped gates). Per `ISOLATION_TARGETS` entry:
 
-- **Seeded positive control** — user A sees its OWN row first. Without this, a deny-all
+- **Seeded positive control** — tenant A sees its OWN rows first. Without this, a deny-all
   database would pass every negative assertion vacuously. The same doctrine applies to
   the mid-turn `rls_verify` MCP probe.
-- Cross-user SELECT returns **zero rows, no error**; cross-user UPDATE/DELETE match
-  **0 rows**; INSERT smuggling the other user's id fails with **SQLSTATE 42501**; the
+- **Org-scope controls** (the pgTAP suite) — a colleague's row in the SAME org is
+  visible, because a policy tightened to a per-user scope would hide it while every
+  cross-tenant assertion still passed; and each rank floor is exercised both ways, rank R
+  succeeding and rank R−1 failing.
+- Cross-tenant SELECT returns **zero rows, no error**; cross-tenant UPDATE/DELETE match
+  **0 rows**; INSERT smuggling another tenant's scope fails with **SQLSTATE 42501**; the
   victim's data is untouched afterwards.
 - **GUC-leak detector** — pool `max: 1` ON PURPOSE: after an impersonated transaction,
   the SAME physical connection must have no identity. Connection rotation would hide
   exactly the session-GUC bug class this exists to catch.
 - **Catalog gate** — facts from `pg_catalog`, not vibes: FORCE RLS flags, per-operation
-  policies, leading-column owner indexes, patched pgvector, non-BYPASSRLS role.
+  policies, an index led by each table's scope column (`org_id` on a tenant table),
+  patched pgvector, non-BYPASSRLS role.
 - **Index shape, asserted statically** — the tenant index must carry the ORDERING, not just
   the filter: `(org_id, <ORDER BY columns, direction>)`, so one index serves the policy,
   the sort and the cursor range. The pgTAP structural suite and the `schema-rls` gate read
@@ -780,8 +805,9 @@ What this harness claims, precisely:
   forms; obfuscation can evade them. The permission deny list, the read-only reviewer
   construction, and CI are the layers that do not depend on pattern-matching.
 - **RLS is the data boundary; everything client-side is UX.** A compromised app binary
-  can send any request it likes — it still authenticates as one user and FORCE RLS
-  bounds the blast radius to that user's rows.
+  can send any request it likes — it still authenticates as one user, and FORCE RLS
+  bounds the blast radius to what that user's memberships admit: their orgs' rows, and
+  only the writes their rank allows.
 - **The Stop chain contains no on-device proof, and the a11y floor is lint + component
   tests, not a browser sweep.** Both stated in full in the gates catalog's
   "Honest losses" — read it before trusting a green chain to mean "works on a phone".

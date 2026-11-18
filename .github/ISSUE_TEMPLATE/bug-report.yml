@@ -50,7 +50,7 @@ body:
     attributes:
       label: Environment
       value: |
-        - harness version (`.harness/manifest.json` → `version`, or the tag):
+        - harness version (`.harness/manifest.json` → `harnessVersion`, or the tag):
         - OS + arch:
         - node / pnpm:
     validations:

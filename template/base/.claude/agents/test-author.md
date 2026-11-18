@@ -29,8 +29,8 @@ file or call `defineWorkspace` — the write-guard denies it (single gate surfac
 
 Coverage you must produce per slice:
 
-1. **RLS isolation — the keystone, proven twice.** For every new user-scoped
-   table, add a row to `ISOLATION_TARGETS` in `tests/rls/db-context.ts`
+1. **RLS isolation — the keystone, proven twice.** For every new table, add a
+   row to `ISOLATION_TARGETS` in `tests/rls/db-context.ts`
    (`{ table, ownerColumn, seedRow }`) AND to `rls_targets` in
    `supabase/tests/rls_structure.test.sql` — the `schema-rls` gate holds the two in
    sync.

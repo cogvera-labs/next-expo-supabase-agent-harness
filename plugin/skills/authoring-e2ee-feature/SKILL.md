@@ -11,8 +11,8 @@ argument-hint: "[feature-name]"
 
 # Authoring an E2EE feature
 
-Encryption sits ON TOP of the authorization boundary, never in place of it: RLS keyed on
-`auth.uid()` still decides which rows a caller may read, and `@app/crypto` decides whether
+Encryption sits ON TOP of the authorization boundary, never in place of it: RLS scoped by
+`org_id` still decides which rows a caller may read, and `@app/crypto` decides whether
 the bytes mean anything once read. Everything in the `authoring-vertical-slice` recipe still
 applies — migration, RLS, `./client` read, procedure, both screens, tests, provenance, green
 gate. This recipe is what that slice gains when a column must be unreadable to the server,
@@ -106,8 +106,8 @@ Two `bytea` columns per encrypted field, both `NOT NULL`:
 Everything else is EXACTLY the ordinary table, because RLS is still the authorization
 boundary and an encrypted table gets no relief from it. In the SAME migration: `ENABLE` +
 `FORCE ROW LEVEL SECURITY`, four per-operation policies `TO authenticated` (never `FOR ALL`,
-never `TO public`) using only the two legal predicate shapes over `org_id`, a leading-column
-owner index that carries the ORDERING as well as the filter, `REVOKE ALL` from `anon`,
+never `TO public`) using only the two legal predicate shapes over `org_id`, a leading
+`org_id` index that carries the ORDERING as well as the filter, `REVOKE ALL` from `anon`,
 `service_role` and `authenticated` (the platform default grants all three, and a GRANT removes
 nothing), then the explicit `GRANT` per operation the policies admit (and
 `node tools/gen-grant-assertions.mjs` to regenerate the exact-privilege assertions, never by

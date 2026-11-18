@@ -20,11 +20,9 @@ upload keystores, Vercel tokens) in a report.
 If you have not heard anything within the acknowledgement window, assume the
 mail went astray and escalate through the advisory form.
 
-These are the same targets `template/base/SECURITY.md` has shipped to every
-scaffolded project since v0.9.0. Until 0.10.0 this file named a reporting
-channel and no times at all — so the harness asked its consumers to make a
-commitment it had not made itself. That asymmetry, not an absence, is what the
-register carried as `vuln-response-sla`, and this section is its discharge.
+These are the same targets that
+[template/base/SECURITY.md](template/base/SECURITY.md) gives every scaffolded
+project, so the harness holds itself to what it asks of its users.
 
 ## Supported versions
 
@@ -127,41 +125,65 @@ it; npm 12 also requires `--allow-git=root` for it.
 
 ## Known Scorecard findings
 
-This repository runs OpenSSF Scorecard and publishes the results. Some findings
-are open for reasons a code change cannot fix:
+This repository runs OpenSSF Scorecard on a schedule and publishes the results
+on the [Scorecard viewer](https://scorecard.dev/viewer/?uri=github.com/cogvera-labs/next-expo-supabase-agent-harness).
+The run of 2026-11-16, against commit `3902a3b` (the v2.0.8 release), scored
+8.4 out of 10. Thirteen of its checks scored 10. These five did not:
 
-- **Code-Review.** There is one maintainer, so no change is approved by a second
-  person. Every change still lands through a pull request and the full CI matrix.
-- **Branch-Protection.** A ruleset on `main` requires a pull request and passing
-  checks, and blocks force-pushes and deletion. It requires no approval, for the
-  reason above. Nobody, the administrator included, can bypass the required
-  checks or push to `main` directly. Scorecard scores that as partial.
-- **Maintained.** Scorecard scores any repository younger than 90 days as
-  unmaintained. This one was created on 2026-07-22.
-- **SAST.** CodeQL has run on every pull request since 1.0.2. Scorecard measures
-  the share of recent commits that were analysed, so the score rises as commits
-  accumulate.
+- **Code-Review: 0.** Scorecard counts a change as reviewed when someone other
+  than its author approves or merges it, and it does not count reviews by bots
+  or AI tools. It found no such review in the 11 recent changes it read. AI
+  agents write most changes here, and the maintainer, who is the author of
+  record, reviews and merges them; no second person approves changes today
+  ([GOVERNANCE.md](GOVERNANCE.md)). Every change still goes through a pull
+  request and the full CI matrix.
+- **Branch-Protection: 4.** A ruleset on `main` requires a pull request and
+  passing checks, and blocks force-pushes and deletion. The ruleset names no
+  bypass actor, so the required checks and the pull-request rule apply to the
+  administrator too; changing the ruleset itself remains an administrator's
+  act. For the reason above, the ruleset requires no approving review, no
+  code-owner review and no approval of the most recent push, and those settings
+  make up the rest of the score.
+- **CII-Best-Practices: 2.** The project's entry on the
+  [OpenSSF Best Practices site](https://www.bestpractices.dev/projects/14727) is
+  in progress for the "passing" level. This check scores only that series
+  (passing, silver and gold); the OSPS Baseline series on the same site does
+  not count toward it.
+- **Vulnerabilities: 8.** Two advisories, GHSA-mh32-jxcr-mh9f and
+  GHSA-r3h5-4585-7x3w, against `astro` 7.4.1 in `docs-site/pnpm-lock.yaml`, the
+  lockfile of the documentation site's build. `astro` is not in the npm package
+  or in a scaffolded project. At the time of that run, Renovate's pull request
+  [#300](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/pull/300),
+  opened on 2026-11-13, was open; it moves `astro` to 7.4.7, which fixes both.
+  Until it merges, the nightly OSV scan in `hygiene.yml` reports the same two.
+- **Contributors: 6.** Scorecard found recent contributors from two
+  organizations, and gives full marks at three. A project with one maintainer
+  gains here only as other people contribute.
+
+One full score says less than it seems: Fuzzing scores 10 because of
+`fast-check` property tests in the scaffold's mobile code, not because of tests
+of the installer or the guard rules.
 
 ## Scope notes
 
 - The harness's guard hooks and permission denies are **tamper-evident, not
   tamper-proof**: a determined agent with shell access can bypass local
   enforcement. CI parity (`tools/validate.mjs --min-floor`), manifest hashing
-  (the `gate-integrity` step, which runs on every install), the frozen
-  `tools/stop.floor.json` the Stop hook UNIONs into its chain, and CODEOWNERS
-  review are the backstops. Reports that "the agent can edit its own gate with
+  (the `gate-integrity` step, which runs on every install), the frozen step
+  list in `tools/stop.floor.json`, which the Stop hook runs even when a
+  project's configuration leaves a step out, and CODEOWNERS review are the
+  backstops. Reports that "the agent can edit its own gate with
   `HARNESS_ALLOW_SELF_EDIT=1`" describe the documented human escape hatch, not a
   vulnerability. What the flag relaxes, and what it does not, is listed in
   [template/base/docs/harness/README.md](template/base/docs/harness/README.md).
-- **MCP tool calls are default-deny** (0.3.0). `.claude/hooks/pretool-mcp-guard.mjs`
+- **MCP tool calls are default-deny.** `.claude/hooks/pretool-mcp-guard.mjs`
   (matcher `mcp__.*`) reads the registry in `tools/approved-tools.json` and denies
   unregistered servers, tools outside a server's list, and write-shaped tool names
-  on a server registered `readOnly` — the last by NAME SHAPE, so it covers verbs a
+  on a server registered `readOnly` — the last by name shape, so it covers verbs a
   vendor has not shipped yet. It fails closed on every ambiguity, including a
-  missing or unparseable registry. Before 0.3.0 the `PreToolUse` matchers were
-  literally `Bash` and `Edit|Write|MultiEdit`, so an `mcp__` call matched no hook at
-  all; a report that an MCP server reached the database on **0.2.1 or earlier** is
-  describing that gap, which is fixed, not a new finding.
+  missing or unparseable registry. Releases before 0.3.0 had no hook for `mcp__`
+  calls, so a report that an MCP server reached the database on 0.2.1 or earlier
+  describes that fixed gap, not a new finding.
 - **A schema change is a reviewed file, never a tool call.** `supabase/migrations/`
   is what the write-guard's SQL rules judge as it is written, what `schema-rls` /
   `tenancy` / `migrations` judge tree-wide, and what a human sees under CODEOWNERS.

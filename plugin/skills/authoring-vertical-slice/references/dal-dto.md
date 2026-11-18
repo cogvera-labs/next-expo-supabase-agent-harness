@@ -137,8 +137,9 @@ The rung split says something real:
 **The envelope rule.** Procedures return `ActionOutcome` on the DATA channel. A domain failure
 is NEVER a thrown `TRPCError` — throwing flattens the `AppError` discriminant the screens
 switch on into an HTTP status, and "someone else deleted this note" becomes "something went
-wrong". Exactly two things bypass the envelope, both transport facts a handler could not
-produce: the auth middleware's `UNAUTHORIZED` and the skew guard's `CONFLICT`. A `.input()`
+wrong". Exactly three things bypass the envelope, all transport facts a handler could not
+produce: the auth middleware's `UNAUTHORIZED`, the skew guard's `CONFLICT` and the rate-limit
+guard's `TOO_MANY_REQUESTS`. A `.input()`
 parse failure is the framework's, not yours. `no transformer` — every payload is JSON-safe by
 construction.
 

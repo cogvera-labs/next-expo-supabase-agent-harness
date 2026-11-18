@@ -1,0 +1,27 @@
+/*
+ * The landing page's "What the harness enforces" list, drawn as a grid of cards. Every rule is
+ * scoped to the page with a hero and to the list right after that heading, so no other page
+ * changes, and without these rules the list still reads as a list. The colours are Starlight's
+ * own theme variables, so both themes follow.
+ */
+html[data-has-hero] .sl-heading-wrapper:has(> #what-the-harness-enforces) + ul {
+  display: grid;
+  grid-template-columns: 100%;
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-has-hero] .sl-heading-wrapper:has(> #what-the-harness-enforces) + ul > li {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--sl-color-gray-5);
+  background-color: var(--sl-color-black);
+}
+
+@media (min-width: 50rem) {
+  html[data-has-hero] .sl-heading-wrapper:has(> #what-the-harness-enforces) + ul {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+}
