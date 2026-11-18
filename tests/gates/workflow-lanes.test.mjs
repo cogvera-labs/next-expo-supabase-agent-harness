@@ -194,6 +194,30 @@ test('the factory selftest runs the SAME deno release the edge-functions lane pi
   for (const pin of factory) assert.equal(pin, shipped[0], 'selftest.yml and quality-gate.yml pin different deno releases')
 })
 
+test('Renovate moves the deno pin in one pull request, without the release tag s leading v', () => {
+  // The factory's workflows and the shipped ones sit in two Renovate groups. Left to them, the
+  // deno bump arrives as two pull requests that each fail the case above, and it is written
+  // `vX.Y.Z`, which the edge-functions case refuses. One rule, placed after both groups so it
+  // wins, gives the pin its own group and strips the prefix.
+  /** @type {{ packageRules: { matchManagers?: string[], matchDepNames?: string[], groupName?: string, extractVersion?: string, matchFileNames?: string[] }[] }} */
+  const renovate = JSON.parse(readFileSync(join(ROOT, 'renovate.json'), 'utf8'))
+  const rules = renovate.packageRules
+  const at = rules.findIndex((r) => (r.matchDepNames ?? []).length === 1 && r.matchDepNames?.[0] === 'deno')
+  assert.ok(at !== -1, 'renovate.json has no packageRule for the deno pin alone')
+  const rule = rules[at]
+  assert.deepEqual(rule.matchManagers, ['github-actions'])
+  assert.equal(rule.matchFileNames, undefined, 'a file filter would leave one of the two trees out of the group')
+  assert.equal(rule.groupName, 'deno')
+  assert.ok(rule.extractVersion, 'the deno rule has no extractVersion')
+  const strip = new RegExp(rule.extractVersion)
+  assert.equal(strip.exec('v2.9.8')?.groups?.version, '2.9.8')
+  const actionGroups = rules
+    .map((r, i) => ({ i, name: r.groupName }))
+    .filter((r) => r.name === 'factory GitHub Actions' || r.name === 'template GitHub Actions')
+  assert.equal(actionGroups.length, 2, 'the two GitHub Actions groups are named as this case expects')
+  for (const g of actionGroups) assert.ok(g.i < at, `the deno rule must come after the "${String(g.name)}" group to override it`)
+})
+
 test('the device-lane paths filter covers the packages the installed app is MADE OF', () => {
   // Not a run of `dorny/paths-filter` — that is vendor code on GitHub's runner, and the
   // header above states why asserting it here would be theatre. What IS decidable from the
