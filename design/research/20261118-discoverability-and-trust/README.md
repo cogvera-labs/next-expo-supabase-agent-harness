@@ -146,6 +146,17 @@ The integrator fills in Status.
 | 7 | Descriptive release titles (`release.yml`) | pending |
 | 8 | Decide `argument-hint` and the Agent Skills standard (`scripts/lib/plugin-folder.mjs`) | pending |
 | 9 | The write guard judges each path against its own checkout (found during execution; see Limits) | pending |
+| 10 | `scripts/hygiene.mjs` reports a directory entry from `git ls-files` (a nested repository) instead of failing with EISDIR | pending |
+| 11 | `check-claims` compares the README's "≈" timings with the committed measurement: a changed "warm ≈" figure still passes today | pending |
+| 12 | The standards-claim sweep (`scripts/lib/standards-claim.mjs`) also reads `docs/changelog/*.md`, which it lost when the old sections moved there | pending |
+| 13 | `check-plugin-manifest` requires the plugin's and the marketplace entry's descriptions to be equal | pending |
+| 14 | `tests/canary/injections.json`: the `upgrade-linux` note still says "five-leg upgrade matrix" | pending |
+| 15 | `init --dry-run` prints "written: N file(s)" although it writes nothing | pending |
+| 16 | `template/base/tools/eslint-rules/index.mjs` names the three sanctioned transport throws; `check-migrations.mjs` and the stack's warrant regex use `YYYYMMDD-slug.md` ADR names | pending |
+
+Outside the protected paths, and left for a later change: the other test files that leave
+`mkdtemp` directories behind (#276) can clean up the way
+`tests/gates/check-plugin-manifest.test.mjs` now does, which left the largest trees.
 
 Earlier records: [20261002-distribution](../20261002-distribution/README.md) and
 [20260813-harness-landscape.md](../20260813-harness-landscape.md).
