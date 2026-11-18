@@ -17,7 +17,7 @@
 //
 // Usage: node scripts/ci/apply-catalog-holds.mjs <scaffold-dir> [--holds <register.json>]
 // SOURCE: scripts/ci/catalog-holds.json · scripts/ci/upgrade-lane.sh
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -132,7 +132,13 @@ function main(argv) {
     return 2
   }
   const yamlPath = join(scaffold, 'pnpm-workspace.yaml')
-  if (!existsSync(yamlPath)) {
+  // Read it once and judge that text. Asking first whether the file exists and opening it
+  // afterwards would act on an answer the file system may no longer give.
+  let before
+  try {
+    before = readFileSync(yamlPath, 'utf8')
+  } catch (err) {
+    if (/** @type {NodeJS.ErrnoException} */ (err).code !== 'ENOENT') throw err
     console.error(`apply-catalog-holds: FAIL — ${yamlPath} does not exist, so this is not a scaffold`)
     return 1
   }
@@ -143,7 +149,6 @@ function main(argv) {
     for (const p of shape) console.error(`  - ${p}`)
     return 1
   }
-  const before = readFileSync(yamlPath, 'utf8')
   const { yaml, held, notes, problems } = applyHolds(before, register.holds)
   for (const n of notes) console.log(`  held releases: NOTE — ${n}`)
   if (problems.length > 0) {
