@@ -12,36 +12,40 @@ server and are kept for provenance, not because this repository shipped them.
 This lineage's own history starts at 0.1.3.
 
 **Older releases.** This file holds 2.0.0 and later, newest first. On 2026-11-18 the 1.x and
-0.x sections moved, verbatim, to [docs/changelog/1.x.md](docs/changelog/1.x.md) and
-[docs/changelog/0.x.md](docs/changelog/0.x.md); the second also holds the ancestor's entries.
-Each release before 2.0.0, with its date and the file that holds it:
+0.x sections moved, verbatim, to
+[docs/changelog/1.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md)
+and
+[docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md);
+the second also holds the ancestor's entries. The links are full URLs because the npm package
+carries this file but not `docs/`. Each release before 2.0.0, with its date and the file that
+holds it:
 
 | Version | Date | File |
 | --- | --- | --- |
-| [1.1.0](docs/changelog/1.x.md#110--2026-10-02) | 2026-10-02 | [docs/changelog/1.x.md](docs/changelog/1.x.md) |
-| [1.0.4](docs/changelog/1.x.md#104--2026-10-01) | 2026-10-01 | [docs/changelog/1.x.md](docs/changelog/1.x.md) |
-| [1.0.3](docs/changelog/1.x.md#103--2026-09-23) | 2026-09-23 | [docs/changelog/1.x.md](docs/changelog/1.x.md) |
-| [1.0.2](docs/changelog/1.x.md#102--2026-09-21) | 2026-09-21 | [docs/changelog/1.x.md](docs/changelog/1.x.md) |
-| [1.0.1](docs/changelog/1.x.md#101--2026-08-19) | 2026-08-19 | [docs/changelog/1.x.md](docs/changelog/1.x.md) |
-| [1.0.0](docs/changelog/1.x.md#100--2026-08-16) | 2026-08-16 | [docs/changelog/1.x.md](docs/changelog/1.x.md) |
-| [0.11.1](docs/changelog/0.x.md#0111--2026-08-15) | 2026-08-15 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.11.0](docs/changelog/0.x.md#0110--2026-08-15) | 2026-08-15 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.10.0](docs/changelog/0.x.md#0100--2026-08-14) | 2026-08-14 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.9.9](docs/changelog/0.x.md#099--2026-08-13) | 2026-08-13 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.9.5](docs/changelog/0.x.md#095--2026-08-11) | 2026-08-11 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.9.0](docs/changelog/0.x.md#090--2026-08-10) | 2026-08-10 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.8.0](docs/changelog/0.x.md#080--2026-08-10) | 2026-08-10 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.7.0](docs/changelog/0.x.md#070--2026-08-08) | 2026-08-08 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.6.0](docs/changelog/0.x.md#060--2026-08-07) | 2026-08-07 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.5.0](docs/changelog/0.x.md#050--2026-08-07) | 2026-08-07 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.4.0](docs/changelog/0.x.md#040--2026-08-06) | 2026-08-06 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.3.0](docs/changelog/0.x.md#030--2026-08-05) | 2026-08-05 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.2.1](docs/changelog/0.x.md#021--2026-08-04) | 2026-08-04 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.2.0](docs/changelog/0.x.md#020--2026-08-03) | 2026-08-03 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.1.3](docs/changelog/0.x.md#013--2026-08-01) | 2026-08-01 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.1.2](docs/changelog/0.x.md#012--2026-07-20) | 2026-07-20 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.1.1](docs/changelog/0.x.md#011--2026-07-19) | 2026-07-19 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
-| [0.1.0](docs/changelog/0.x.md#010--2026-07-18) | 2026-07-18 | [docs/changelog/0.x.md](docs/changelog/0.x.md) |
+| [1.1.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md#110--2026-10-02) | 2026-10-02 | [docs/changelog/1.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md) |
+| [1.0.4](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md#104--2026-10-01) | 2026-10-01 | [docs/changelog/1.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md) |
+| [1.0.3](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md#103--2026-09-23) | 2026-09-23 | [docs/changelog/1.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md) |
+| [1.0.2](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md#102--2026-09-21) | 2026-09-21 | [docs/changelog/1.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md) |
+| [1.0.1](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md#101--2026-08-19) | 2026-08-19 | [docs/changelog/1.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md) |
+| [1.0.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md#100--2026-08-16) | 2026-08-16 | [docs/changelog/1.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/1.x.md) |
+| [0.11.1](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#0111--2026-08-15) | 2026-08-15 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.11.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#0110--2026-08-15) | 2026-08-15 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.10.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#0100--2026-08-14) | 2026-08-14 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.9.9](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#099--2026-08-13) | 2026-08-13 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.9.5](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#095--2026-08-11) | 2026-08-11 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.9.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#090--2026-08-10) | 2026-08-10 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.8.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#080--2026-08-10) | 2026-08-10 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.7.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#070--2026-08-08) | 2026-08-08 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.6.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#060--2026-08-07) | 2026-08-07 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.5.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#050--2026-08-07) | 2026-08-07 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.4.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#040--2026-08-06) | 2026-08-06 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.3.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#030--2026-08-05) | 2026-08-05 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.2.1](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#021--2026-08-04) | 2026-08-04 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.2.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#020--2026-08-03) | 2026-08-03 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.1.3](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#013--2026-08-01) | 2026-08-01 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.1.2](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#012--2026-07-20) | 2026-07-20 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.1.1](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#011--2026-07-19) | 2026-07-19 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
+| [0.1.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#010--2026-07-18) | 2026-07-18 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
 
 ## [2.0.8] — 2026-11-11
 

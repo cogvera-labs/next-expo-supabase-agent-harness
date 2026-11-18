@@ -34,6 +34,7 @@ authors:
     family-names: Nicklin
     orcid: 'https://orcid.org/0009-0006-6658-6560'
 repository-code: 'https://github.com/cogvera-labs/next-expo-supabase-agent-harness'
+url: 'https://cogvera-labs.github.io/next-expo-supabase-agent-harness/'
 keywords:
   - claude-code
   - claude-code-hooks
