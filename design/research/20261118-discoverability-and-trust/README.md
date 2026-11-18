@@ -145,7 +145,7 @@ The integrator fills in Status.
 | 6 | `init` detects a local `npm i`; the scaffold gets a root README; the service-role warrant accepts `YYYYMMDD-slug.md` ADRs | pending |
 | 7 | Descriptive release titles (`release.yml`) | pending |
 | 8 | Decide `argument-hint` and the Agent Skills standard (`scripts/lib/plugin-folder.mjs`) | pending |
-| 9 | The write guard judges each path against its own checkout (found during execution; see Limits) | pending |
+| 9 | The write guard judges each path against its own checkout (found during execution; see Limits) | done (#306): a path inside `.claude/worktrees/<id>/` is judged against that worktree; not confirmed with a live agent worktree |
 | 10 | `scripts/hygiene.mjs` reports a directory entry from `git ls-files` (a nested repository) instead of failing with EISDIR | pending |
 | 11 | `check-claims` compares the README's "≈" timings with the committed measurement: a changed "warm ≈" figure still passes today | pending |
 | 12 | The standards-claim sweep (`scripts/lib/standards-claim.mjs`) also reads `docs/changelog/*.md`, which it lost when the old sections moved there | pending |
