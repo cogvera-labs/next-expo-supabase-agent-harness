@@ -6,6 +6,14 @@ Participation in this project is covered by the
 questions through
 [Discussions](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/discussions),
 and vulnerabilities through the private channel in [SECURITY.md](SECURITY.md).
+[SUPPORT.md](SUPPORT.md) says where to ask for help and what answer to expect.
+
+To find your way around, start with [docs/architecture.md](docs/architecture.md),
+the map of this repository: what each folder holds, how a change reaches an
+installed project, and where each check lives. The root [AGENTS.md](AGENTS.md)
+gives the same orientation to coding agents, with the checks to run for each
+kind of change. If an AI tool helps with your change, read
+[Using AI tools](#using-ai-tools) before you start.
 
 ## Ground rules
 
@@ -14,14 +22,13 @@ and vulnerabilities through the private channel in [SECURITY.md](SECURITY.md).
    `node --test tests/` green, and the scaffold-green jobs — `bootstrap-linux`
    (node 22 **and** 24), `metal-bootstrap` and `demo-eject` (an
    `init --with-demo` scaffold, before and after `eject`) — must still produce a
-   project where `pnpm validate` passes out of the box. Both run on **ubuntu only**:
-   the one Windows runner in the matrix is `installer-unit`, which exists for
-   the path-separator/CRLF bug class and does not build a scaffold. On macOS,
-   `installer-unit` runs too, and `macos-scaffold` runs `pnpm validate` on a
-   scaffold without Docker; it reds on any skip but the database gate's. (This
-   sentence claimed a Windows `bootstrap` job through 0.5.0. There has never
-   been one — so "green on Windows" has never meant "a Windows scaffold is
-   green", and nobody should read it that way.)
+   project where `pnpm validate` passes out of the box. All three run on
+   **ubuntu only**: the one Windows runner in the matrix is `installer-unit`,
+   which exists for the path-separator/CRLF bug class and does not build a
+   scaffold. On macOS, `installer-unit` runs too, and `macos-scaffold` runs
+   `pnpm validate` on a scaffold without Docker; it reds on any skip but the
+   database gate's. No job builds a scaffold on Windows, so nothing here means
+   "a Windows scaffold is green".
 2. **Nothing project-specific in `template/`.** The hygiene gate greps for
    leaked strings (real tenant IDs, DSNs, signing material, store credentials)
    and for cross-porting residue from the SIBLING harnesses — Hono, Drizzle,
@@ -53,6 +60,43 @@ and vulnerabilities through the private channel in [SECURITY.md](SECURITY.md).
    silently. No selftest job may require EAS, Apple, or Google credentials —
    the harness proves itself credential-free.
 
+## Using AI tools
+
+AI coding agents write most changes to this repository, in sessions that run
+its own guard hooks and Stop gate, and AI-assisted contributions are welcome on
+the same terms. The rules below are about who answers for a change, not about
+which tool wrote it.
+
+- **Say what helped.** Fill in the pull request's "AI assistance" field, and
+  keep the `Co-Authored-By:` trailer your tool adds to the commits it helped
+  write, or add one yourself. "None" is a fine answer.
+- **A person submits the change and answers for it.** Understand the change
+  well enough to explain why it is right and to answer review questions
+  yourself. An agent may draft a pull request or an issue, but a person reads
+  it, sends it and replies to review. "The agent wrote it" does not answer a
+  review question.
+- **Run the checks and paste their real output.** The commands in
+  [Local development](#local-development) apply whoever wrote the code. Paste
+  what they printed, not a statement that they passed, and fill in the pull
+  request's "What I could not verify" field.
+- **Keep it reviewable.** One concern per pull request, as small as the change
+  allows. For bulk rewrites, mass reformatting or changes across many files
+  that nobody asked for, open an issue or a discussion first.
+- **Write the words yourself, or edit them.** A person reads every issue, pull
+  request description and review reply, so keep them short, specific and true.
+  A security report must describe behaviour you reproduced yourself
+  ([SECURITY.md](SECURITY.md)).
+- **What the maintainer may do.** A pull request or issue that shows no
+  understanding of its own change, such as output that was never run, files or
+  APIs that do not exist, or a description that does not match the diff, may
+  be closed without a full review.
+- **The gates judge every change the same way.** The hooks, the validate chain
+  and CI apply to code a person wrote and to code an agent wrote, the
+  maintainer's included ([GOVERNANCE.md](GOVERNANCE.md)). If you use Claude
+  Code in a clone of this repository, the project settings in
+  `.claude/settings.json` run its guard hooks and Stop gate on your session,
+  as they do on the maintainer's. They catch mistakes early; CI decides.
+
 ## Local development
 
 ### Your first change
@@ -75,7 +119,7 @@ node scripts/check-claims.mjs    # recomputes the numbers the docs state (under 
 node scripts/hygiene.mjs         # leaked strings, unearned maturity and standards claims (under 1 s)
 GITHUB_BASE_REF=main CI=true node --test "tests/gates/**/*.test.mjs"   # many of these read the docs (about 2 min)
 
-# A page under template/base/docs/ or template/modules/*/docs/, or a change in docs-site/
+# A page under template/base/docs/, template/modules/*/docs/ or docs/, or a change in docs-site/
 pnpm --dir docs-site install --frozen-lockfile   # the documentation site has its own lockfile
 pnpm --dir docs-site run build                   # renders every page; a broken link or #anchor fails it
 
@@ -96,8 +140,9 @@ The hooks, the gate scripts and nearly every shipped doc under `template/` are
 owned files: each release records their bytes, so that `update` can tell an
 untouched copy from an edited one. After changing one, run
 `node scripts/generate-released-shas.mjs --current` and commit what it writes;
-`node scripts/check-released-shas.mjs --verify-tags` (about 10 s) names the
-file and fails until you do. A new gate or guard rule also needs its can-fail proof
+`node scripts/check-released-shas.mjs --verify-tags` names the file and fails
+until you do. It takes over a minute, because it checks every release tag and
+the history of `main`. A new gate or guard rule also needs its can-fail proof
 registered in `tests/canary/injections.json` (ground rule 6), which
 `node scripts/check-canary-coverage.mjs` checks; at about 6 min it is the
 slowest check in the list.
@@ -123,13 +168,11 @@ node scripts/check-plugin-manifest.mjs  # plugin/marketplace fields and icon, th
 node scripts/check-canary-coverage.mjs  # every gate AND every job in every shipped workflow, base and modules, has a registered, RUNNING red-proof
 node scripts/generate-floor.mjs --check    # BOTH frozen snapshots (validate.floor.json, stop.floor.json) mirror the config
 node scripts/generate-skill-references.mjs --check  # the slice skill's code blocks match the example's marked spans
-# RUN THE SUITE IN THE CI ENVIRONMENT SHAPE, not your shell's. Gate fixtures build a
-# THROWAWAY git repo with no remote, and on a `pull_request` run GITHUB_BASE_REF names the
-# base branch of the PR against THIS repo — so a gate that resolves a diff base looks for an
-# `origin/main` the fixture does not have and fails CLOSED, correctly. Nine tests in one file
-# then asserted against the fail-closed verdict: green in every maintainer's shell, red only
-# on the PR. CI is the enforcement (this is exactly how it was caught); the export is how you
-# find out in seconds instead of after a full matrix run.
+# Run the suite in CI's environment shape, not your shell's. Gate fixtures build a
+# throwaway git repo with no remote, and on a pull request GITHUB_BASE_REF names the base
+# branch, so a gate that resolves a diff base finds no `origin/main` there and fails closed,
+# correctly. A test that passes in your shell can still fail on the pull request; the export
+# shows that in seconds instead of after a full CI run.
 GITHUB_BASE_REF=main CI=true node --test "tests/**/*.test.mjs"   # gate proofs + installer lifecycle + hook contracts
 
 # The machinery under its own bar (pnpm install once at the repo root):
@@ -138,15 +181,10 @@ pnpm exec tsc --noEmit                  # checkJs over installer/, scripts/, tes
 pnpm exec knip                          # dead exports/files/deps in the machinery
 node scripts/check-complexity-ratchet.mjs  # re-lints with --no-inline-config: a disable cannot hide growth
 node scripts/check-rule-integrity.mjs      # the shipped boundary rules cannot be deleted or narrowed
-# The other lint.yml blockers. The four machinery-lint ones were missing from this
-# list through 0.5.0, so a maintainer who ran the list literally went red in CI on four
-# checks they never ran — precisely the "a subset is how four of these came to be red at
-# once" failure the paragraph above this block warns about — and check-seeded-migrations
-# was missing through 0.6.0. check-claims now derives lint.yml's blocking check list and
-# refuses this section omitting any of it, so the closure is mechanical rather than
-# remembered. check-ramp-ledger, check-dependency-channel and check-seeded-migrations
-# need full git history (fetch-depth: 0) and SKIP LOUDLY without a previous release tag
-# rather than passing.
+# The other lint.yml blockers. check-claims derives lint.yml's blocking checks and fails
+# when this section omits one. check-ramp-ledger, check-dependency-channel and
+# check-seeded-migrations need full git history (fetch-depth: 0) and skip loudly, rather
+# than pass, without a previous release tag.
 node scripts/check-escape-registry.mjs     # SEEDED_FILES / ESCAPE_LISTS / WRITE_PROTECTED / PROPOSABLE reconcile
 node scripts/check-demo-index.mjs          # the demo index lists every demo register row both ways, and no owned config/tool/register names a demo path (`--write` regenerates the index)
 node scripts/check-tier-coverage.mjs       # every one-surface gate declares its surface
@@ -176,11 +214,10 @@ cd /tmp/scratch && git init -q && pnpm install && git add -A \
   && node tools/validate.mjs --report-all
 ```
 
-`--report-all` runs all **37** steps and shows every red at once. The two added in
-0.3.0 run before anything expensive and are the ones most likely to catch a
-machinery mistake: `wiring` (step 3 — are the enforcement layers actually
-connected) and `secrets` (step 4 — a hermetic credential scan, in rule-id lockstep
-with `.gitleaks.toml`).
+`--report-all` runs all **37** steps and shows every red at once. Two of them run
+before anything expensive and are the most likely to catch a machinery mistake:
+`wiring` (step 3: are the enforcement layers connected) and `secrets` (step 4: a
+hermetic credential scan, in rule-id lockstep with `.gitleaks.toml`).
 
 Root `devDependencies` are exact-pinned and never ship: the npm `files` list
 excludes every root config/lockfile, and with no `prepare` script `npx
@@ -197,7 +234,7 @@ in `template/base/docs/harness/README.md`.
 ## Coding standards
 
 CI enforces the first three items below, so they are not a matter of taste in
-review. The last two are conventions the maintainer will ask for.
+review. The rest are conventions the maintainer will ask for.
 
 - **The factory's own code** (`installer/`, `scripts/`, `tests/`, the gate
   scripts and hooks under `template/`) is plain ESM JavaScript with JSDoc types.
@@ -214,10 +251,35 @@ review. The last two are conventions the maintainer will ask for.
   Biome for formatting, `knip --strict`, and the boundary rules in
   `template/base/dependency-cruiser.cjs`. The `bootstrap-linux` lane runs that
   configuration against a rendered scaffold.
-- **Comments say why.** This codebase explains a check's reason at the check,
-  often with the incident that motivated it. Match that. A number in prose must
-  be one `scripts/check-claims.mjs` can recompute, or it should not be written.
-- **Commits** follow Conventional Commits.
+- **Comments say why** the code is the way it is, as [Comments](#comments)
+  below describes.
+- **Numbers in prose.** A number in prose must be one
+  `scripts/check-claims.mjs` can recompute, or it should not be written.
+- **Commits** follow Conventional Commits. A commit an AI tool helped write
+  carries a `Co-Authored-By:` trailer ([Using AI tools](#using-ai-tools)).
+
+### Comments
+
+A comment explains the code as it is now. History has its own homes.
+
+- **Keep the why at the code.** Say what the code protects: the invariant it
+  keeps, the failure it prevents and the evidence for it, in a sentence or
+  two. An explanation that needs more than a few lines belongs in the gates
+  catalog, a design record under `design/` or an ADR, and the comment links to
+  it.
+- **Date nothing.** A comment carries no release number of this project, no
+  issue number, no date, and no "since", "until" or "through". What changed and
+  when goes in [CHANGELOG.md](CHANGELOG.md), and the issue number goes in the
+  commit message.
+- **Code that exists for older installs is the exception.** Tag it
+  `// compat(<=1.0.x): <the old state it handles>; remove when <condition>`, so
+  a search finds every such branch when it can be retired.
+- **Write plainly.** Use capitals only for the status words the tools print
+  (`FAIL`, `SKIPPED`, `NOTE`, `STAMPED`) and for SQL keywords. The numbers rule
+  above applies to comments too.
+
+Much of the existing code was written before these rules. Bring a comment in
+line when you change the code around it.
 
 ## Testing policy
 
@@ -228,8 +290,9 @@ review. The last two are conventions the maintainer will ask for.
 - **A bug fix comes with the test that would have caught it.**
 - **Every gate lands with a proof that it can fail**, registered in
   `tests/canary/injections.json` (ground rule 6).
-  `scripts/check-canary-coverage.mjs` fails the build for a gate, guard rule or
-  CI job that has none, because a check that cannot go red proves nothing.
+  `scripts/check-canary-coverage.mjs` fails the build for a gate or guard rule
+  that has none, and for a CI job with no registry entry, because a check that
+  cannot go red proves nothing.
 - **Coverage is enforced.** `selftest.yml` runs the installer tests with
   coverage floors on `installer/**` and on `template/base/tools/lib/**`. The
   floors only rise. The gate scripts themselves run as child processes that a
@@ -242,14 +305,14 @@ review. The last two are conventions the maintainer will ask for.
 1. Add a `## [x.y.z] — YYYY-MM-DD` section to `CHANGELOG.md`.
 2. Bump the version everywhere the lockstep gate looks: `package.json`,
    `plugin/.claude-plugin/plugin.json`, `CITATION.cff`, and the **nine**
-   `HARNESS_HOOK_VERSION` stamps under `template/base/.claude/hooks/`
-   (`subagent-verdict.mjs` joined them in 0.6.0, `launch.mjs` in 1.0.0 and
-   `session-brief.mjs` in 1.1.0 — the
-   gate iterates the directory, so the count follows the tree rather than this
-   sentence). The bump also starts the new version's released-sha table
-   (`node scripts/generate-released-shas.mjs --current`) and adds the predecessor
-   to `VINTAGES` in `scripts/lib/ramp-sites.mjs`; the lockstep gate requires the
-   table, and `check-released-shas.mjs` requires one for every vintage.
+   `HARNESS_HOOK_VERSION` stamps under `template/base/.claude/hooks/` (the gate
+   iterates the directory, so a new hook brings a new stamp, and
+   `scripts/check-claims.mjs` keeps this count true). The bump also starts the
+   new version's released-sha table
+   (`node scripts/generate-released-shas.mjs --current`) and adds the
+   predecessor to `VINTAGES` in `scripts/lib/ramp-sites.mjs`; the lockstep
+   gate requires the table, and `check-released-shas.mjs` requires one for
+   every vintage.
 3. Run `node scripts/check-release-lockstep.mjs` — the same check runs on every
    PR in the selftest matrix and again at tag time.
 4. **Confirm `upgrade-linux` is green on the release commit.** It installs the
@@ -258,9 +321,8 @@ review. The last two are conventions the maintainer will ask for.
    there and the tolerated-absent ones are not, `doctor` never says broken, the
    chain is green, every ramp NOTE names the release it expires in, and
    `graduate` refuses while those NOTEs stand. **No `template/migrations.json`
-   record is trustworthy until that lane has executed** — the 0.2.0 changelog
-   records an update-planted defect found "by running the real upgrade, not by
-   reading the plan", and this lane is that act's CI successor.
+   record is trustworthy until that lane has run**: a defect that `update`
+   plants is found by running the real upgrade, not by reading the plan.
 5. Tag `vx.y.z` and push — `release.yml` re-runs the gates, waits for a green
    selftest matrix on the tagged SHA, verifies the changelog section, packs,
    attests provenance, publishes the GitHub Release, and then publishes that
@@ -269,9 +331,9 @@ review. The last two are conventions the maintainer will ask for.
    with each entry shortened to its lead and a link to the full section at the
    tag (`scripts/ci/release-notes.mjs`).
 
-The mechanics the five releases through 0.9.0 actually used, written down so
-the next one inherits a procedure rather than an archaeology (this list is what
-step 5 compresses):
+The mechanics behind step 5 follow. They were written down from the early
+releases, each shipped from one release branch; later releases have also
+shipped from a stack of pull requests, or from ordinary pull requests on `main`.
 
 - **One long-lived branch per release**, named `release/vx.y.z-<theme>`, squashed
   as a single PR whose subject is the release's conventional-commit headline
@@ -305,20 +367,19 @@ step 5 compresses):
   `HYGIENE_PRIVATE_NAMES` Actions secret, one regular expression per line.
   `release.yml` on its tag, and `hygiene.yml` on a push to `main` or a tag, set
   `HYGIENE_REQUIRE_PRIVATE_NAMES`, so there the gate fails while the secret is
-  unset or empty. Set it in the repository settings before 2.0.8 merges, or the
-  first push to `main` after the merge goes red.
+  unset or empty. Keep it set in the repository settings: if it is removed or
+  emptied, the next push to `main` and the next release tag go red.
 - **Post-tag follow-ups are part of the release**, not optional: dispatch the
   schedule-gated lanes once (`obligations-clockful`, `registers-clockful`,
   `floor-advisories`) so their first runs happen while the release context is
   warm, and re-record the chain-budget measurement only through the reviewed
-  `workflow_dispatch` path (the 0.7.0/0.8.0 pattern — measure, commit, then
-  publish, in that order).
-- **A release that GROWS the chain re-records BEFORE the tag** (1.0.0: 34 → 36).
+  `workflow_dispatch` path: measure, commit, then publish, in that order.
+- **A release that GROWS the chain re-records BEFORE the tag.**
   `check-claims` refuses every wall-clock figure while the committed measurement's
   step count differs from the live chain, so the figures are scrubbed in the
   chain-growth commit, the chain is frozen, `selftest.yml` is dispatched by hand
-  ON THE RELEASE BRANCH after the bump commit (the node-22 leg records warm,
-  Stop-chain and — since 1.0.0 — the COLD path in one artifact), the reviewed
+  ON THE RELEASE BRANCH after the bump commit (the node-22 leg records the warm,
+  Stop-chain and cold paths in one artifact), the reviewed
   `scripts/chain-budget.json` is committed on the branch, and only then does the
   figures commit land — all before merge, so the tag build ships figures that
   count-match the chain it runs. Post-tag re-recording stays the pattern for a

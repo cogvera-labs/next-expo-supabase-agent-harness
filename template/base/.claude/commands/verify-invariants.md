@@ -43,9 +43,10 @@ the final call, and a weakened invariant the reviewer under-ranked is still a FA
   Actions return `ActionOutcome<T>` from `@app/errors` on the DATA channel —
   `outcomeOk(...)` / `outcomeErr(appError.X())`; a domain failure is RETURNED, never
   thrown (a thrown `TRPCError` flattens the discriminated `AppError` the screens switch on
-  into a status). Only transport auth (`UNAUTHORIZED`) and the skew guard's `CONFLICT` may
-  bypass it. An `orgProcedure` handler carries its `const gate = ctx.org; if (!gate.ok)
-  return gate` two-liner; ids come from the VERIFIED `ctx.actor`, never the input.
+  into a status). Only transport auth (`UNAUTHORIZED`), the skew guard's `CONFLICT` and the
+  rate-limit guard's `TOO_MANY_REQUESTS` may bypass it. An `orgProcedure` handler carries
+  its `const gate = ctx.org; if (!gate.ok) return gate` two-liner; ids come from the
+  VERIFIED `ctx.actor`, never the input.
 - **Boundary + exports walls.** verticals `_|_` verticals; `shared -/-> verticals`;
   `platform/*` reaches only the `{errors,events}` kernel; `packages/api -/-> next/*` (the
   reversibility wall); `apps/mobile -/-> ` web-only pkgs; `apps/web -/-> ` react-native. The

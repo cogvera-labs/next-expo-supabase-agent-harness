@@ -51,7 +51,7 @@ missing any of these arrives pre-red):
   role attribute — the REVOKE is the only lever over it, and it stays revoked until an
   ADR-governed Edge Function needs a per-table grant.
 - **RLS tests** — the table joins the `rls_targets` list and the pgTAP suites under
-  `supabase/tests/*.sql` (structure + cross-user isolation) AND the live isolation matrix
+  `supabase/tests/*.sql` (structure + cross-tenant isolation) AND the live isolation matrix
   in `tests/rls/`; `node tools/gen-grant-assertions.mjs` (`pnpm gen` runs it) regenerates
   `supabase/tests/rls_grants.generated.test.sql`, the exact privileges of every table, and
   nobody edits its rows or its `plan()` by hand. `pnpm db:reset` then `pnpm db:test` must

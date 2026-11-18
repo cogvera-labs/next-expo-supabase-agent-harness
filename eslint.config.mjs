@@ -33,6 +33,12 @@ export default [
     ignores: ['docs-site/dist/**', 'docs-site/.astro/**'],
   },
   {
+    // Claude Code's subagent worktrees: whole checkouts of this repository, each linted at its
+    // own source. Without this, one agent run puts every script here in front of `eslint .` and
+    // the complexity ratchet once per worktree.
+    ignores: ['.claude/worktrees/**'],
+  },
+  {
     files: ['**/*.mjs', '**/*.js', '**/*.cjs'],
     ...js.configs.recommended,
     languageOptions: {

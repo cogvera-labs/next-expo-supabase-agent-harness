@@ -1,5 +1,5 @@
 ---
-description: Add a Supabase migration + RLS — a declarative schema change plus a new timestamped, append-only migration carrying FORCE RLS, per-op policies on auth.uid(), a leading-column owner index, and narrow grants.
+description: Add a Supabase migration + RLS — a declarative schema change plus a new timestamped, append-only migration carrying FORCE RLS, per-op policies scoped by org_id, a leading org_id index, and narrow grants.
 argument-hint: "[table-or-change]"
 allowed-tools: Read, Grep, Glob, Bash(date -u +%Y%m%d%H%M%S), Bash(git diff --name-only HEAD), Bash(node tools/gen-grant-assertions.mjs), Bash(pnpm gen), Bash(pnpm db:reset), Bash(pnpm db:test), Bash(pnpm test:rls)
 ---
@@ -19,17 +19,20 @@ Get the UTC migration timestamp with `date -u +%Y%m%d%H%M%S` and use it as `<tim
    on a database that already ran it, so the deployed schema and the committed history diverge
    silently.
 
-Every user-scoped table carries, IN THE SAME migration:
+Every tenant table, keyed by a NOT NULL `org_id`, carries, IN THE SAME migration:
 
 - `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;` AND `... FORCE ROW LEVEL SECURITY;` (FORCE
   subjects the table owner too — the role that runs migrations and SQL-editor sessions becomes
   policy-subject; a BYPASSRLS role still bypasses, which the REVOKE below is for);
 - four per-operation policies `TO authenticated` (never `FOR ALL`), each predicate real (no
-  `USING (true)`) and keyed on the initPlan sub-select `(select auth.uid())` so the planner
-  hoists it into an InitPlan (once per statement, not once per row), with `WITH CHECK` on
-  INSERT/UPDATE so a row cannot be inserted under — or handed to — another owner;
-- a LEADING-column owner index (every policy filters by the owner column on every statement,
-  so a second-position index degrades the policy to a sequential scan a two-row test DB never
+  `USING (true)`) and in one of the two forms `tools/tenancy.json` allows,
+  `org_id = ANY((SELECT private.member_org_ids())::uuid[])` or the
+  `(SELECT private.member_ranks())` rank floor: uncorrelated sub-selects the planner hoists
+  into an InitPlan (once per statement, not once per row). Never a per-user
+  `owner_id = (SELECT auth.uid())` scope. `WITH CHECK` on INSERT/UPDATE, so a row cannot be
+  inserted under — or handed to — another org;
+- a LEADING `org_id` index (every policy filters by `org_id` on every statement, so a
+  second-position index degrades the policy to a sequential scan a two-row test DB never
   reveals); when the table is keyset-paginated, carry the `ORDER BY` columns in the same index
   so one index serves the policy, the sort and the cursor range;
 - `REVOKE ALL ON TABLE ... FROM anon;` and `REVOKE ALL ON TABLE ... FROM service_role;`
@@ -55,14 +58,14 @@ is written (append-only: it cannot be edited afterwards to add it). RLS exemptio
 decision in the write-guard-protected `tools/rls-exempt.json` — never edit it yourself.
 
 Delegate the authoring to the `migration-rls-author` subagent. Then wire the new table into
-the `rls_targets` list and the pgTAP suites (`supabase/tests/*.sql` — structure + cross-user
+the `rls_targets` list and the pgTAP suites (`supabase/tests/*.sql` — structure + cross-tenant
 isolation) and the live isolation matrix (`tests/rls/`).
 
 ## Apply + prove
 
 ```
 pnpm db:reset        # fresh-applies the whole chain from zero
-pnpm db:test         # pgTAP: structure + cross-user isolation, against what the DB compiled
+pnpm db:test         # pgTAP: structure + cross-tenant isolation, against what the DB compiled
 ```
 
 Both must pass. Then run `/rls-check` (or the `security-reviewer` subagent) over the diff and
