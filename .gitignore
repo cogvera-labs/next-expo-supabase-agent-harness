@@ -56,6 +56,6 @@ docs-site/dist/
 docs-site/.astro/
 # Claude Code's subagent worktrees (an Agent run with worktree isolation checks out a whole
 # copy of this repository here). Unignored, `git ls-files --others` lists each one as a
-# directory entry, hygiene's file sweep fails on it with EISDIR, and `eslint .` lints every
-# copy of every script, so the factory Stop gate goes red on files nobody wrote.
+# directory entry, hygiene's file sweep reports each one as a finding, and `eslint .` lints
+# every copy of every script, so the factory Stop gate goes red on files nobody wrote.
 .claude/worktrees/
