@@ -76,8 +76,9 @@ is asked through context.
 
 Among about 40 projects reviewed, none combines what this repository has: gates that run the
 project's own tests against a live Postgres before the agent stops; a registered proof that every
-gate can fail; a CI floor that forbids removing a gate; an `update` and `--rollback` path; and
-supply-chain controls and compliance mappings shipped inside the scaffold. The idea is converging
+gate can fail; a CI floor that keeps a gate from being quietly removed; an `update` and
+`--rollback` path; and supply-chain controls and compliance mappings shipped inside the
+scaffold. The idea is converging
 (the tiny starters above, [lights-on-software-factory](https://github.com/gojko/lights-on-software-factory)),
 so the opening is to be seen first with proof, not to invent it.
 

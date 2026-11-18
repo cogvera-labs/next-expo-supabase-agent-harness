@@ -57,7 +57,8 @@ The source reports stayed in scratch space; these briefs condense them and keep 
 - The changelog is 687 KB; the roadmap still says "Next: 2.0.0".
 
 **Discoverability.**
-- 8 stars; 18 unique visitors in 14 days, 2 of them from Google.
+- 8 stars. The repository's traffic figures (views, visitors, referrers) were consulted but
+  are not public, so this record does not publish them.
 - Absent from all 18 generic web queries; GitHub search misses it for "react native supabase
   starter", "template" and "boilerplate", words its name, description and topics lack.
 - npm ranks it first for "next expo supabase", 63rd for "claude code hooks", and outside the top

@@ -12,8 +12,7 @@ The shared web-search budget ran out, so Google rankings were not measured.
 | Measure | Value on 2026-11-18 |
 |---|---|
 | Stars, watchers, forks | 8, 1, 2; no new star since 2026-09-27 |
-| Views, 2026-11-03 to 11-16 | 141 views, 18 unique visitors |
-| Referrers, same window | github.com 4 unique visitors, Google 2, nothing else |
+| Traffic (views, unique visitors, referrers) | Consulted for 2026-11-03 to 11-16; not published here, because GitHub does not make it public |
 | npm downloads | 488 a week, 1,183 a month (the registry search API's snapshot field); likely partly mirrors and scanners (inferred), so not a measure of adoption |
 | npm dependents | 0 |
 | Issues | 140, none opened by a human outside the organisation |
@@ -157,5 +156,5 @@ mirrors such as awesome.ecosyste.ms appear in 8 of the 21 result sets.
 ## Measuring it again
 
 Re-run in 90 days: the GitHub search and topic positions above; visitors and referrers (GitHub
-keeps 14 days, so record weekly during a launch); the 18 generic web queries and Search Console's
-indexed pages; npm positions and dependents.
+keeps 14 days, so record weekly during a launch, and keep them out of the public record); the
+18 generic web queries and Search Console's indexed pages; npm positions and dependents.
