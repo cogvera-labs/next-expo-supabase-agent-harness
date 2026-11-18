@@ -216,21 +216,17 @@ test('the register judge reds a missing list, a duplicate, a range and a missing
   assert.match(registerProblems({ holds: [{ broken: ['1.0.0'] }] }).join(), /holds\[0\] has no name/)
 })
 
-test('the shipped register is usable, and where the seeded catalog pins a held package exactly it pins the held version', () => {
-  /** @type {{ holds: { name: string, broken: string[], hold: string }[] }} */
+test('the shipped register is usable, and the seeded catalog needs none of its holds applied', () => {
+  /** @type {{ holds: { name: string, broken: string[], hold: string, why: string }[] }} */
   const register = JSON.parse(readFileSync(REGISTER, 'utf8'))
   assert.deepEqual(registerProblems(register), [])
-  assert.ok(register.holds.length > 0, 'an empty register would make every case above the only proof')
+  // A fresh scaffold is already where the lane puts an upgraded one: run over the seeded
+  // catalog, the script finds nothing to hold. tests/gates/catalog-held-releases.test.mjs
+  // holds the stronger claim, that the catalog pins exactly each held version.
   const catalog = readFileSync(CATALOG, 'utf8')
-  for (const hold of register.holds) {
-    const value = catalogEntry(catalog, hold.name)
-    assert.ok(value !== null, `${hold.name} is held but the seeded catalog does not list it`)
-    // A fresh scaffold must never resolve what an upgraded one is held off.
-    assert.ok(!hold.broken.includes(value), `the seeded catalog pins ${hold.name} at the broken ${value}`)
-    if (/^\d+\.\d+\.\d+$/.test(value)) {
-      assert.equal(value, hold.hold, `the seeded catalog pins ${hold.name} ${value}, the register holds ${hold.hold}`)
-    }
-  }
+  const { yaml, held, notes, problems } = applyHolds(catalog, register.holds)
+  assert.deepEqual({ held, notes, problems }, { held: [], notes: [], problems: [] })
+  assert.equal(yaml, catalog)
 })
 
 test('the upgrade lane applies the holds and reinstalls when one was applied', () => {
