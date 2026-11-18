@@ -146,7 +146,7 @@ The integrator fills in Status.
 | 7 | Descriptive release titles (`release.yml`) | pending |
 | 8 | Decide `argument-hint` and the Agent Skills standard (`scripts/lib/plugin-folder.mjs`) | pending |
 | 9 | The write guard judges each path against its own checkout (found during execution; see Limits) | pending |
-| 10 | `scripts/hygiene.mjs` reports a directory entry from `git ls-files` (a nested repository) instead of failing with EISDIR | pending |
+| 10 | `scripts/hygiene.mjs` reports a directory entry from `git ls-files` (a nested repository) instead of failing with EISDIR | done (#304): the entry is a finding that names the way out; the submodule case shares the code path and has no test |
 | 11 | `check-claims` compares the README's "≈" timings with the committed measurement: a changed "warm ≈" figure still passes today | pending |
 | 12 | The standards-claim sweep (`scripts/lib/standards-claim.mjs`) also reads `docs/changelog/*.md`, which it lost when the old sections moved there | pending |
 | 13 | `check-plugin-manifest` requires the plugin's and the marketplace entry's descriptions to be equal | pending |
