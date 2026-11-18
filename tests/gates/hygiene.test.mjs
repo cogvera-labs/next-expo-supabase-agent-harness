@@ -108,6 +108,33 @@ test('GREEN: the SAME NUL under .selftest/ — running acceptance rung 4 must no
   })
 })
 
+test('RED: an untracked nested repository is named as a finding, not read as a file', () => {
+  // git does not descend into a nested repository: `ls-files --others` lists the whole
+  // directory as one entry, `<dir>/`. An agent worktree under `.claude/worktrees/` is such an
+  // entry wherever `.gitignore` does not cover it. Read as a file, it ends the sweep on an
+  // uncaught EISDIR that names neither the entry nor a way out.
+  const rel = 'hygiene-nested-repo-fixture.tmp'
+  const abs = join(ROOT, rel)
+  mkdirSync(abs, { recursive: true })
+  try {
+    const init = spawnSync('git', ['-C', abs, 'init', '-q'], { encoding: 'utf8' })
+    assert.equal(init.status, 0, `precondition: git init in the fixture failed:\n${init.stderr}`)
+    assert.equal(ignored(rel), false, `${rel} is covered by .gitignore, so git never lists it and nothing is proven`)
+    const listing = spawnSync('git', ['-C', ROOT, 'ls-files', '--others', '--exclude-standard', '--', rel], {
+      encoding: 'utf8',
+    })
+    assert.equal(listing.stdout.trim(), `${rel}/`, 'precondition: git lists the nested repository as one directory entry')
+    const { code, out } = hygiene()
+    assert.equal(code, 1, `the sweep passed over a nested repository it cannot see into:\n${out}`)
+    assert.doesNotMatch(out, /EISDIR/, `the sweep read the directory as a file:\n${out}`)
+    assert.match(out, /HYGIENE: FAIL \(1\)/)
+    assert.match(out, /hygiene-nested-repo-fixture\.tmp\/ is a directory, not a file/)
+    assert.match(out, /\.gitignore/, 'the finding names the way out')
+  } finally {
+    rmSync(abs, { recursive: true, force: true })
+  }
+})
+
 // ── THE MATURITY-CLAIM SWEEP (0.9.9) ──────────────────────────────────────────────
 // The register shipped in 0.9.9 grades all 149 requirements of ASD's Maturity Level
 // Three, and the sentence it must never become — "achieves ML3" — is wrong in the
