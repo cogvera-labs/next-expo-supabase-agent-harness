@@ -12,6 +12,18 @@ $ GITHUB_BASE_REF=main CI=true node --test "tests/**/*.test.mjs"
 <paste the summary lines>
 ```
 
+## AI assistance
+
+<!-- "None", or which AI tools helped and with which part of the change. Then
+what you checked yourself: the diff you read, the commands you ran, the
+behaviour you confirmed. CONTRIBUTING.md, "Using AI tools", says why. -->
+
+## What I could not verify
+
+<!-- What you could not run or check, and why: a platform you do not have, a
+lane that needs credentials, a check that skipped. Write "Nothing" only if it
+is true. -->
+
 ## Checklist
 
 - [ ] I ran the full "Local development" list in CONTRIBUTING.md, not a subset.
@@ -24,3 +36,5 @@ $ GITHUB_BASE_REF=main CI=true node --test "tests/**/*.test.mjs"
 - [ ] If this changes what a consumer receives on `update`, `template/migrations.json`
       records it.
 - [ ] No credentials, tokens or private data in the diff or in pasted output.
+- [ ] I understand every change in this diff and can answer for it, including
+      any part an AI tool wrote.

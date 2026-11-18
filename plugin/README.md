@@ -1,11 +1,24 @@
 # next-expo-supabase-agent-harness (Claude Code plugin)
 
 The agent half of [next-expo-supabase-agent-harness](https://github.com/cogvera-labs/next-expo-supabase-agent-harness),
-a scaffold for pnpm monorepos that ship a Next.js web app and an Expo mobile app over one
-Supabase backend. This plugin carries the harness's subagents, slash commands and skills, so
-you can use them in a Claude Code session without installing the harness.
+a scaffold for pnpm monorepos that ship a Next.js web app and an Expo (React Native) mobile
+app over one Supabase backend. This plugin carries the harness's subagents, slash commands
+and skills, so you can use them in a Claude Code session without installing the harness.
+They are written for a project the harness installed, whose docs, registers and tools they
+read; in another Next.js, Expo or Supabase repository they work from whatever of those they
+find. The harness itself is documented at
+[cogvera-labs.github.io/next-expo-supabase-agent-harness](https://cogvera-labs.github.io/next-expo-supabase-agent-harness/).
 
 ## Install
+
+On Claude Code 2.1.292 or later, one command adds this repository's marketplace and installs
+the plugin:
+
+```sh
+claude plugin install next-expo-supabase-agent-harness --marketplace cogvera-labs/next-expo-supabase-agent-harness
+```
+
+On an earlier version, add the marketplace first:
 
 ```sh
 claude plugin marketplace add cogvera-labs/next-expo-supabase-agent-harness
@@ -79,6 +92,12 @@ Nothing runs when a command or skill loads. When you type one, it pre-approves o
 and searching files, the plugin's own included; a skill that Claude starts by itself asks
 first. Every command Claude runs for them, and every file edit, follows your own permission
 settings. The plugin has no hooks, MCP servers or scripts.
+
+## What it sends
+
+The plugin itself sends and fetches nothing: it is Markdown prompts and references, a
+manifest, an icon and a license, with no network code. None of its agents has a web tool,
+and the links inside them are the sources they cite.
 
 ## What it does not hold
 

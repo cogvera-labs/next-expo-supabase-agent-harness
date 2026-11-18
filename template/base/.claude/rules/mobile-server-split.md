@@ -20,9 +20,10 @@ Server Actions under `apps/web/app/actions/*`.
 - **The client never authorizes.** The app config, `LargeSecureStore`, and device
   state are containment for the client process — not authorization for data.
   Never gate data access on client state: every authorization decision is a
-  Supabase RLS policy keyed on `auth.uid()` (four per-operation policies, `TO
-  authenticated`) plus the server-only data layer. A forged or expired token is
-  not rejected by the app — it simply matches no rows.
+  Supabase RLS policy scoped by `org_id` through the membership helpers, which
+  read `auth.uid()` (four per-operation policies, `TO authenticated`), plus the
+  server-only data layer. A forged or expired token is not rejected by the app —
+  it simply matches no rows.
 - **The client never imports a server-graph or service-role module into the
   bundle.** Metro does not tree-shake, so an import that is unreachable in
   practice still ships. `@app/api` is a DEVDEPENDENCY consumed `import type` only
