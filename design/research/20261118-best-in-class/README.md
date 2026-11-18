@@ -35,7 +35,13 @@ The source reports stayed in scratch space; these briefs condense them and keep 
 - **Worktrees.** The factory write guard resolves paths against the main checkout, so it refused
   every write in the agents' worktrees under `.claude/worktrees/` as `.claude/**`. The agents
   moved to scratch clones outside the project instead of working around it; the guard fix is a
-  protected follow-up.
+  protected follow-up. With the worktrees present, untracked and unignored, hygiene's file sweep
+  also failed with EISDIR on each worktree's directory entry, so this branch ignores
+  `.claude/worktrees/` in `.gitignore` and `eslint.config.mjs`.
+- **Disk.** The test suites leave `mkdtemp` directories behind in the OS temp folder (issue
+  #276). With several agents running the suites at once, they filled the volume, about 30 GB
+  in some 36,000 directories, and writes failed until the integrator removed the ones older than
+  30 minutes. With agents in the loop, #276 is no longer cosmetic.
 - **Drift.** Live figures are as of 2026-11-18; git counts are pinned to v2.0.8, with commands
   in [credibility.md](credibility.md).
 
@@ -105,20 +111,20 @@ The integrator fills in Status.
 
 | ID | Workstream executed in this branch | Status |
 |---|---|---|
-| E1 | README rewrite | pending |
-| E2 | Docs site as a front door | pending |
-| E3 | User pages under `docs/`: getting started, how it works, FAQ, comparison, glossary | pending |
-| E4 | Evidence, building-with-agents, architecture, CLI and index pages under `docs/` | pending |
-| E5 | Navigation: root `AGENTS.md` and `CLAUDE.md`, folder READMEs, `.gitattributes` | pending |
-| E6 | Community and trust files, PR template, issue chooser | pending |
-| E7 | Package and plugin metadata | pending |
-| E8 | Accuracy and links in shipped docs and agent instructions | pending |
-| E9 | Changelog archive | pending |
-| E10 | This research record | pending |
+| E1 | README rewrite | done |
+| E2 | Docs site as a front door | done |
+| E3 | User pages under `docs/`: getting started, how it works, FAQ, comparison, glossary | done |
+| E4 | Evidence, building-with-agents, architecture, CLI and index pages under `docs/` | done |
+| E5 | Navigation: root `AGENTS.md` and `CLAUDE.md`, folder READMEs, `.gitattributes` | done |
+| E6 | Community and trust files, PR template, issue chooser | done |
+| E7 | Package and plugin metadata | done; the integrator narrowed the CITATION abstract to "building blocks for end-to-end encryption" |
+| E8 | Accuracy and links in shipped docs and agent instructions | done; the ambiguous items it left are in [repository-audit.md](repository-audit.md) |
+| E9 | Changelog archive | done; 2.x stays in `CHANGELOG.md`, 0.x and 1.x moved verbatim to `docs/changelog/` |
+| E10 | This research record | done |
 
 | # | Maintainer action, in order | Status |
 |---|---|---|
-| 1 | Nightly lanes: save the maestro-smoke artifact before 2026-11-20 12:21 UTC and pin the culprit; merge #300, then #283; re-run corpus-fidelity; cut 2.0.9, as published scaffolds still crash `lint`; legs A and E wait on upstream or the protected lane; calendar reds 2026-12-01 and 12-09 | pending |
+| 1 | Nightly lanes: save the maestro-smoke artifact before 2026-11-20 12:21 UTC and pin the culprit; merge #300, then #283; re-run corpus-fidelity; cut 2.0.9, as published scaffolds still crash `lint`; legs A and E wait on upstream or the protected lane; calendar reds 2026-12-01 and 12-09 | in part: this branch pins typescript-eslint 8.72.2 in the seeded catalog; the rest is pending |
 | 2 | About set to the shared description; the 20 topics; the repository pinned on the org profile | pending |
 | 3 | npm: a release after this branch (new README on npm, changelog entries); deprecate below 2.0.8, `0.0.0-stage` included; a second maintainer with 2FA | pending |
 | 4 | Verify the docs site in Search Console and Bing, with the sitemap; consider an org root site or custom domain | pending |

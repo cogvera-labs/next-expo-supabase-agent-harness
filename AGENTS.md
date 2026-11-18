@@ -25,10 +25,10 @@ here it is `template/base/tools/check-secrets.mjs` ([template/README.md](templat
 | [tests/](tests/) | The factory's test suites and the can-fail-proof registry ([tests/README.md](tests/README.md)). |
 | [.claude/](.claude/), [.github/](.github/) | This repository's own Claude Code hooks and CI. A project gets `template/base/.claude/` and `template/base/github/`. |
 | [plugin/](plugin/), [.claude-plugin/](.claude-plugin/) | The Claude Code plugin, and the marketplace entry that points at it. |
-| [docs/](docs/), [docs-site/](docs-site/) | Pages about this repository and its CLI ([docs/cli.md](docs/cli.md), [docs/architecture.md](docs/architecture.md)); the documentation site, which renders the template's docs in place. |
+| [docs/](docs/), [docs-site/](docs-site/) | Pages about this repository and its CLI, indexed in [docs/README.md](docs/README.md), with the release notes before 2.0.0 in [docs/changelog/](docs/changelog/); the documentation site, which renders the template's docs and those pages in place ([docs-site/README.md](docs-site/README.md)). |
 | [design/](design/) | Dated fact records, specs, proposals and research ([design/README.md](design/README.md)). |
 | [README.md](README.md), [CHANGELOG.md](CHANGELOG.md), [CONTRIBUTING.md](CONTRIBUTING.md) | The front page (npm shows it too), the release notes, and every check CI blocks on. |
-| [ROADMAP.md](ROADMAP.md), [GOVERNANCE.md](GOVERNANCE.md), [SECURITY.md](SECURITY.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), [CITATION.cff](CITATION.cff) | Project policy and community files. |
+| [ROADMAP.md](ROADMAP.md), [GOVERNANCE.md](GOVERNANCE.md), [SECURITY.md](SECURITY.md), [SUPPORT.md](SUPPORT.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), [CITATION.cff](CITATION.cff) | Project policy and community files. |
 | [LICENSE](LICENSE), [LICENSES/](LICENSES/), [REUSE.toml](REUSE.toml) | Apache-2.0 for the repository; everything under `template/` is "Apache-2.0 OR 0BSD". |
 | [package.json](package.json), [pnpm-lock.yaml](pnpm-lock.yaml), [pnpm-workspace.yaml](pnpm-workspace.yaml) | The npm manifest (`bin`, `files`) and the root dev toolchain. This root is not a workspace. |
 | [eslint.config.mjs](eslint.config.mjs), [tsconfig.json](tsconfig.json), [knip.json](knip.json), [renovate.json](renovate.json) | Lint, typecheck and dead-code settings for the factory's own code; Renovate's update policy. |

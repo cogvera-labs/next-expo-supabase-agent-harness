@@ -38,6 +38,7 @@ anything.
 
 | Folder or file | Subject |
 |---|---|
+| [research/20261118-best-in-class/](research/20261118-best-in-class/README.md) | Making the repository easier to understand, find and trust: the research, the plan it produced, and what the branch that followed changed |
 | [research/20261002-distribution/](research/20261002-distribution/README.md) | Publishing to npm with trusted publishing, plugin distribution, and making the project easier to find, try and contribute to |
 | [research/20261001-context-paradigm/](research/20261001-context-paradigm/README.md) | The research and design rounds behind SINGLE-HOME-2026-10.md |
 | [research/20260813-harness-landscape.md](research/20260813-harness-landscape.md) | Other agent harnesses and what to take from them, with its data in [20260813-harness-landscape.json](research/20260813-harness-landscape.json) |

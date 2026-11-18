@@ -72,7 +72,8 @@ is the set of repo-root sites that hardcode the upstream owner:
 - `docs/forking.md`: this checklist
 - `CITATION.cff`: `title`, `authors`, `repository-code`
 - `CHANGELOG.md`: the lineage note at the top (it names this repo as the
-  ancestor of yours) and the version line you continue from
+  ancestor of yours) and the version line you continue from. `docs/changelog/0.x.md`
+  repeats the note above the releases it archives
 - `CONTRIBUTING.md`: rule 2 names the vocabulary your lineage owns
 - `.github/workflows/selftest.yml`: the `upgrade-linux` matrix names upstream
   release tags; remove those legs or point them at your own releases
@@ -89,8 +90,9 @@ is the set of repo-root sites that hardcode the upstream owner:
 - `docs-site/astro.config.mjs`: `site` (`https://cogvera-labs.github.io`) and `base`
   (`/next-expo-supabase-agent-harness`), the address the documentation site is
   published at; the links on `docs-site/src/content/docs/index.md`, which carry the
-  same `base`; and the repository URL in `docs-site/src/harness-docs/corpus.mjs`,
-  which the edit links use
+  same `base`; the repository URL in `docs-site/src/harness-docs/corpus.mjs`,
+  which the edit links use; and the repository, npm package and publisher in
+  `docs-site/src/route-data.mjs`, which the home page's structured data names
 - `.claude/settings.json`: you inherit the upstream maintainer's permissions.
   Review the default mode before your first agent turn.
 - `plugin/.claude-plugin/plugin.json`: the `npx` command in `description`, plus

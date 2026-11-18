@@ -316,7 +316,8 @@ them.
 | [`docs/`](docs/), [`docs-site/`](docs-site/), [`design/`](design/) | Pages about this repository, the documentation site's source, design records |
 
 A path in the shipped docs, such as `tools/check-secrets.mjs`, is under `template/base/`
-here. [docs/architecture.md](docs/architecture.md) has the full map.
+here. [docs/architecture.md](docs/architecture.md) has the full map, and
+[AGENTS.md](AGENTS.md) is the briefing for agents working on this repository.
 
 ## Documentation
 
@@ -328,8 +329,8 @@ renders the doctrine, gates catalog, runbooks and module guides every scaffold r
 ## Contributing and feedback
 
 - Bugs and gate proposals: [open an issue](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/issues/new/choose)
-- Questions: [Discussions](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/discussions)
-- Pull requests: read [CONTRIBUTING.md](CONTRIBUTING.md), which lists every check CI blocks on
+- Questions: [Discussions](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/discussions); [SUPPORT.md](SUPPORT.md) says where to ask what
+- Pull requests: read [CONTRIBUTING.md](CONTRIBUTING.md), which lists every check CI blocks on and how AI-assisted changes are handled
 - Vulnerabilities: report privately, as described in [SECURITY.md](SECURITY.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 
