@@ -37,7 +37,7 @@ catalog:
   # ---- toolchain --------------------------------------------------------------
   typescript: ~6.0.3 # typescript-eslint 8.63.x supports >=4.8.4 <6.1.0
   tsx: ^4.23.0
-  '@biomejs/biome': 2.6.2 # exact: formatter drift would churn the format gate
+  '@biomejs/biome': 2.6.7 # exact: formatter drift would churn the format gate
   eslint: ^9.39.4 # 9.x line: typescript-eslint 8.x peers eslint ^9
   # exact: 8.73.0 adds no-unsafe-class-instance-assignment to strictTypeChecked, and the rule
   # overflows the stack on apps/mobile's PressableScale.tsx, so `lint` crashes on a fresh
@@ -148,7 +148,7 @@ catalog:
   # return no fetched response; the /_next/image endpoint exists in every install. 16.4.5
   # fixes all seven, a patch on the same minor; 15.5.29 fixes the three on the 15 line.
   # SOURCE: https://nextjs.org/blog/november-2026-security-release
-  next: 16.4.5
+  next: 16.4.6
   next-safe-action: ^8.5.3
   tailwindcss: ^4.3.0 # v4 CSS-first, WEB ONLY — mobile pins v3 in apps/mobile (see below)
   '@tailwindcss/postcss': ^4.3.0
