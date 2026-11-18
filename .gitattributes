@@ -15,3 +15,14 @@
 template/stack/packages/design-tokens/src/generated/** linguist-generated=true
 template/stack/packages/platform/supabase/src/types.ts linguist-generated=true
 template/base/tools/generated/** linguist-generated=true
+
+# Generated-but-committed files of the factory itself. GitHub collapses their diffs in pull
+# requests by default, so review the source and the generator instead.
+# plugin/{agents,commands,skills}: copies of template/base/.claude/, written by
+# `node scripts/generate-plugin-folder.mjs --write`; check-plugin-manifest.mjs fails on drift.
+plugin/agents/** linguist-generated=true
+plugin/commands/** linguist-generated=true
+plugin/skills/** linguist-generated=true
+# template/shas: the released-sha tables, written by
+# `node scripts/generate-released-shas.mjs --current`; check-released-shas.mjs fails when stale.
+template/shas/** linguist-generated=true
