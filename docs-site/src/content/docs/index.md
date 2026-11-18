@@ -24,8 +24,8 @@ hero:
       icon: external
 ---
 
-`next-expo-supabase-agent-harness` is the npm package and its CLI. Run it from an empty
-folder for the new project:
+`next-expo-supabase-agent-harness` is the npm package and its CLI. Create a project from an
+empty folder:
 
 ```sh
 npx --yes next-expo-supabase-agent-harness@latest init
@@ -50,7 +50,7 @@ what is expected; hooks, gate scripts and CI decide whether a change stands.
   verdicts, and sends the agent back to work while any of them fails.
 - **The validate chain.** `pnpm validate` runs {{gates}} gates, cheapest first. Each has at
   least one registered can-fail proof, a test or CI leg that makes it fail
-  ({{can-fail-proofs}} in all; the registry calls them canaries), and the
+  ({{can-fail-proofs}} registered for the {{gates}} gates), and the
   [gates catalog](/next-expo-supabase-agent-harness/harness/gates-catalog/) shows how to
   watch each one go red.
 - **The CI floor.** CI runs the same chain against a frozen copy of its step list, so a

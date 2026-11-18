@@ -22,10 +22,15 @@ export const LEAD_GROUPS = [
       ['how-it-works', 'How it works'],
       ['faq', 'FAQ'],
       ['comparison', 'Comparison'],
+    ],
+  },
+  {
+    label: 'Reference',
+    items: [
+      ['cli', 'CLI'],
       ['glossary', 'Glossary'],
     ],
   },
-  { label: 'Reference', items: [['cli', 'CLI']] },
   {
     label: 'Project',
     items: [
@@ -146,10 +151,55 @@ function firstH1(source) {
 /** Every link under a sidebar entry, in sidebar order. */
 const linksOf = (entry) => (entry.slug === undefined ? entry.items.flatMap(linksOf) : [entry])
 
+const LINK = /\[([^\]]+)\]\([^)\s]+\)/g
+// Markup that would reach llms.txt as raw characters once code spans and links are text.
+const MARKUP = /[[\]<>*_#|\\]/
+// What a summary paragraph opens with; a list, a quote, a table or a fence opens otherwise.
+const PROSE_START = /^[\p{L}\p{N}`[("']/u
+
+/** A description over 160 characters, cut as the render cuts it (titleFromFirstH1 in markdown-plugins.mjs). */
+function cutLikeTheRender(text) {
+  if (text.length <= 160) return text
+  const cut = text.lastIndexOf(' ', 157)
+  return `${text.slice(0, cut > 0 ? cut : 157).replace(/[\s,;:.–—-]+$/, '')}…`
+}
+
+/**
+ * A repository document's opening paragraph as plain text, for its llms.txt line when
+ * page-meta.mjs gives it no description. A docs/*.md page opens with a one- or two-sentence
+ * summary under its `# ` heading, which the render also makes the page's meta description,
+ * so llms.txt and the page say the same thing. Code spans and links keep their text. A
+ * paragraph that is missing, holds other markup, or is one the render passes over (a status
+ * line, a lead-in ending in a colon) fails the build: describe that page in page-meta.mjs.
+ */
+function openingParagraph(page) {
+  const lines = readFileSync(page.absPath, 'utf8').split(/\r?\n/)
+  const heading = lines.findIndex((line) => line.startsWith('# '))
+  const start = lines.findIndex((line, i) => heading !== -1 && i > heading && line.trim() !== '')
+  const end = lines.findIndex((line, i) => start !== -1 && i > start && line.trim() === '')
+  const raw = start === -1 ? '' : lines.slice(start, end === -1 ? undefined : end).join(' ').trim()
+  // The odd parts of a split on backticks are code spans, kept as written.
+  const parts = raw.split('`').map((part, i) => (i % 2 === 1 ? part : part.replace(LINK, '$1')))
+  const text = parts.join('').replace(/\s+/g, ' ').trim()
+  const markup = parts.some((part, i) => i % 2 === 0 && MARKUP.test(part))
+  if (!PROSE_START.test(raw) || parts.length % 2 === 0 || markup || text.startsWith('Status:') || text.endsWith(':')) {
+    throw new Error(
+      `${page.repoPath}: llms.txt describes a repository document by the paragraph under its "# " heading, and that paragraph is missing, is not plain text, or is one the page's own description skips. Rewrite it as a one- or two-sentence summary, or describe the page in page-meta.mjs.`,
+    )
+  }
+  return cutLikeTheRender(text)
+}
+
+/** What llms.txt says about a page: its page-meta.mjs description, else a repository document's opening paragraph. */
+function descriptionOf(page) {
+  if (page.meta?.description) return page.meta.description
+  return page.local || page.installPath ? undefined : openingParagraph(page)
+}
+
 /**
  * The llms.txt page index, for starlight-llms-txt's `details`: one section per sidebar group,
- * in sidebar order, each page with its title, its description where page-meta.mjs has one,
- * and the repository file it is rendered from.
+ * in sidebar order, each page with its title, its description where page-meta.mjs has one or
+ * it is a repository document, and the repository file it is rendered from.
  */
 export function llmsPageIndex(siteWithBase) {
   const pages = new Map([...sitePages(), ...loadCorpus().pages].map((p) => [p.route, p]))
@@ -157,7 +207,8 @@ export function llmsPageIndex(siteWithBase) {
     const page = pages.get(slug)
     // A site page's title is in its frontmatter, which is not read here; its sidebar label stands in.
     const title = (page.local ? undefined : firstH1(readFileSync(page.absPath, 'utf8'))) ?? label ?? slug
-    const about = page.meta?.description ? `${page.meta.description} ` : ''
+    const description = descriptionOf(page)
+    const about = description ? `${description} ` : ''
     return `- [${title}](${siteWithBase}${slug}/): ${about}Source: \`${page.repoPath}\`.`
   }
   return harnessSidebar()

@@ -10,13 +10,13 @@ The pages in `docs/` describe this repository and its CLI. A project's own docum
 | [how-it-works.md](how-it-works.md) | The enforcement loop, the layers, and what each layer cannot do |
 | [faq.md](faq.md) | Short answers to the questions people ask first, each with a source |
 | [comparison.md](comparison.md) | How this compares with other starters and with other agent guardrails, dated and sourced |
-| [glossary.md](glossary.md) | The project's terms, each with a definition and the name the code uses for it |
 
 ## Reference
 
 | Page | What it is for |
 |---|---|
 | [cli.md](cli.md) | Every command, flag, placeholder and exit code of the CLI |
+| [glossary.md](glossary.md) | The project's terms, each with a definition and the name the code uses for it |
 | [architecture.md](architecture.md) | How the repository is laid out: a map of every top-level entry, where a project's files come from, and where to find a hook, a gate or its proof |
 
 ## The project

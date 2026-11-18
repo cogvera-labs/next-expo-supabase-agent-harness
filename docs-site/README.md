@@ -31,7 +31,8 @@ The build log names each page whose description was cut or missing.
 The sidebar opens with the groups in `LEAD_GROUPS` in
 [`src/harness-docs/site-index.mjs`](src/harness-docs/site-index.mjs) (Start here, Reference,
 Project), then one group per template docs folder. `llms.txt` lists every page in the same
-order.
+order, each with its `page-meta.mjs` description or, for a repository document, its opening
+paragraph.
 
 ## Links
 
@@ -52,7 +53,7 @@ order.
 
 - **A repository document.** Write `docs/<name>.md` with no frontmatter, a `# ` title and a
   first paragraph of one or two sentences under 160 characters, which becomes the
-  description. Add `['docs/<name>.md', '<route>']` to `REPOSITORY_DOCS` in `corpus.mjs` and
+  description on the page and in `llms.txt`. Add `['docs/<name>.md', '<route>']` to `REPOSITORY_DOCS` in `corpus.mjs` and
   `['<route>', '<sidebar label>']` to a group in `LEAD_GROUPS`. The route is public once
   deployed, so keep it stable.
 - **A page of the site's own.** Write `src/content/docs/<name>.md` with `title` and
@@ -79,6 +80,9 @@ site page cannot show literal double braces. Write no other number that can go s
 
 - A file listed in `REPOSITORY_DOCS` that does not exist, or one with frontmatter or no `# `
   heading.
+- A repository document with no `page-meta.mjs` description whose opening paragraph
+  `llms.txt` cannot use: missing, holding markup other than code spans and links, or a
+  paragraph the page's own description skips.
 - Two pages claiming one route, or a page claiming the site root.
 - A stale exclusion in `corpus.mjs`, or an empty template docs tree.
 - A `page-meta.mjs` entry for a page the site does not render, an unknown field, or a field
