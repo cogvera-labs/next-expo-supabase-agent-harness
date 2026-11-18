@@ -49,6 +49,10 @@ claude            # Claude Code: ask for one small change
 > `typescript-eslint` under `catalog:` in `pnpm-workspace.yaml` to `8.72.2` after `init` and
 > before `pnpm install`. A project that already resolved 8.73.0 makes the same change, runs
 > `pnpm install` again and commits the new `pnpm-lock.yaml`.
+>
+> The same releases let a new install resolve expo-sqlite 57.0.5, whose prebuilt Android
+> library supports arm64 only: on an x86_64 emulator or a 32-bit device the app's saved theme
+> and locale do not load. Change `expo-sqlite` to `57.0.4` in the same place, in the same way.
 
 **Use `npx` or a global install, never a local `npm i`.** A local
 `npm i next-expo-supabase-agent-harness` in the project folder writes a `package-lock.json`,

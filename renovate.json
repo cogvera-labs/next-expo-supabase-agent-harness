@@ -229,6 +229,12 @@
       "dependencyDashboardApproval": true
     },
     {
+      "description": "expo-sqlite 57.0.5 ships its prebuilt Android library for arm64-v8a only (expo/expo#53673), so the catalog holds 57.0.4 and this skips that one release. tests/gates/catalog-held-releases.test.mjs holds the pair; remove both once a fixed release is pinned.",
+      "matchFileNames": ["template/base/pnpm-workspace.yaml"],
+      "matchPackageNames": ["expo-sqlite"],
+      "allowedVersions": "!/^57\\.0\\.5$/"
+    },
+    {
       "description": "next minors move the App Router contract. Patches, which carry the security floor, still flow.",
       "matchFileNames": ["template/base/pnpm-workspace.yaml"],
       "matchPackageNames": ["next"],
