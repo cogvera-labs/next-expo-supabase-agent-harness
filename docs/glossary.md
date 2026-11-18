@@ -36,7 +36,8 @@ judges the committed history.
 ### Block cap
 
 The number of consecutive Stop-hook blocks after which Claude Code ends a turn anyway, set by
-`CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` in `.claude/settings.json` (eight in the shipped settings).
+`CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` in the shipped
+[`.claude/settings.json`](../template/base/.claude/settings.json).
 The harness marks the last allowed block `LAST CHANCE`, records the outcome in
 `.harness/turn-outcomes.jsonl`, and tells the next turn.
 
@@ -61,8 +62,9 @@ retrofit keeps your configs and parks the harness's copies beside them as
 ### Can-fail proof
 
 A recorded way to make a check fail on purpose (inject the violation, watch the check turn
-red), which shows that the check is not decoration. Every gate, guard rule and CI job has one,
-and this repository's CI runs them.
+red), which shows that the check is not decoration. Every gate, guard rule and CI job a
+project receives has one, and this repository's CI runs them. This repository's own CI jobs
+are registered too, most with a written note instead of an injected failure.
 
 - **Where:** the "Anti-vacuity" line of each section of the
   [gates catalog](../template/base/docs/harness/gates-catalog.md); the registry
@@ -86,8 +88,8 @@ The ordered list of gates that `pnpm validate` runs, cheapest first, defined as
 
 The frozen copy of the chain's step list, `tools/validate.floor.json`, which CI runs with
 `node tools/validate.mjs --min-floor` and trusts over the local config, so a project can add
-gates but cannot remove one. `tools/stop.floor.json` does the same for the Stop chain: the
-Stop hook runs the local list joined with it.
+gates but cannot quietly remove one. `tools/stop.floor.json` does the same for the Stop
+chain: the Stop hook runs the local list joined with it.
 
 - **Where:** the doctrine's
   [one gate config, three enforcement layers](../template/base/docs/harness/README.md#one-gate-config-three-enforcement-layers).
@@ -133,8 +135,10 @@ every `// SOURCE: docs/harness/README.md` comment in the code points to it.
 The paths the harness's enforcement depends on, listed as data: the gate scripts and registers
 under `tools/`, the agent configuration under `.claude/`, the workflows, the install record
 under `.harness/`, `supabase/`, the RLS tests and a few root configs such as `lefthook.yml`.
-The `wiring` gate requires a CODEOWNERS rule with a real owner over all of it, and the guards
-protect its enforcing files from an agent's writes.
+The `wiring` gate requires a CODEOWNERS rule naming at least one owner over all of it, though
+it cannot tell whether that account exists, and `init`'s default owner, when it finds no git
+remote, is a placeholder. The guards protect the surface's enforcing files from an agent's
+writes.
 
 - **Where:**
   [`tools/lib/enforcement-surface.mjs`](../template/base/tools/lib/enforcement-surface.mjs);
@@ -256,7 +260,7 @@ is the practice of building such a harness rather than relying on instructions a
 
 - **Where:** the [README](../README.md); the
   [doctrine](../template/base/docs/harness/README.md). On the term, see Birgitta Böckeler's
-  [Harness engineering for coding agent users](https://www.martinfowler.com/articles/harness-engineering.html).
+  [Harness engineering for coding agent users](https://martinfowler.com/articles/harness-engineering.html).
 - **Also called:** Claude Code harness; the template (the files it installs).
 
 ### HARNESS_ALLOW_SELF_EDIT=1
@@ -301,8 +305,8 @@ blocks if the hook cannot load.
 ### Lane
 
 A CI job, or a group of jobs, with one purpose, such as the `static` job that runs the chain,
-`runtime-rls`, or the Android emulator lane. A path-filtered lane runs only when a pull request
-touches its paths.
+`runtime-rls`, or the Android emulator lane. A path-filtered lane runs on a pull request only
+when the pull request touches its paths.
 
 - **Where:** [`quality-gate.yml`](../template/base/github/workflows/quality-gate.yml);
   [enforcement tiers](../template/base/docs/harness/enforcement-tiers.md).

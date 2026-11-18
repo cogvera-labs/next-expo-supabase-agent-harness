@@ -81,7 +81,7 @@ even if the tree is green by then (the doctrine's
 Not without leaving evidence: the guardrails are tamper-evident, not tamper-proof. Hooks,
 settings, gate scripts and workflows are write-protected, `gate-integrity` re-hashes them on
 every validate, CI runs a frozen copy of the gate list that a project can add to but not
-shrink, and CODEOWNERS review covers those paths (the doctrine's
+quietly shrink, and CODEOWNERS review covers those paths (the doctrine's
 [tamper evidence](../template/base/docs/harness/README.md#tamper-evidence-honest-limits)
 section). A `disableAllHooks` setting does stop every hook that is not set in managed
 settings, which is why a team deploys the hooks through
@@ -123,10 +123,12 @@ says never to hand an MCP server the direct database URL or the service-role key
 
 The `schema-rls` and `tenancy` gates check that every table's policies exist in the allowed
 shapes, and the `rls-isolation` step proves they isolate. It runs pgTAP and supabase-js suites
-against the local stack: user A sees its own row first, a cross-user read returns zero rows,
-an insert that smuggles another user's id fails with SQLSTATE 42501, and no identity survives
-on a pooled connection. With no stack running, once the project has migrations, it fails under
-the Stop hook and in CI (the doctrine's
+against the local stack, with tenancy scoped by organization: the owner of org A sees org A's
+rows, a colleague's row in the same org is visible, each rank floor admits the rank it names
+and refuses the one below, a cross-tenant read returns zero rows, an insert naming another org
+fails with SQLSTATE 42501, and a caller whose identity claim is empty, as it is on a pooled
+connection after a transaction, sees no rows. With no stack running, once the project has
+migrations, it fails under the Stop hook and in CI (the doctrine's
 [RLS testing doctrine](../template/base/docs/harness/README.md#rls-testing-doctrine)).
 
 ### Why does my RLS policy return 403 or 42501?
@@ -226,9 +228,12 @@ you can verify, as [SECURITY.md](../SECURITY.md) describes.
 
 ### Is there evidence that it makes agents write better code?
 
-Not yet. What the repository shows is that each gate, guard rule and CI job fails when its
-violation is injected, and that its maintainers' own agent sessions run under the shipped bash
-guard and equivalent write and Stop guards; the effect on an agent's output has not been
+Not yet. What the repository shows is that every gate and guard rule has a registered proof
+that it can fail, most of them a test or a CI step that injects the violation and watches the
+check go red, and that every job in the workflows a project receives has one too. This
+repository's own CI jobs are registered as well, most of them with a written note naming the
+checks that prove the work they run. Its maintainers' own agent sessions run under the shipped
+bash guard and equivalent write and Stop guards. The effect on an agent's output has not been
 measured. A pre-registered evaluation with and without the harness is tracked in
 [issue #170](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/issues/170), and
 the [evidence page](evidence.md) lists what is and is not measured.

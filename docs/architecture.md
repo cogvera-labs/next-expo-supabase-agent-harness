@@ -85,7 +85,7 @@ can never run in this repository's own Actions. `.claude/` keeps its dot.
 
 | To find | Look in |
 |---|---|
-| A hook | [template/base/.claude/hooks/](../template/base/.claude/hooks/), for example [pretool-bash-guard.mjs](../template/base/.claude/hooks/pretool-bash-guard.mjs). [settings.json](../template/base/.claude/settings.json) wires each one to its event through [launch.mjs](../template/base/.claude/hooks/launch.mjs), and the doctrine's [hook map](../template/base/docs/harness/README.md#the-hook-map-deterministic-enforcement) lists each hook, its event and what it enforces. |
+| A hook | [template/base/.claude/hooks/](../template/base/.claude/hooks/), for example [pretool-bash-guard.mjs](../template/base/.claude/hooks/pretool-bash-guard.mjs). [settings.json](../template/base/.claude/settings.json) wires each one to its event and starts every one but the session-start brief through [launch.mjs](../template/base/.claude/hooks/launch.mjs), and the doctrine's [hook map](../template/base/docs/harness/README.md#the-hook-map-deterministic-enforcement) lists each hook, its event and what it enforces. |
 | A gate | [template/base/tools/](../template/base/tools/), for example [check-secrets.mjs](../template/base/tools/check-secrets.mjs). Most steps run `check-<step>.mjs`; some run a script with another name, several scripts, or a third-party tool, and the step's line in `harness.config.mjs` names what it runs. |
 | A gate's can-fail proof | Its entry under `steps` in [tests/canary/injections.json](../tests/canary/injections.json): a test file such as [tests/gates/check-secrets.test.mjs](../tests/gates/check-secrets.test.mjs), a numbered canary step such as "Canary 26" in [.github/workflows/selftest.yml](../.github/workflows/selftest.yml), or both. [scripts/check-canary-coverage.mjs](../scripts/check-canary-coverage.mjs) fails a step that has none. |
 | The chain definition | `VALIDATE_STEPS` and `STOP_HOOK_STEPS` in [template/base/tools/harness.config.mjs](../template/base/tools/harness.config.mjs), run by [validate.mjs](../template/base/tools/validate.mjs) and frozen in [validate.floor.json](../template/base/tools/validate.floor.json) and [stop.floor.json](../template/base/tools/stop.floor.json), which [scripts/generate-floor.mjs](../scripts/generate-floor.mjs) regenerates. |
@@ -157,8 +157,9 @@ disagree about what is required.
 3. **Before a merge.** The consumer's workflows run the same chain with
    `--min-floor`, against
    [`tools/validate.floor.json`](../template/base/tools/validate.floor.json), a frozen copy
-   of the step list. A project can add steps to its chain. It cannot remove one without CI
-   noticing, because the floor ships as an owned, hash-pinned file.
+   of the step list. A project can add steps to its chain. It cannot quietly remove one,
+   because the floor ships as an owned, hash-pinned file, so a removal is a visible change to
+   that file.
    [`tools/stop.floor.json`](../template/base/tools/stop.floor.json) does the same for the
    Stop chain.
 
@@ -188,15 +189,15 @@ every install at once.
 | Mechanism | What it establishes |
 |---|---|
 | [tests/](../tests/) (`node --test`) | Tests for the installer, the gate scripts, the hooks and the factory's own checks |
-| [tests/canary/injections.json](../tests/canary/injections.json) and [scripts/check-canary-coverage.mjs](../scripts/check-canary-coverage.mjs) | Every gate, every guard rule and every CI job has a registered proof that it can fail. A gate that cannot go red is treated as decoration. |
+| [tests/canary/injections.json](../tests/canary/injections.json) and [scripts/check-canary-coverage.mjs](../scripts/check-canary-coverage.mjs) | Every gate, every guard rule and every CI job of the shipped workflows has a registered proof that it can fail, and every job of this repository's own CI is registered, most with a written note naming what proves its work. A gate that cannot go red is treated as decoration. |
 | `selftest.yml` `installer-unit` | The test suites and the factory checks pass on Linux, Windows and macOS, above coverage floors that only rise |
 | `selftest.yml` `bootstrap-linux` | A scaffold rendered with no edits passes the whole chain, against a live Supabase stack, on Node 22 and 24 |
 | `selftest.yml` `macos-scaffold` | The same scaffold passes on macOS without Docker; any skip but the database gate's fails it |
 | `selftest.yml` `canary` | Each registered violation, injected into a real scaffold, turns the matching gate red |
 | `selftest.yml` `demo-eject` | An `init --with-demo` scaffold passes the chain and the live database proofs, and after `eject` it equals a default scaffold byte for byte and passes the chain again |
 | `selftest.yml` `upgrade-linux` | One leg per starting point (the previous release, then older release tags back to v0.1.3), plus a second leg on one of them that performs the sweep `graduate` needs. Each installs an old version, updates it to the change under test and judges the result. This is the test of `template/migrations.json`. `grep -E '^ +baseline: ' .github/workflows/selftest.yml` lists the legs. |
-| [scripts/check-claims.mjs](../scripts/check-claims.mjs) | The counts the README, CONTRIBUTING.md and the shipped docs state (the chain length, the guard-rule ids, the hooks, the compliance figures and the timings) are recomputed from their sources. A number it does not know about goes unchecked, which is why the pages under `docs/` give commands instead of counts. |
-| [scripts/hygiene.mjs](../scripts/hygiene.mjs) | Nothing specific to this project leaks into `template/`, the placeholder registry is closed in both directions, and no maturity or certification claim appears anywhere |
+| [scripts/check-claims.mjs](../scripts/check-claims.mjs) | The counts the README, CONTRIBUTING.md and the shipped docs state (the chain length, the guard-rule ids, the hooks and the compliance figures) are recomputed from their sources, and it refuses a published timing that no committed CI measurement of the current chain backs. A number it does not know about goes unchecked, which is why the pages under `docs/` give commands instead of counts. |
+| [scripts/hygiene.mjs](../scripts/hygiene.mjs) | Nothing specific to this project leaks into `template/`, the placeholder registry is closed in both directions, no Essential Eight maturity claim appears anywhere in the repository, and no ASVS, MASVS or CRA standing claim appears in the README, the CHANGELOG or the shipped docs, in the phrasings the checks know |
 | [scripts/check-release-lockstep.mjs](../scripts/check-release-lockstep.mjs) | One version across the package, plugin manifest, citation file, hook stamps and changelog |
 | [scripts/check-sbom-drift.mjs](../scripts/check-sbom-drift.mjs) | Every dependency added since the previous release has a reviewed row |
 | [scripts/check-complexity-ratchet.mjs](../scripts/check-complexity-ratchet.mjs) | The factory's functions stay under its complexity limit, and those recorded over it may not grow |

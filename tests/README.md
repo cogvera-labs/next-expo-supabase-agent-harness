@@ -53,15 +53,17 @@ Which suites to run for which kind of change is in the root [AGENTS.md](../AGENT
 
 [canary/injections.json](canary/injections.json) holds at least one proof that each of these
 can go red: every step of the validate and Stop chains, every CI job of the shipped workflows
-(base and modules), and every factory check and factory CI job. The registry calls these
-proofs canaries. A proof is usually a test here that runs the real gate on an injected
+(base and modules), and every factory check. It also registers every job of this
+repository's own CI, most of them with a written note naming the checks that prove the job's
+work (kind `steps`) rather than a proof of their own. The registry calls these proofs
+canaries. A proof is usually a test here that runs the real gate on an injected
 violation (`fixture`), or a named leg of `.github/workflows/selftest.yml` that injects the
 violation into a real scaffold (`selftest`, the "Canary" steps); the file's own comments list
 every kind. Guard rules are proved in [hooks/hook-contract.test.mjs](hooks/hook-contract.test.mjs)
 instead, with a deny and an allow case for each rule id.
 
-[check-canary-coverage.mjs](../scripts/check-canary-coverage.mjs) fails on a step, job, check
-or rule with no proof, and on an entry whose subject or proof no longer exists. The registry
-is write-protected: deleting a row is how a gate would stop being falsifiable while every
-count still added up, so an edit needs `HARNESS_ALLOW_SELF_EDIT=1`, which is a human's
-decision.
+[check-canary-coverage.mjs](../scripts/check-canary-coverage.mjs) fails on a step, check or
+rule with no proof, on a job with no entry, and on an entry whose subject or proof no longer
+exists. The registry is write-protected: deleting a row is how a gate would stop being
+falsifiable while every count still added up, so an edit needs `HARNESS_ALLOW_SELF_EDIT=1`,
+which is a human's decision.

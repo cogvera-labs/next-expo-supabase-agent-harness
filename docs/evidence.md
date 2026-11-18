@@ -25,9 +25,11 @@ the `v2.0.8` tag. Where a check could not be run while writing, the page says so
 
 A **can-fail proof** is a test or a CI step that breaks what a check guards and asserts that
 the check goes red. The registry that lists them,
-[tests/canary/injections.json](../tests/canary/injections.json), calls them canaries. A
-check without one may be unable to fail at all, so CI refuses a new gate, guard rule or CI
-job that has none.
+[tests/canary/injections.json](../tests/canary/injections.json), calls them canaries; a guard
+rule's proof is its deny and allow cases in
+[tests/hooks/hook-contract.test.mjs](../tests/hooks/hook-contract.test.mjs). A check without
+one may be unable to fail at all, so CI refuses a new gate or guard rule that has none, and a
+new CI job that has no registry entry.
 
 ## Enforcement
 
@@ -35,7 +37,7 @@ job that has none.
 |---|---|---|---|---|
 | A guard hook judges a shell command before it runs | `node template/base/.claude/hooks/pretool-bash-guard.mjs < payload.json`, with the payload below | One line of JSON with `"permissionDecision":"deny"` and the rule's message. With `pnpm install` as the command it prints nothing, which allows it | [tests/hooks/hook-contract.test.mjs](../tests/hooks/hook-contract.test.mjs) | `installer-unit` |
 | Every guard-rule id has a deny or allow case, and each case runs | `GITHUB_BASE_REF=main CI=true node --test tests/hooks/hook-contract.test.mjs` | `# fail 0` in the closing summary | Its test "every guard rule id has a behavioral canary" fails for a rule with no case | `installer-unit` |
-| Every validate and Stop step, every factory gate and every CI job, here and in what projects receive, has a registered can-fail proof | `node scripts/check-canary-coverage.mjs --no-spawn` | `CANARY COVERAGE: CLEAN (<n> steps each carry a red-proof; …)` | [tests/gates/check-canary-coverage.test.mjs](../tests/gates/check-canary-coverage.test.mjs) | `installer-unit`, which runs it without `--no-spawn` |
+| Every validate and Stop step, every factory gate and every CI job a project receives has a registered can-fail proof; this repository's own CI jobs have a proof or a written note naming what proves their work | `node scripts/check-canary-coverage.mjs --no-spawn` | `CANARY COVERAGE: CLEAN (<n> steps each carry a red-proof; …)` | [tests/gates/check-canary-coverage.test.mjs](../tests/gates/check-canary-coverage.test.mjs) | `installer-unit`, which runs it without `--no-spawn` |
 | A gate fails on the violation it exists for; the secrets gate, for example | `GITHUB_BASE_REF=main CI=true node --test tests/gates/check-secrets.test.mjs` | `# fail 0`. Its red cases plant a service-role key, a private key and a remote database URL with credentials, and expect the gate to fail | Selftest step "Canary 26: an sb_secret_ key in a tracked file → secrets must FAIL" | `installer-unit`, `canary` |
 | CI breaks a real scaffold on purpose, once per numbered canary, and expects the named gate to fail | `grep -nE 'Canary [0-9]+:' .github/workflows/selftest.yml` | One line per canary step, such as `Canary 5: remove FORCE RLS from the migration → schema-rls must FAIL`. A few more live in the helpers under [scripts/ci/](../scripts/ci/) | The steps are the proofs | `canary`, and the other `selftest.yml` jobs that hold a canary |
 | CI runs a frozen copy of the step list, so a project can add a gate but cannot quietly remove one | `node scripts/generate-floor.mjs --check` | `generate-floor --check: OK (VALIDATE_STEPS: <n>, STOP_HOOK_STEPS: <n> in lockstep)` | [tests/gates/floor-lockstep.test.mjs](../tests/gates/floor-lockstep.test.mjs): a floor out of step reds, and `--min-floor` fails closed when the floor is missing or corrupt | `installer-unit`; in a project, the `static` job of `quality-gate.yml` runs `validate --min-floor` |
@@ -63,7 +65,7 @@ What these rows do not show:
 
 | Claim | Run | A pass looks like | Can-fail proof | CI job |
 |---|---|---|---|---|
-| The README's counts, compliance figures and timings match their sources, and the compliance sentence cannot be deleted | `node scripts/check-claims.mjs` | `CLAIMS: CLEAN (chain <n> steps, …)` | [tests/gates/check-claims.test.mjs](../tests/gates/check-claims.test.mjs): a stale count, a too-generous compliance figure, a deleted sentence, and a stale count split across two lines each turn it red | `hygiene`, a required check on `main` |
+| The README's counts and compliance figures match their sources, a published timing needs a committed CI measurement behind it, and the compliance sentence cannot be deleted | `node scripts/check-claims.mjs` | `CLAIMS: CLEAN (chain <n> steps, …)` | [tests/gates/check-claims.test.mjs](../tests/gates/check-claims.test.mjs): a stale count, a too-generous compliance figure, a deleted sentence, and a stale count split across two lines each turn it red | `hygiene`, a required check on `main` |
 | No Essential Eight maturity claim anywhere in the repository, and no ASVS, MASVS or CRA standing claim in the README, the CHANGELOG or the shipped docs, in the phrasings the checks know | `node scripts/hygiene.mjs` | `HYGIENE: CLEAN (…)`. A local run first says the private-name check skipped, because that list is a repository secret | [tests/gates/hygiene.test.mjs](../tests/gates/hygiene.test.mjs) and [tests/gates/standards-claim.test.mjs](../tests/gates/standards-claim.test.mjs) plant a claim and expect red, and keep a sentence that denies the claim green | `hygiene`, `installer-unit` |
 | A published timing is a committed CI measurement, not an estimate | `jq -c '.measurement' scripts/chain-budget.json` | `{"recordedOn":"<date>","runner":"Linux/X64 (selftest)","chainSteps":<n>,"stepsMeasured":<n>}`, with the two counts equal | [tests/gates/chain-budget.test.mjs](../tests/gates/chain-budget.test.mjs); `check-claims` refuses every timing while the record and the live step list differ | `hygiene`; `bootstrap-linux` holds each step to its recorded ceiling |
 | The installer's own complexity debt is recorded, and may shrink but not grow | `pnpm install --frozen-lockfile`, then `node scripts/check-complexity-ratchet.mjs` | `COMPLEXITY RATCHET: CLEAN (<n> recorded function(s), none grew; worst is installer/commands/init.mjs::init at <n>)` | [tests/gates/check-complexity-ratchet.test.mjs](../tests/gates/check-complexity-ratchet.test.mjs) | `machinery-lint` |

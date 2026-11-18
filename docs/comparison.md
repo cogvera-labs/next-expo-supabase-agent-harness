@@ -38,8 +38,8 @@ As of November 2026:
 | [Open SaaS](https://github.com/wasp-lang/open-saas) | A web SaaS template on Wasp (React, Node.js, Prisma), with payments, an admin dashboard and a docs site; no mobile app | Free and open source | Its documentation page on the subject is titled "How (Not) to Update Your Open SaaS App" | Instructions and skills: `AGENTS.md`, skills and a Claude Code plugin |
 
 Of the starters whose code could be inspected, none blocks a tool call, re-runs the checks
-before the agent stops, or keeps a gate from being removed with a CI floor. The paid kits'
-code is not public, so for them this page reports what the vendors say.
+before the agent stops, or keeps a gate from being quietly removed with a CI floor. The paid
+kits' code is not public, so for them this page reports what the vendors say.
 
 ### create-t3-turbo
 
@@ -137,7 +137,7 @@ harness decides whether the result may end the turn.
 These block a tool call before it runs, in any repository and, for most of them, in several
 agents. They know shell commands, file patterns and secrets, not your schema: none ships
 checks for one stack, such as row-level security suites against a live Postgres, or a CI floor
-that keeps a gate from being removed.
+that keeps a gate from being quietly removed.
 
 - **[failproofai](https://github.com/FailproofAI/failproofai)** offers "Observability and
   enforcement for every harness your agents run in." Its built-in policies block dangerous tool
@@ -182,8 +182,8 @@ together:
 
 - gates for its own stack that run when the agent tries to end a turn, including row-level
   security suites against a live Postgres;
-- a can-fail proof for every gate, guard rule and CI job;
-- a CI floor that keeps a project from removing a gate;
+- a can-fail proof for every gate, guard rule and shipped CI job;
+- a CI floor that keeps a project from quietly removing a gate;
 - `update`, with `--dry-run` and `--rollback`, for projects that already exist;
 - supply-chain controls and compliance mappings inside the scaffold.
 

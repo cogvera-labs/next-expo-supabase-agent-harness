@@ -37,7 +37,7 @@ the database gates. The installer's unit tests run on Linux, Windows and macOS.
 | The agent says the tests pass when they do not. | When it tries to stop, the Stop hook runs the gates and tests itself and sends it back while any is red, up to Claude Code's block cap. |
 | It weakens, skips or deletes tests. | `test-quality` (no `.only`, unreviewed `.skip` or test without assertions), `diff-coverage` (each changed source file needs a test) and a CI mutation-testing job (a new surviving mutant fails). |
 | It adds `eslint-disable` or `@ts-ignore`. | `suppressions`: `@ts-ignore`, `@ts-nocheck` and a rule-less `eslint-disable` fail; any other directive needs a reason and a reviewed allowlist entry. |
-| It edits the check instead of the code. | Write protection on gate scripts and hooks, `gate-integrity` hashes, and a frozen CI gate list that a project cannot shrink. |
+| It edits the check instead of the code. | Write protection on gate scripts and hooks, `gate-integrity` hashes, and a frozen CI gate list that a project cannot quietly shrink. |
 | It runs `rm -rf`, `git reset --hard`, a force-push or `--no-verify`. | The bash guard denies these, `.env` reads and destructive SQL outside migrations before they run: a tripwire on command text, not a sandbox. |
 | It puts the service-role key in client code or a commit. | The write guard refuses it in web and package code; the `secrets` gate scans every tracked file. |
 | It ignores `CLAUDE.md`. | `CLAUDE.md` is context; hooks, gates and CI enforce the same rules either way. |
@@ -125,7 +125,7 @@ rules; hooks, gate scripts and CI enforce them.
  +--> agent: a command, a file edit or an MCP call
  |      |
  |      v
- +--- PreToolUse guards: deny, with the rule id and the reason
+ +--- PreToolUse guards: deny, with the reason
  |      | allowed
  |      v
  |    the call runs; PostToolUse checks report on each edit
@@ -141,20 +141,23 @@ rules; hooks, gate scripts and CI enforce them.
 ```
 
 - **Before a tool runs.** PreToolUse guards check every shell command, file write and MCP
-  call against 151 guard-rule ids and deny a match, naming the rule. Nine hooks ship in all
-  ([hook map](template/base/docs/harness/README.md#the-hook-map-deterministic-enforcement)).
-- **Before a turn ends.** The Stop hook itself runs `pnpm validate`, the RLS isolation
-  suites, the unit suites with coverage and its other steps, and exits 2 while one is red.
-  A turn still red at Claude Code's block cap ends, and the next turn is told.
-- **The gates.** `pnpm validate` runs 37 gates, cheapest first, from formatting and secrets
-  to row-level security, migrations and both apps' builds. Each has a can-fail proof, a
-  recorded way to make it fail ([gates catalog](template/base/docs/harness/gates-catalog.md));
-  the registry calls them canaries. CI here refuses a gate, guard rule or CI job without
-  one, and 38 canaries break a real scaffold to show the check goes red.
+  call against 151 guard-rule ids, and deny a match with the rule's message, which says why.
+- **Before a turn ends.** The Stop hook runs the validate chain, the RLS isolation suites,
+  the unit suites with coverage and its other steps itself, and exits 2 while one is red. A
+  turn still red at Claude Code's block cap ends, and the next turn is told.
+- **The gates.** `pnpm validate` runs 37 gates, cheapest first: formatting and secrets
+  early, row-level security and migrations in the middle, both apps' builds near the end.
+  Each gate has a can-fail proof, a recorded way to make it fail
+  ([gates catalog](template/base/docs/harness/gates-catalog.md)), and this repository's CI
+  refuses a gate or guard rule without one. 38 canaries, numbered CI steps, break a real
+  scaffold to watch the matching check go red.
 - **Before a merge.** CI runs the chain against `tools/validate.floor.json`, a frozen,
-  hash-pinned copy of the gate list (the CI floor), so a project can add a gate but not
-  remove one. A gate missing its database or toolchain skips loudly on a laptop and fails
-  in CI.
+  hash-pinned copy of the gate list (the CI floor), so a project cannot quietly remove a
+  gate. A gate missing its database or toolchain skips loudly on a laptop and fails in CI.
+
+Nine hooks ship in all; the
+[hook map](template/base/docs/harness/README.md#the-hook-map-deterministic-enforcement) says
+when each runs and what it enforces.
 
 The [harness doctrine](template/base/docs/harness/README.md) says why each mechanism exists
 and where it stops.
@@ -226,7 +229,8 @@ git rev-list --count HEAD
 
 The maintainer sets the scope, reviews and merges the pull requests, cuts the releases, and
 answers for what ships. Since 1.0.0 every change to `main` has come through a pull request,
-and on each one CI recomputes this README's counts and timings (`scripts/check-claims.mjs`).
+and on each one CI recomputes this README's counts and refuses a timing that no committed CI
+measurement backs (`scripts/check-claims.mjs`).
 Releases are built by CI from a tag, attested, and published to npm through trusted
 publishing. [Building with agents](docs/building-with-agents.md) describes the process, and
 [Evidence](docs/evidence.md) gives a command for each claim.
@@ -248,8 +252,10 @@ publishing. [Building with agents](docs/building-with-agents.md) describes the p
   fails open if its backend and its in-process fallback both fail.
 - **The `e2ee` module ships building blocks, not an encrypted app.** No shipped feature is
   encrypted, and the worked example stores plaintext.
-- **Device tests are not per pull request.** The Android emulator job with Maestro runs on
-  a schedule and on manual dispatch.
+- **Device tests are not on every pull request.** In a project, the Android emulator lane
+  runs when a pull request touches the mobile app (unless the project has deferred its mobile
+  surface), nightly and on manual dispatch; this repository's own device job runs only
+  nightly and on dispatch.
 - **Outcomes are not measured yet.** Nothing yet shows how much the harness changes what an
   agent ships;
   [#170](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/issues/170)

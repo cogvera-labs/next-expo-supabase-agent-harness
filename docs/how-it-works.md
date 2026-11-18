@@ -8,9 +8,10 @@ is a deterministic gate, not a request." Instructions tell the agent what good w
 hooks, gate scripts and CI decide whether its work stands. One file,
 [`tools/harness.config.mjs`](../template/base/tools/harness.config.mjs), defines the
 [chain](glossary.md#chain) of gates, and `pnpm validate`, the Stop hook and CI all read it, so
-they cannot disagree about what "done" means. Every gate, guard rule and CI job has a
-[can-fail proof](glossary.md#can-fail-proof): a recorded way to make it fail, which this
-repository's CI runs (the registry calls these proofs canaries).
+they cannot disagree about what "done" means. Every gate and guard rule has a
+[can-fail proof](glossary.md#can-fail-proof), a recorded way to make it fail, and so does
+every job in the workflows a project receives; this repository's CI runs them (the registry
+calls these proofs canaries).
 
 Paths on this page are the ones in a scaffolded project. The links open the template copy in
 this repository.
@@ -43,7 +44,7 @@ this repository.
  pull request     CI: the chain against its frozen floor, RLS on a live stack
         |
         v
- merge            CODEOWNERS sign-off on harness, auth and data paths
+ merge            CODEOWNERS sign-off, where branch protection requires it
 ```
 
 ## The layers at a glance
@@ -95,9 +96,10 @@ The rules are data in
 [`.claude/hooks/lib/guard-rules.mjs`](../template/base/.claude/hooks/lib/guard-rules.mjs),
 each with an id, the message the agent sees and a test that proves it fires; the
 [threat model](../template/base/docs/security/threat-model.md#agent-time-refusals) lists them
-all. Each hook starts through `launch.mjs`, which blocks the call if the hook cannot load, so
-a broken guard does not wave a call through. Behind the guards stand the permission deny list
-in [`.claude/settings.json`](../template/base/.claude/settings.json) and, at the end, CI.
+all. Each guard hook starts through `launch.mjs`, which blocks the call if the hook cannot
+load, so a broken guard does not wave a call through. Behind the guards stand the permission
+deny list in [`.claude/settings.json`](../template/base/.claude/settings.json) and, at the
+end, CI.
 
 **What the guards cannot do.** They match text, and the doctrine calls the bash guard "a
 high-value tripwire, NOT a sandbox": an obfuscated or unanticipated spelling can pass, and a
@@ -123,9 +125,9 @@ When the agent tries to end its turn,
 runs the [Stop chain](glossary.md#stop-hook-and-stop-chain): every step that
 `STOP_HOOK_STEPS` in `tools/harness.config.mjs` lists, joined with the frozen list in
 [`tools/stop.floor.json`](../template/base/tools/stop.floor.json), so a project can add a
-step but never remove one. The chain starts with the validate chain, reporting every red at
-once, and goes on to the RLS isolation suites against the local database, both unit suites
-with coverage, and the checks after them, ending with `reviewer-verdicts`. The
+step but not quietly remove one. The chain starts with the validate chain, reporting every
+red at once, and goes on to the RLS isolation suites against the local database, both unit
+suites with coverage, and the checks after them, ending with `reviewer-verdicts`. The
 [gates catalog](../template/base/docs/harness/gates-catalog.md#stop-hook-runtime-suites-stop_hook_steps)
 documents each step.
 
@@ -144,20 +146,22 @@ check; CI never honours a stamp.
 
 ### The block cap
 
-Claude Code ends a turn anyway after a run of consecutive Stop-hook blocks, so a stuck
-session terminates. That is the [block cap](glossary.md#block-cap), which the shipped
-`.claude/settings.json` sets as `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` (eight). The harness keeps
-the valve and makes sure it leaves a mark: its last allowed block says `LAST CHANCE`, every
-outcome is appended to `.harness/turn-outcomes.jsonl`, and the next turn reports a predecessor
-that ended at the cap, even when the tree is green again by then. In the same session, the
-next turn that would end green is sent back once to say which gates the red turn left; in a
-new session, the session-start brief says so.
+Claude Code stops honouring a Stop hook after a run of consecutive blocks, so a turn that
+cannot get green still ends. That limit is the [block cap](glossary.md#block-cap); the shipped
+`.claude/settings.json` sets it with `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`. The harness keeps the
+cap and makes a capped turn visible:
 
-A turn can also end without a green chain when the hook reaches its timeout, and Claude Code
-treats an exit 2 whose message says a file is missing as a non-blocking error, which can let
-such a turn end at once. The doctrine's
+- the last block it is allowed says `LAST CHANCE`;
+- every outcome of the Stop hook is appended to `.harness/turn-outcomes.jsonl`;
+- the next turn is told which gates the capped turn left red, even if the tree is green by
+  then. In the same session, a turn that would end green is sent back once to say so; in a
+  new session, the session-start brief says it.
+
+Two other cases can end a turn without a green chain: the hook reaching its timeout, and an
+exit 2 whose message says a file is missing, which Claude Code treats as a non-blocking
+error. The doctrine's
 [stop-validate-gate](../template/base/docs/harness/README.md#stop-validate-gate) section
-states both.
+describes both.
 
 **What the Stop hook cannot do.** It decides whether the tree passes the chain, not whether
 the change is the one you asked for, and a test can be weakened and still pass. `test-quality`,
@@ -184,16 +188,17 @@ The shipped
 chain with `node tools/validate.mjs --min-floor`. That flag reads
 [`tools/validate.floor.json`](../template/base/tools/validate.floor.json), a frozen copy of
 the chain's step list that CI trusts over the local config, and fails closed if the copy is
-missing or corrupt. A project can add gates to its chain; it cannot remove one without CI
-noticing, because the floor is a harness-owned, hash-pinned file. This is the
-[CI floor](glossary.md#ci-floor). In CI, every gate that would skip on a laptop fails instead,
-and no stamp is honoured.
+missing or corrupt. A project can add gates to its chain; it cannot quietly remove one,
+because the floor is a harness-owned, hash-pinned file: dropping a step means changing that
+file in a commit a reviewer can see. This is the [CI floor](glossary.md#ci-floor). In CI,
+every gate that would skip on a laptop fails instead, and no stamp is honoured.
 
 Other jobs run the unit suites, the RLS suites against a live Supabase stack and the mutation
-lane. Some lanes run only when a pull request touches their paths, such as the browser tests
-and the database-scale plan checks, and the Android emulator lane runs on a schedule and on
-manual dispatch. Separate workflows run gitleaks after a push, OSV-Scanner on the lockfile and
-CodeQL. To see CI's verdict before you push, run `node tools/validate.mjs --ci-parity`.
+lane. Some lanes run on a pull request only when it touches their paths, such as the browser
+tests, the database-scale plan checks and the Android emulator lane; these also run nightly
+and on manual dispatch. Separate workflows run gitleaks after a push, OSV-Scanner on the
+lockfile and CodeQL. To see CI's verdict before you push, run
+`node tools/validate.mjs --ci-parity`.
 
 **What CI cannot do.** It blocks a merge only when your repository requires its checks.
 Branch protection, like the rest of your hosting settings, lives outside the repository.
@@ -250,7 +255,7 @@ the commit hooks, `pnpm validate` and CI apply as they do to a person, and `AGEN
 the same instructions. But nothing denies a command before it runs or sends the agent back
 while a check fails: a violation is caught at the commit or at the pull request instead.
 
-### Subagents and auto mode
+### Subagents and shell writes
 
 Reviewer subagents have hooks of their own: `SubagentStart` records the tree each reviewer
 is dispatched on, and `SubagentStop` reads the reviewer's `VERDICT:` line, blocks a
@@ -268,14 +273,12 @@ of the `SubagentStart` and `SubagentStop` payloads, not of a guard firing inside
 Whatever wrote a file, the Stop hook judges the tree when the main turn tries to end, and the
 commit hooks and CI judge it again.
 
-In auto mode, Claude Code's own instructions invite the agent to make file changes with
-`sed`, heredocs or short scripts
-([anthropics/claude-code#89251](https://github.com/anthropics/claude-code/issues/89251)).
-Those writes go through the Bash tool, so the write guard's content checks do not see them.
-The bash guard still denies shell writes to the harness's own files, and the doctrine
-enforces the security invariants in layers (hooks, lint, dependency rules and gates), so a
-file written through the shell still meets the lint rules and gates that judge the whole tree
-at the Stop hook and in CI.
+An agent can also change a file through the Bash tool, with `sed`, a heredoc or a short
+script. That is not an Edit or Write call, so the write guard's content checks do not see it.
+The bash guard still denies the shell writes to the harness's own files that its rules match,
+and the doctrine enforces the security invariants in layers (hooks, lint, dependency rules and
+gates), so a file written through the shell still meets the lint rules and gates that judge
+the whole tree at the Stop hook and in CI.
 
 ### The network
 
@@ -290,7 +293,8 @@ turn it on, and why a host allowlist bounds where data can go, not whether it go
 
 The Stop chain runs the mobile app's tests under Node with jest-expo: Hermes, native modules
 and the OS keychain do not run, so a turn can end green without the app ever starting on a
-device. The device lane covers that half in CI, on a schedule. The
+device. The device lane covers that half in CI: on a pull request that touches the mobile
+app, unless the project has deferred its mobile surface, and nightly. The
 [gates catalog](../template/base/docs/harness/gates-catalog.md) states this, with the limit of
 the accessibility checks, before its list of gates.
 

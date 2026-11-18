@@ -290,8 +290,9 @@ line when you change the code around it.
 - **A bug fix comes with the test that would have caught it.**
 - **Every gate lands with a proof that it can fail**, registered in
   `tests/canary/injections.json` (ground rule 6).
-  `scripts/check-canary-coverage.mjs` fails the build for a gate, guard rule or
-  CI job that has none, because a check that cannot go red proves nothing.
+  `scripts/check-canary-coverage.mjs` fails the build for a gate or guard rule
+  that has none, and for a CI job with no registry entry, because a check that
+  cannot go red proves nothing.
 - **Coverage is enforced.** `selftest.yml` runs the installer tests with
   coverage floors on `installer/**` and on `template/base/tools/lib/**`. The
   floors only rise. The gate scripts themselves run as child processes that a
