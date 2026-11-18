@@ -8,8 +8,10 @@
   "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
   "labels": ["dependencies"],
-  "dependencyDashboard": true,
-  "dependencyDashboardOSVVulnerabilitySummary": "all",
+  "dependencyDashboard": {
+    "enabled": true,
+    "osvVulnerabilitySummary": "all"
+  },
   "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
     "addLabels": ["security"]
