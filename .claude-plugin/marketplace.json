@@ -1,7 +1,7 @@
 {
   "name": "next-expo-supabase-agent-harness",
   "metadata": {
-    "description": "Agent-side companion to the next-expo-supabase-agent-harness: subagents, commands, and skills for monorepos shipping a Next.js web app and an Expo mobile app over one shared Supabase backend."
+    "description": "Agent-side companion to next-expo-supabase-agent-harness: subagents, slash commands and skills for monorepos with a Next.js web app and an Expo (React Native) app on one Supabase backend."
   },
   "owner": {
     "name": "Cogvera Labs",
@@ -11,7 +11,19 @@
     {
       "name": "next-expo-supabase-agent-harness",
       "source": "./plugin",
-      "description": "Agent half of the harness: migration/RLS, DAL, and test authors; security, web-security, mobile-security, accessibility, design, architecture, and code-quality reviewers; a citation verifier; slash commands such as /adr, /new-feature, and /verify-citations; the vertical-slice, e2ee-feature, and mobile-UI-design skills."
+      "description": "Subagents, slash commands and skills for Next.js, Expo (React Native) and Supabase monorepos: RLS migration authoring, security and accessibility reviewers, vertical-slice and mobile-UI skills. It carries no hooks.",
+      "category": "development",
+      "tags": [
+        "nextjs",
+        "expo",
+        "react-native",
+        "supabase",
+        "rls",
+        "row-level-security",
+        "security-review",
+        "accessibility",
+        "monorepo"
+      ]
     }
   ]
 }

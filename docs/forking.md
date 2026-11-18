@@ -72,7 +72,8 @@ is the set of repo-root sites that hardcode the upstream owner:
 - `docs/forking.md`: this checklist
 - `CITATION.cff`: `title`, `authors`, `repository-code`
 - `CHANGELOG.md`: the lineage note at the top (it names this repo as the
-  ancestor of yours) and the version line you continue from
+  ancestor of yours) and the version line you continue from. `docs/changelog/0.x.md`
+  repeats the note above the releases it archives
 - `CONTRIBUTING.md`: rule 2 names the vocabulary your lineage owns
 - `.github/workflows/selftest.yml`: the `upgrade-linux` matrix names upstream
   release tags; remove those legs or point them at your own releases
@@ -80,8 +81,8 @@ is the set of repo-root sites that hardcode the upstream owner:
 - `SECURITY.md`: the advisories URL, the `update` command and the release
   verification command
 - `.github/CODEOWNERS`: every owner handle
-- `.github/ISSUE_TEMPLATE/config.yml`: the advisory, discussions and repro URLs,
-  and the `npx` line in `bug-report.yml`
+- `.github/ISSUE_TEMPLATE/config.yml`: the documentation, FAQ, discussions,
+  advisory and Code of Conduct URLs, and the `npx` line in `bug-report.yml`
 - `.github/workflows/pages.yml`: the artifact upload and the deploy job run only in
   this repository (`github.repository_id == '1308800605'`). Put your repository's id
   in both `if:` conditions once Pages is enabled with the source "GitHub Actions", or
@@ -89,14 +90,15 @@ is the set of repo-root sites that hardcode the upstream owner:
 - `docs-site/astro.config.mjs`: `site` (`https://cogvera-labs.github.io`) and `base`
   (`/next-expo-supabase-agent-harness`), the address the documentation site is
   published at; the links on `docs-site/src/content/docs/index.md`, which carry the
-  same `base`; and the repository URL in `docs-site/src/harness-docs/corpus.mjs`,
-  which the edit links use
+  same `base`; the repository URL in `docs-site/src/harness-docs/corpus.mjs`,
+  which the edit links use; and the repository, npm package and publisher in
+  `docs-site/src/route-data.mjs`, which the home page's structured data names
 - `.claude/settings.json`: you inherit the upstream maintainer's permissions.
   Review the default mode before your first agent turn.
-- `plugin/.claude-plugin/plugin.json`: the `npx` command in `description`, plus
-  `author`, `homepage`, `repository`, `documentationUrl`, `supportUrl`
+- `plugin/.claude-plugin/plugin.json`: `author`, `homepage`, `repository`,
+  `documentationUrl`, `supportUrl`
 - `plugin/.claude-plugin/icon.png`: the upstream logo; put your own square PNG there
-- `plugin/README.md`: the marketplace in both install commands
+- `plugin/README.md`: the marketplace in the three install commands
 - `.claude-plugin/marketplace.json`: `owner`
 - `REUSE.toml` and `LICENSES/`: keep the upstream copyright and append yours
 - `tests/gates/check-reuse.test.mjs`: it asserts the upstream copyright string

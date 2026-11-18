@@ -6,32 +6,56 @@ message: >-
 type: software
 title: next-expo-supabase-agent-harness
 abstract: >-
-  A deterministic agent harness for pnpm monorepos that ship a Next.js 16 web
-  app and an Expo (React Native) mobile app over one shared Supabase backend
-  (Postgres, row-level security, Auth), deployed to Vercel and to the Apple
-  App Store and Google Play via EAS Build and Submit: Claude Code hooks that
-  send the agent back to work when a check fails, security-invariant lint
-  rules and pre-write guards, row-level-security isolation tests against a
-  real database, cross-surface contract/parity and design-token gates, Expo
-  config policy gates (ATS, permissions, plugins, CNG purity), an
-  inline-citation provenance pipeline, and supply-chain-hardened CI.
+  A Next.js + Expo (React Native) monorepo starter on Supabase with a Claude
+  Code harness: hooks that send the agent back to work while a quality gate
+  fails. A command-line tool scaffolds a pnpm monorepo with a Next.js web app
+  and an Expo app on one Supabase backend, where Postgres row-level security
+  is the authorization boundary for both apps. Its premise is that quality is
+  a deterministic gate, not a request: instruction files such as AGENTS.md and
+  CLAUDE.md are advisory context, while hooks, gate scripts and CI enforce.
+  Guard hooks (PreToolUse) check each shell command, file write and MCP call
+  before it runs, and deny the ones a rule forbids. When the agent tries to
+  end a turn, a Stop hook runs the validation chain, the row-level security
+  tests, the unit suites and other checks, and sends the agent back while one
+  fails, up to Claude Code's limit on consecutive blocks; the turn then ends
+  and the next turn is told. Every gate in the chain has a can-fail proof, a
+  registered test or CI step that shows it going red, and this repository's
+  CI fails a change that adds a gate without one. The project's CI runs the
+  same chain against a frozen list of its steps, so a project can add gates
+  but cannot quietly remove one. pgTAP and supabase-js suites test the
+  row-level security policies against a real Postgres database. An update
+  command moves an existing project to a later release and can roll it back,
+  and opt-in modules add web deployment, mobile builds and store submission,
+  build provenance and building blocks for end-to-end encryption, among
+  others. The harness is tamper-evident, not tamper-proof.
 authors:
   - name: Cogvera Labs
   - given-names: Thomas
     family-names: Nicklin
     orcid: 'https://orcid.org/0009-0006-6658-6560'
 repository-code: 'https://github.com/cogvera-labs/next-expo-supabase-agent-harness'
+url: 'https://cogvera-labs.github.io/next-expo-supabase-agent-harness/'
 keywords:
+  - claude-code
+  - claude-code-hooks
+  - claude-code-harness
+  - harness-engineering
+  - agent-harness
+  - agentic-coding
+  - coding-agent
+  - ai-guardrails
+  - quality-gates
+  - agents-md
   - nextjs
   - expo
   - react-native
   - supabase
   - row-level-security
-  - claude-code
-  - coding-agent
-  - quality-gates
+  - pgtap
+  - monorepo
+  - starter
+  - supply-chain-security
   - provenance
-  - supply-chain
 license: Apache-2.0
 version: 2.0.8
 date-released: '2026-11-11'

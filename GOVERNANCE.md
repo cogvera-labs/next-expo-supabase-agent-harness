@@ -31,6 +31,25 @@ what gets merged.
 | Release manager | The maintainer | Cuts releases by the procedure in CONTRIBUTING.md, "Releases", tags the merge commit, and runs the post-tag follow-ups. |
 | Contributor | Anyone | Opens issues, discussions and pull requests under the [Code of Conduct](CODE_OF_CONDUCT.md). Contributors hold no repository permissions. |
 
+## How AI agents are used, and who answers for them
+
+AI coding agents (Claude Code) write most changes to this repository, and the
+commits they help write carry a `Co-Authored-By: Claude` trailer. Their
+sessions run under this repository's own guard hooks and Stop gate
+(`.claude/settings.json`).
+
+Agents hold no role in the table above. People decide what is merged and
+released: the maintainer reviews and merges the agents' changes, cuts every
+release, and answers for everything in this repository, including what an
+agent wrote. The gates and CI judge every change the same way, whoever wrote
+it. No second person reviews changes today, which is what OpenSSF Scorecard's
+Code-Review check reports ([SECURITY.md](SECURITY.md), "Known Scorecard
+findings").
+
+Contributions from outside follow [CONTRIBUTING.md](CONTRIBUTING.md), "Using
+AI tools". [docs/building-with-agents.md](docs/building-with-agents.md)
+describes the process, with commands that count the trailers.
+
 ## Who has access to what
 
 - **Repository administration**, which includes settings, the security advisory
