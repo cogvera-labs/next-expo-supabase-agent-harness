@@ -1342,7 +1342,7 @@
       {
         "kind": "fixture",
         "ref": "tests/gates/ramp-verdict.test.mjs",
-        "note": "the five-leg upgrade matrix via scripts/ci/upgrade-lane.sh; its expiry judgement (fired vs expected, the 'expected-but-silent' defect class) lives in scripts/lib/ramp-verdict.mjs precisely so these death-tests can falsify it"
+        "note": "the upgrade matrix via scripts/ci/upgrade-lane.sh, one leg per row of the job's matrix; its expiry judgement (fired vs expected, the 'expected-but-silent' defect class) lives in scripts/lib/ramp-verdict.mjs precisely so these death-tests can falsify it"
       },
       {
         "kind": "fixture",

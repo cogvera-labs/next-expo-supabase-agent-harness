@@ -8,7 +8,7 @@
 //    surface. This is the factory holding ITSELF to a rule it ships to consumers —
 //    see the section header below for why the ESLint rule cannot do this job.
 import { execFileSync } from 'node:child_process'
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync, existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { walkFiles } from '../installer/lib/fs-walk.mjs'
@@ -463,6 +463,16 @@ for (const relPath of repoFiles) {
   // `--cached` lists a path deleted from the working tree but still in the index; a file
   // that is not there cannot carry a NUL.
   if (!existsSync(join(ROOT, relPath))) continue
+  // git does not descend into a nested repository: `--others` lists an untracked one (an
+  // agent worktree, a scratch clone) as a single `<dir>/` entry, and `--cached` lists a
+  // submodule as its path. This sweep cannot see inside either, and reading the entry as a
+  // file ends the run on an uncaught EISDIR that names neither the entry nor a way out.
+  if (statSync(join(ROOT, relPath)).isDirectory()) {
+    failures.push(
+      `${relPath} is a directory, not a file: git lists a nested repository (a worktree, a clone, a submodule) as one entry and does not descend into it, so this sweep cannot read what it holds. If it is scratch output, add it to .gitignore; otherwise move it out of this checkout.`,
+    )
+    continue
+  }
   textFilesScanned += 1
   const buf = readFileSync(join(ROOT, relPath))
   const at = buf.indexOf(0)

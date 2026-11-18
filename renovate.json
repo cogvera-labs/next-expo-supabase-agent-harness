@@ -197,6 +197,13 @@
       "semanticCommitScope": "template-ci"
     },
     {
+      "description": "The deno pin is one decision. tests/gates/workflow-lanes.test.mjs holds selftest.yml and the shipped quality-gate.yml to the same exact X.Y.Z, so the two move in one PR, not one in each Actions group, and the release tag's leading v is stripped to keep the form the test expects.",
+      "matchManagers": ["github-actions"],
+      "matchDepNames": ["deno"],
+      "groupName": "deno",
+      "extractVersion": "^v(?<version>.*)$"
+    },
+    {
       "description": "Every major waits for a Dependency Dashboard click.",
       "matchUpdateTypes": ["major"],
       "dependencyDashboardApproval": true
