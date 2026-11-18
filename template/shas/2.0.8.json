@@ -26,6 +26,15 @@
             "SECURITY_OWNERS"
           ]
         ]
+      },
+      {
+        "sha256": "2c012d8cbe191f79fec1582cc6831a899b8d587b1017f7d1bffca04334a00cdc",
+        "sites": [
+          [
+            6896,
+            "SECURITY_OWNERS"
+          ]
+        ]
       }
     ],
     ".claude/agents/design-reviewer.md": [
@@ -34,6 +43,9 @@
       }
     ],
     ".claude/agents/migration-rls-author.md": [
+      {
+        "sha256": "06a93a6fcd2f3f05a85ea1bfd44c4c9e17b8da87ddaa0a405e306cd0adc0b912"
+      },
       {
         "sha256": "2c40354ddf3df297b288fd1d28d7bc55a90e2411f4b4fc665fe461c4d943f867"
       }
@@ -52,14 +64,29 @@
             "SECURITY_OWNERS"
           ]
         ]
+      },
+      {
+        "sha256": "cd978fcf570c22d302a5aec58a7cde8b506c19039407b58eabf8ccb9daf0217c",
+        "sites": [
+          [
+            6423,
+            "SECURITY_OWNERS"
+          ]
+        ]
       }
     ],
     ".claude/agents/test-author.md": [
+      {
+        "sha256": "46c7fd572061805bdf5ea83ecb51b3553f69a0c9389d917b745765262c41fb5b"
+      },
       {
         "sha256": "5084748abbfc2029a2620f65e0aa02572b66a718ce6a94a9fbb64500423bb22a"
       }
     ],
     ".claude/agents/torvalds-reviewer.md": [
+      {
+        "sha256": "354312100aa0521d0c05a33e844b50c201dc499a13d04889018fbd3c31b4285d"
+      },
       {
         "sha256": "b7dcd68b2113be1e9d52c99e6ea7a83efd05c22923ea53541d46606aaddb9ed1"
       }
@@ -76,22 +103,34 @@
     ],
     ".claude/commands/new-action.md": [
       {
+        "sha256": "104db1e1e3f6f0c5437eadffb45fbab604ae2834043fe104fe947ccd64580a0f"
+      },
+      {
         "sha256": "2a34ab6e2cdda487476901d6707f099afcefced96cff18955f02ec878605b3cc"
       }
     ],
     ".claude/commands/new-feature.md": [
       {
         "sha256": "62259ef74f5d839a4793c9e37b89a7051a05e7ab4ad92b95c28bfc9ecdc89145"
+      },
+      {
+        "sha256": "ea419b2585958ccc13098139d9be0e85ac537403bd778139916dc14443498c01"
       }
     ],
     ".claude/commands/new-migration.md": [
       {
         "sha256": "161f24c07d8848fb08fd2e97d8243d0f6b00cddd80533812072b8704feab145a"
+      },
+      {
+        "sha256": "1fc9eb06e89178fa1caf9c02e29545a54417d686d021bb942b58db677f654189"
       }
     ],
     ".claude/commands/rls-check.md": [
       {
         "sha256": "4e2453d96ab22c76588a935824876c31e15fbaba0120aeff77f4516191bb2025"
+      },
+      {
+        "sha256": "b7ccfa8e7eaa3106c639ae6608716c4bd95fc82ee514b7e16e9959eb0342066c"
       }
     ],
     ".claude/commands/verify-citations.md": [
@@ -102,6 +141,9 @@
     ".claude/commands/verify-invariants.md": [
       {
         "sha256": "2e55f33c20edd11b409a4316389a7cc2b907e73a89bf349c7163eaa4d930897d"
+      },
+      {
+        "sha256": "a1d58b69999a81dbf217e47e44e8054f826dd2efaa24ed6a70a2d94de429515c"
       }
     ],
     ".claude/hooks/launch.mjs": [
@@ -173,6 +215,15 @@
             "SECURITY_OWNERS"
           ]
         ]
+      },
+      {
+        "sha256": "2def40ac3f3914f2d321d0ad13fc9b5249acd727c83ea9f8351f19485a349790",
+        "sites": [
+          [
+            1250,
+            "SECURITY_OWNERS"
+          ]
+        ]
       }
     ],
     ".claude/rules/e2ee.md": [
@@ -182,12 +233,18 @@
     ],
     ".claude/rules/encryption.md": [
       {
+        "sha256": "692d85cbc43401a5b906256e26e15c4b5b676962a3df09d12217cd2500bb8f11"
+      },
+      {
         "sha256": "7146d59fbb27dec12ad2a7a7672e444ddb74b8bb4fbf9a605a2d7678dd5f0a61"
       }
     ],
     ".claude/rules/mobile-server-split.md": [
       {
         "sha256": "c9ff092361e0ee722c1ae8a39c6b5f0a2bf19246071e137f6f5978cd7a0367e3"
+      },
+      {
+        "sha256": "ed1dcc1450528880793861e58d339e826c91567b2e5ac86fad4e3a4fc5b8aa16"
       }
     ],
     ".claude/rules/provenance.md": [
@@ -213,6 +270,9 @@
     ".claude/skills/authoring-e2ee-feature/SKILL.md": [
       {
         "sha256": "02012125d4ad291ead9572202e681a4a0d934786250a03d7352afdb8d77bcb2f"
+      },
+      {
+        "sha256": "df07ce27f237382b6c5f3b489046504764386f4e6730ead0b40206784a3abd18"
       }
     ],
     ".claude/skills/authoring-vertical-slice/SKILL.md": [
@@ -223,21 +283,33 @@
     ".claude/skills/authoring-vertical-slice/references/dal-dto.md": [
       {
         "sha256": "826b3e15460a4c160a2cdf13aba9e5d6bf50a3a19cef804cecf9b056b62486bd"
+      },
+      {
+        "sha256": "8e551617695f27045858b5712ec172c434fc35e0924ebb58dbb725a164247ac3"
       }
     ],
     ".claude/skills/authoring-vertical-slice/references/migration-rls.md": [
       {
         "sha256": "b2b86e85a52b897c2ca2f714a20b7aa28e8e7575e837a61db3aed7532ba5a19e"
+      },
+      {
+        "sha256": "bbfd2a3bccb3fecaa06c693a1e3b5e602e610ea27b93f42d3abb3792b26250c1"
       }
     ],
     ".claude/skills/authoring-vertical-slice/references/mobile-screen.md": [
       {
         "sha256": "e3cbd855b64bade73b32a9491a1256a9e58624406fa1368deaa5e5590f3537d5"
+      },
+      {
+        "sha256": "ef939679512da05df841e8e687904f38fba327f08515092863cc15c704362195"
       }
     ],
     ".claude/skills/authoring-vertical-slice/references/tests.md": [
       {
         "sha256": "9c1c899ed8ef6708092d3ac7b8a68e82794238cafe72f9ed6cf459d7885760cf"
+      },
+      {
+        "sha256": "c93b73d2c649b613823457264059beb4902eb1fc10ff2a9b7cc8e5799da9e36e"
       }
     ],
     ".claude/skills/authoring-vertical-slice/scripts/scaffold-slice.mjs": [
@@ -715,6 +787,15 @@
     ],
     "docs/harness/README.md": [
       {
+        "sha256": "63f900bc586af2cf76428225494fd80bb092fb741a3ae21a9b262b129473c1ca",
+        "sites": [
+          [
+            21677,
+            "SECURITY_OWNERS"
+          ]
+        ]
+      },
+      {
         "sha256": "da6c530c910cb98b8b0f85ca19715d905c3d7646e684c74b0609da31502887d8",
         "sites": [
           [
@@ -730,6 +811,19 @@
       }
     ],
     "docs/harness/gates-catalog.md": [
+      {
+        "sha256": "03baa10eafada7db57cab804431d95068d31dfc75037c8711db73cbc9ff6d22b",
+        "sites": [
+          [
+            29320,
+            "SECURITY_OWNERS"
+          ],
+          [
+            155990,
+            "SECURITY_TXT_EXPIRES"
+          ]
+        ]
+      },
       {
         "sha256": "1ffb88be487b94c9287cac1b550e78da9b7b24bb0056c9a582c6fb955d27600d",
         "sites": [
@@ -936,6 +1030,9 @@
       }
     ],
     "docs/runbooks/local-development.md": [
+      {
+        "sha256": "5878bfba031874594ec14699c3879de47994a97e0095ef11f34c74ccbf2d9231"
+      },
       {
         "sha256": "a51c398803c33ddd297895d73edc7cc6c836dff7907253a9a1137b0714a022e6"
       }

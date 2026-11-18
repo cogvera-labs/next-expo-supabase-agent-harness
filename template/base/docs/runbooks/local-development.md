@@ -56,10 +56,11 @@ so the two agree out of the box.
 pnpm dev:mobile # expo start — Metro bundler + the dev client
 ```
 
-`apps/mobile` reads its `EXPO_PUBLIC_*` values, talks **directly** to Supabase for
-reads/writes (Class-A) and to the tRPC router served by the web app for the rest
-(Class-B). If you are exercising the Class-B path, keep `pnpm dev:web` running; for
-Class-A-only work the web server is optional. On a device/emulator, `127.0.0.1`
+`apps/mobile` reads its `EXPO_PUBLIC_*` values and signs in **directly** against
+Supabase Auth. Its reads and writes go through the tRPC router the web app serves
+(Class-B, the default); only a vertical that opts into Class-A reads straight from
+Supabase through its `./client`. So keep `pnpm dev:web` running: without it, sign-in
+and Class-A reads still work, and every tRPC call fails. On a device/emulator, `127.0.0.1`
 means the device itself — point `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_WEB_ORIGIN`
 at your machine's LAN IP (or a tunnel) so the phone can reach the stack.
 

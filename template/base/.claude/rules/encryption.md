@@ -8,7 +8,7 @@ checks runs in a base install. The full rule, `.claude/rules/e2ee.md`, ships wit
 module: `enable e2ee` installs it, and an install without the module does not have it.
 SOURCE: docs/harness/README.md (the always-loaded rules surface)
 
-- **RLS keyed on `auth.uid()` stays THE authorization boundary. Encryption sits ON
+- **RLS scoped by `org_id` stays THE authorization boundary. Encryption sits ON
   TOP of it and never replaces it.** An encrypted table gets no relief from a single
   policy, grant, index, `FORCE`, or audit trigger. *Twin: the whole `schema-rls` /
   `tenancy` suite and both isolation twins (`supabase/tests/**` pgTAP and

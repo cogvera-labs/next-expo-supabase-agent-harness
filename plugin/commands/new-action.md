@@ -44,8 +44,9 @@ Pick the rung off the ladder in `packages/api/src/trpc.ts`:
 THE ENVELOPE RULE. The procedure returns `ActionOutcome<T>` from `@app/errors` on the DATA
 channel — `outcomeOk(...)` / `outcomeErr(appError.X())`. A domain failure is NEVER a thrown
 `TRPCError`: throwing flattens the discriminated `AppError` the screens switch on into an HTTP
-status. Only auth (`UNAUTHORIZED`) and version-skew (`CONFLICT`) bypass the envelope, and both
-are transport facts the handler could not produce. Bound every wire value in the
+status. Only auth (`UNAUTHORIZED`), version-skew (`CONFLICT`) and the rate-limit guard
+(`TOO_MANY_REQUESTS`) bypass the envelope, and all three are transport facts the handler could
+not produce. Bound every wire value in the
 `@app/contracts` schema (`.max()` on strings); `owner_id` / actor ids come from the VERIFIED
 `ctx.actor`, never from the input.
 

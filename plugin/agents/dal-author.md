@@ -44,9 +44,10 @@ the first run):
    failure is a returned `outcomeErr(appError.X())`, NEVER a thrown error —
    throwing flattens the discriminated `AppError` a screen switches on into a
    transport status, and "someone else deleted this note" becomes "something went
-   wrong". EXACTLY TWO throws bypass the envelope, both transport facts a handler
-   could not produce: `authedProcedure`'s `UNAUTHORIZED` and the skew guard's
-   `CONFLICT`. The `app-error-only` ESLint rule is the static half. Kinds:
+   wrong". EXACTLY THREE throws bypass the envelope, all transport facts a handler
+   could not produce: `authedProcedure`'s `UNAUTHORIZED`, the skew guard's
+   `CONFLICT` and the rate-limit guard's `TOO_MANY_REQUESTS`. The `app-error-only`
+   ESLint rule is the static half. Kinds:
    `unauthorized|forbidden|notFound|conflict|validation|rateLimited|rlsDenied|unavailable|unknown`.
 2. **The DAL takes a client, it never makes one.** The client handed in is the
    per-request, RLS-scoped one, consumed through the structural `NotesDatabase`
