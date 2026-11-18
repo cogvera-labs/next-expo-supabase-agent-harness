@@ -526,6 +526,9 @@
     ".github/workflows/a11y-deep.yml": [
       {
         "sha256": "1e9f12aa5fd80522743309ed946eed70afd1231de350cbd14202fae9bde08e1d"
+      },
+      {
+        "sha256": "3eeea83dbb5948850973911b85b50a937ede1ff56dcc6ebaceb4ec9fdf927afd"
       }
     ],
     ".github/workflows/actions-lint.yml": [
@@ -537,11 +540,23 @@
             "DEFAULT_BRANCH"
           ]
         ]
+      },
+      {
+        "sha256": "f3d5ffcbc2bdb9702785d181c95437ee357c40b5656d0f0515458c68a36de3a6",
+        "sites": [
+          [
+            937,
+            "DEFAULT_BRANCH"
+          ]
+        ]
       }
     ],
     ".github/workflows/adr-guard.yml": [
       {
         "sha256": "a42a7fabcdeff0948f5a44bfd32232234bf838f85b35145652ea059ff3755a37"
+      },
+      {
+        "sha256": "cb0fa1b16bc4905b5ac5346acd44a8cd3ae1b44bf7aa1791b41028d67c588657"
       }
     ],
     ".github/workflows/codeql.yml": [
@@ -553,9 +568,21 @@
             "DEFAULT_BRANCH"
           ]
         ]
+      },
+      {
+        "sha256": "96565352bf331d7f6043a2665ce9dc2ee15a0a2af3755489b44b47515a8fe166",
+        "sites": [
+          [
+            501,
+            "DEFAULT_BRANCH"
+          ]
+        ]
       }
     ],
     ".github/workflows/deploy-record.yml": [
+      {
+        "sha256": "b723367e5fcd284e9de205bad21d35c5d1a2803486eb3dc725352657b435707d"
+      },
       {
         "sha256": "dbe627683f377a013a0b2c37b392a7bb1350a04dceacfed7551cdcf31d141266"
       }
@@ -563,14 +590,23 @@
     ".github/workflows/device-e2e.yml": [
       {
         "sha256": "0f16484223f8ed8bc55414666b599c3d97078b36f4bc29a9efeb9b79d937d82e"
+      },
+      {
+        "sha256": "12597118ffb36ba9d7c13a6401201f8da349d91bca8fcaba7d22d20d026e9892"
       }
     ],
     ".github/workflows/eas-update.yml": [
+      {
+        "sha256": "b4db0d75f2781922141892510968ff1309f78e57916df3eee77c837bcf44414f"
+      },
       {
         "sha256": "bd38d3c9985f1ea73d90ad540d3f99cc10a1d950143389607f478c7782b93933"
       }
     ],
     ".github/workflows/eval-live.yml": [
+      {
+        "sha256": "09e4358da9f9633e97458e41b2c247d789f88bcba31552537272eb900d930cd2"
+      },
       {
         "sha256": "43ac8e6c26cbad717ef40b5ddace77dc2698b9dc5eea8a4912eb5367caf32c10"
       }
@@ -584,19 +620,43 @@
             "DEFAULT_BRANCH"
           ]
         ]
+      },
+      {
+        "sha256": "ed458c6cfc4c4212982da92bcac01ca25996d4bb22dc13d35a891e398bd42b7a",
+        "sites": [
+          [
+            510,
+            "DEFAULT_BRANCH"
+          ]
+        ]
       }
     ],
     ".github/workflows/migration-safety.yml": [
       {
         "sha256": "14871450309f5afc3d8aea4cf67918d54a55b4ca69d95fb247d48eeffb015d7e"
+      },
+      {
+        "sha256": "6addb74867080c4e27b20946617440f87c6594fa2d57fe90b0bcf058b87321f4"
       }
     ],
     ".github/workflows/mutation.yml": [
       {
         "sha256": "2406ee4b090f0c9452aa4d3794688d74275bab66400118a26835ae0b758f0992"
+      },
+      {
+        "sha256": "d0f83d72e33d4484287f363e21d50cc141c5f340d1967884eb3680d92b3b520b"
       }
     ],
     ".github/workflows/osv-scan.yml": [
+      {
+        "sha256": "9a740baa834ac6ada6c7b0d6a5b2cef4087d1e605196cff5952fc4b44e83fc98",
+        "sites": [
+          [
+            1379,
+            "DEFAULT_BRANCH"
+          ]
+        ]
+      },
       {
         "sha256": "ec5eeb7500c48678f46cb69fb59cc07fa0483fa14a58b4c09cff0400268e076a",
         "sites": [
@@ -608,6 +668,15 @@
       }
     ],
     ".github/workflows/preview-mobile.yml": [
+      {
+        "sha256": "968be224f9c163ae9ec22d867ff5202ff4fb6e6f23ebd43cc4055680036d2e10",
+        "sites": [
+          [
+            1029,
+            "DEFAULT_BRANCH"
+          ]
+        ]
+      },
       {
         "sha256": "a3539135da69a01aa089399b83790786dd1ab57e1b96b4296d34a01836e3e517",
         "sites": [
@@ -621,9 +690,21 @@
     ".github/workflows/provenance.yml": [
       {
         "sha256": "42e51cfac9ecae17e546830f452ca4e0d22289c0c2423c43dfb88436a6ee0c46"
+      },
+      {
+        "sha256": "e2e38e9bd8536990b40e7610763e9259c1f2da2cd6ee4f937f83fae0da4c0f25"
       }
     ],
     ".github/workflows/quality-gate.yml": [
+      {
+        "sha256": "19a6bbed524aebf4f3ea6c330a729665f521b6ddc242d275444669493084dc96",
+        "sites": [
+          [
+            2223,
+            "DEFAULT_BRANCH"
+          ]
+        ]
+      },
       {
         "sha256": "535a4a0b436a175c94456206be6b2241f412844751f5dc5d2eeec2b1e38bbbe8",
         "sites": [
@@ -637,6 +718,9 @@
     ".github/workflows/release-mobile.yml": [
       {
         "sha256": "4edb8bd016ee58ffabd09495b4950e7ef593d525adc13597a5df511e21ac4949"
+      },
+      {
+        "sha256": "cb69943ae611b52dcbb8204a3b1a6542eda28421f0140046e742c313dd79e1e3"
       }
     ],
     ".github/workflows/release-please.yml": [
@@ -648,16 +732,31 @@
             "DEFAULT_BRANCH"
           ]
         ]
+      },
+      {
+        "sha256": "cfdc3f0f8aec4ac10b85a5e6ee65863c958cda17521b73ff81ac46f6d09ad5da",
+        "sites": [
+          [
+            1214,
+            "DEFAULT_BRANCH"
+          ]
+        ]
       }
     ],
     ".github/workflows/store-metadata-push.yml": [
       {
         "sha256": "e1aa538415bfa4414d3cc71a064265a0fa3e4a9776319ac35c0f3a8162767cfe"
+      },
+      {
+        "sha256": "fe10eb7d274bff25ce516aef61e6dc57be328acc5ab5dcf779d79b9d32264d7f"
       }
     ],
     ".github/workflows/web-deploy.yml": [
       {
         "sha256": "46ecebb3226e5add49c131219dc2f9954f9296fe52a4458c7b20636db4d36544"
+      },
+      {
+        "sha256": "7ceec56add1f9a408da2ea84ed39d58ae978ce747b9d6318405d789cc89cbe92"
       }
     ],
     ".github/zizmor.yml": [

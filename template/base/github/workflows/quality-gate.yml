@@ -997,10 +997,10 @@ jobs:
   # gate, plus the nightly schedule and manual dispatch as the unconditional net. A tree with
   # no functions reports OK with the count, so the lane stays green when there are none.
   #
-  # deno comes from denoland/setup-deno at an EXACT version. Renovate's github-actions manager
-  # reads `deno-version` as the npm `deno` package and proposes each bump in its own PR, under
-  # the same five-day age rule as every npm update; its deno manager bumps each function's
-  # deno.json and deno.lock together. The module cache is keyed on the deno.lock files, so the
+  # deno comes from denoland/setup-deno at an EXACT version, written without the release tag's
+  # leading `v`. Renovate's github-actions manager reads `deno-version` and proposes each bump
+  # from deno's GitHub releases; its deno manager bumps each function's deno.json and deno.lock
+  # together. The module cache is keyed on the deno.lock files, so the
   # network only fills a cache the lockfiles pin. Measured (2026-09-30, deno 2.9.6, the seeded
   # function): the binary is a 42 MB download (96 MB unpacked), once per run; a cold check
   # fills a 13 MB module cache (supabase-js, its five @supabase npm packages and what they
@@ -1031,7 +1031,7 @@ jobs:
 
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
-          deno-version: v2.9.8
+          deno-version: 2.9.8
           cache: true
 
       # No install: the gate is node built-ins plus the deno above. CI=true, so a missing

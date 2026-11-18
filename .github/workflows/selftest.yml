@@ -205,7 +205,7 @@ jobs:
       # holds the two equal, so the factory proves the version consumers run.
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
-          deno-version: v2.9.8
+          deno-version: 2.9.8
       - name: Scaffold canary fixture (with the worked example; committed git baseline for the diff-based gates)
         run: |
           node installer/cli.mjs init --dir "$RUNNER_TEMP/canary" --tier core --yes --with-demo
@@ -1117,7 +1117,7 @@ jobs:
       # holds the two equal, so the factory proves the version consumers run.
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
-          deno-version: v2.9.8
+          deno-version: 2.9.8
       - name: Bootstrap a fresh project from the template
         run: node installer/cli.mjs init --dir "$GITHUB_WORKSPACE/.selftest/boot" --tier core --yes
       - name: Git baseline + corepack (lefthook prepare and the diff-based gates need a repo)
