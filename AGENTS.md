@@ -51,9 +51,11 @@ Only `installer/`, `template/` and a few root files go into the npm package (`fi
   paths get past the bash guard. Using that gap defeats the guardrail this repository exists to
   demonstrate. When such a path needs a change, describe it, with draft text, for a human.
 - **Agent worktrees.** Claude Code puts an agent's worktree under `.claude/worktrees/`, and the
-  write guard judges paths relative to the main checkout, so it currently refuses every edit
-  inside one; a fix to the protected guard is pending. Work in a scratch clone outside the
-  repository instead, never through shell writes into the worktree.
+  write guard judges paths relative to the main checkout, so it refuses every edit inside one
+  until the protected guard is fixed (follow-up 9 in the
+  [research record](design/research/20261118-discoverability-and-trust/README.md#plan-and-status)).
+  Work in a scratch clone outside the repository instead, never through shell writes into the
+  worktree.
 - **Bash guard.** [pretool-bash-guard.mjs](.claude/hooks/pretool-bash-guard.mjs) re-exports the
   guard every project gets. It matches command text, quoted strings, commit messages and
   `grep` patterns included. Commit with `-F` and a message file, remove scratch directories
@@ -77,7 +79,7 @@ review. In short:
 |---|---|
 | A doc: README, CONTRIBUTING, CHANGELOG, a page under `template/` | `node scripts/check-claims.mjs`; `node scripts/hygiene.mjs`; `GITHUB_BASE_REF=main CI=true node --test "tests/gates/**/*.test.mjs"` |
 | `README.md` | the doc checks; `node scripts/check-reuse.mjs`; `GITHUB_BASE_REF=main CI=true node --test tests/installer/readme-recording.test.mjs` |
-| A page under `template/base/docs/` or `template/modules/*/docs/`, or `docs-site/` | the doc checks; `pnpm --dir docs-site install --frozen-lockfile`; `pnpm --dir docs-site run build` |
+| A page under `template/base/docs/`, `template/modules/*/docs/` or `docs/`, or a change in `docs-site/` | the doc checks; `pnpm --dir docs-site install --frozen-lockfile`; `pnpm --dir docs-site run build` |
 | `docs/cli.md` | `GITHUB_BASE_REF=main CI=true node --test tests/gates/cli-docs-sync.test.mjs tests/installer/demo-eject.test.mjs` |
 | `design/` | `node scripts/check-claims.mjs`; `node scripts/check-obligations.mjs` |
 | `installer/` | `GITHUB_BASE_REF=main CI=true node --test "tests/installer/**/*.test.mjs"`; `node scripts/check-syntax.mjs`; `node scripts/hygiene.mjs` |

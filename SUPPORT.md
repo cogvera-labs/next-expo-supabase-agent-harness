@@ -25,13 +25,14 @@ documentation and communities.
   `npx --yes next-expo-supabase-agent-harness@latest update` brings the harness
   up to date, and `npx --yes next-expo-supabase-agent-harness@latest doctor`
   reports whether the install is healthy.
-- **Read the gate's own message.** A failing gate prints a `FIX[<gate>]:` line
-  that names the fix, and `docs/harness/gates-catalog.md` in your project
-  explains each gate and how it can fail.
-- **Bring the facts.** The harness version (`.harness/manifest.json`, the
-  `version` field), your OS, and your Node and pnpm versions, as the bug form
-  asks. Paste the full output of the failing command, not a summary of it.
-  Never paste credentials, tokens or private data.
+- **Read the gate's own message.** A failing gate prints a `FIX[<gate>]:`
+  line that gives the command that reproduces the failure and points to the
+  gate's section of `docs/harness/gates-catalog.md` in your project, which
+  explains the gate and how it can fail.
+- **Bring the facts.** The harness version (`harnessVersion` in
+  `.harness/manifest.json`), your OS, and your Node and pnpm versions, as the
+  bug form asks. Paste the full output of the failing command, not a summary
+  of it. Never paste credentials, tokens or private data.
 
 ## What to expect
 

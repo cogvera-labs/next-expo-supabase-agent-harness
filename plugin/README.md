@@ -3,8 +3,10 @@
 The agent half of [next-expo-supabase-agent-harness](https://github.com/cogvera-labs/next-expo-supabase-agent-harness),
 a scaffold for pnpm monorepos that ship a Next.js web app and an Expo (React Native) mobile
 app over one Supabase backend. This plugin carries the harness's subagents, slash commands
-and skills, so you can use them in a Claude Code session without installing the harness:
-they work in any Next.js, Expo or Supabase repository. The harness itself is documented at
+and skills, so you can use them in a Claude Code session without installing the harness.
+They are written for a project the harness installed, whose docs, registers and tools they
+read; in another Next.js, Expo or Supabase repository they work from whatever of those they
+find. The harness itself is documented at
 [cogvera-labs.github.io/next-expo-supabase-agent-harness](https://cogvera-labs.github.io/next-expo-supabase-agent-harness/).
 
 ## Install

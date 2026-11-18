@@ -22,13 +22,13 @@ kind of change. If an AI tool helps with your change, read
    `node --test tests/` green, and the scaffold-green jobs — `bootstrap-linux`
    (node 22 **and** 24), `metal-bootstrap` and `demo-eject` (an
    `init --with-demo` scaffold, before and after `eject`) — must still produce a
-   project where `pnpm validate` passes out of the box. Both run on **ubuntu only**:
-   the one Windows runner in the matrix is `installer-unit`, which exists for
-   the path-separator/CRLF bug class and does not build a scaffold. On macOS,
-   `installer-unit` runs too, and `macos-scaffold` runs `pnpm validate` on a
-   scaffold without Docker; it reds on any skip but the database gate's. No job
-   builds a scaffold on Windows, so nothing here means "a Windows scaffold is
-   green".
+   project where `pnpm validate` passes out of the box. All three run on
+   **ubuntu only**: the one Windows runner in the matrix is `installer-unit`,
+   which exists for the path-separator/CRLF bug class and does not build a
+   scaffold. On macOS, `installer-unit` runs too, and `macos-scaffold` runs
+   `pnpm validate` on a scaffold without Docker; it reds on any skip but the
+   database gate's. No job builds a scaffold on Windows, so nothing here means
+   "a Windows scaffold is green".
 2. **Nothing project-specific in `template/`.** The hygiene gate greps for
    leaked strings (real tenant IDs, DSNs, signing material, store credentials)
    and for cross-porting residue from the SIBLING harnesses — Hono, Drizzle,
@@ -119,7 +119,7 @@ node scripts/check-claims.mjs    # recomputes the numbers the docs state (under 
 node scripts/hygiene.mjs         # leaked strings, unearned maturity and standards claims (under 1 s)
 GITHUB_BASE_REF=main CI=true node --test "tests/gates/**/*.test.mjs"   # many of these read the docs (about 2 min)
 
-# A page under template/base/docs/ or template/modules/*/docs/, or a change in docs-site/
+# A page under template/base/docs/, template/modules/*/docs/ or docs/, or a change in docs-site/
 pnpm --dir docs-site install --frozen-lockfile   # the documentation site has its own lockfile
 pnpm --dir docs-site run build                   # renders every page; a broken link or #anchor fails it
 

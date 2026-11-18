@@ -53,8 +53,8 @@ retrofit installs into an existing pnpm workspace that has `apps/web` or `apps/m
 retrofit keeps your configs and parks the harness's copies beside them as
 `<name>.harness.<ext>` files for you to merge.
 
-- **Where:** [`installer/lib/detect.mjs`](../installer/lib/detect.mjs); the
-  [README](../README.md), "Who this is for".
+- **Where:** [`installer/lib/detect.mjs`](../installer/lib/detect.mjs); the README's
+  [Who this is for](../README.md#who-this-is-for).
 - **Also called:** mode (the session-start brief prints `bootstrap` or `retrofit`).
 
 ## C
@@ -435,8 +435,8 @@ An overloaded word in this project, so always qualify it. Its senses:
   then the raw text and the request id
   ([state choreography](../template/base/.claude/skills/designing-mobile-ui/references/state-choreography.md)).
 
-**Where:** [`apply-proposal`](cli.md#apply-proposal-id) in the CLI reference; the
-[README](../README.md), "Compliance mappings".
+**Where:** [`apply-proposal`](cli.md#apply-proposal-id) in the CLI reference; the README's
+[Compliance mappings](../README.md#compliance-mappings).
 
 ### Reviewer verdict
 

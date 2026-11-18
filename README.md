@@ -209,7 +209,7 @@ applied to one stack.
 
 | Instead of | It is better at | This repository adds |
 |---|---|---|
-| A starter you copy once, such as [create-t3-turbo](https://github.com/t3-oss/create-t3-turbo) or [Solito](https://github.com/nandorojo/solito) | Fewer moving parts, a far larger community | Row-level security tested against Postgres, an agent held to the rules, and `update` |
+| A starter you copy once, such as [create-t3-turbo](https://github.com/t3-oss/create-t3-turbo), or a library that shares screens, such as [Solito](https://github.com/nandorojo/solito) | Fewer moving parts, a far larger community | Row-level security tested against Postgres, an agent held to the rules, and `update` |
 | Agent instructions: `AGENTS.md`, rules, skill packs | Nothing to run, and they work with many agents | Hooks and gates that refuse what instructions can only ask |
 | Generic guard hooks, such as [failproofai](https://github.com/FailproofAI/failproofai), [destructive_command_guard](https://github.com/Dicklesworthstone/destructive_command_guard) or [cc-safety-net](https://github.com/kenryu42/cc-safety-net) | Many coding agents, any stack | Gates that know the schema and both apps, a can-fail proof for each, a CI floor, and the starter |
 
@@ -260,9 +260,10 @@ publishing. [Building with agents](docs/building-with-agents.md) describes the p
   agent ships;
   [#170](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/issues/170)
   tracks a with-and-without evaluation.
-- **No independent review.** One maintainer reviews and merges changes, the branch rules
-  require passing CI rather than a second reviewer, and the
-  [security assurance case](docs/security/assurance-case.md) has had no outside review.
+- **No independent review.** One maintainer reviews changes, and the maintainer or the
+  collaborator merges them; the branch rules require passing CI rather than a second
+  reviewer, and the [security assurance case](docs/security/assurance-case.md) has had no
+  outside review.
 
 ## Commands
 

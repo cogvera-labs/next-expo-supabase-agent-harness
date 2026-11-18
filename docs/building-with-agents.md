@@ -10,8 +10,19 @@ rest of the repository's claims.
 
 ## The facts at v2.0.8
 
-Each figure is pinned to the `v2.0.8` tag (`3902a3b`, 2026-11-11) and is what the command
-beside it prints, run from a clone that has the tags.
+Each figure is pinned to the `v2.0.8` tag (`3902a3b`, 2026-11-11).
+
+| Figure at v2.0.8 | What it means |
+|---|---|
+| 804 of 846 commits carry the trailer; so do 583 of the 595 non-merge commits | The trailer is `Co-Authored-By`, naming a Claude model. The non-merge commits without one are release squashes up to 1.0, git's own revert messages, Renovate updates and one outside contribution; the last command below lists them. |
+| 609 commits name Claude as author | Most of the rest name a person as author and carry the trailer as well: the author field records whose git identity made the commit, and the trailer records that Claude Code took part. |
+| 660 commits carry a `Claude-Session` link | The link names the session that produced the commit ([what that means](#what-the-commit-trailers-mean)). |
+| 30 release tags, v0.1.3 to v2.0.8 | One per release this lineage tagged; the ancestor's versions, up to 0.1.2, have none. |
+| `e552d6e` adds 511 files: it imports the ancestor harness | The first commit, on 2026-07-22, imports the harness this one was forked from. The [CHANGELOG](../CHANGELOG.md)'s lineage note says so, and the oldest changelog entries are the ancestor's. |
+| Up to v1.0.0: 72 entries, one of them a pull request | Before 1.0, changes reached `main` as direct commits, including whole releases squashed into one, so the per-change trail is coarse there. |
+| v1.0.0 to v2.0.8: 108 entries, 73 merges and 35 squashes | Since 1.0, every change reached `main` through a pull request. |
+
+To reproduce each figure, run these in a clone that has the tags:
 
 ```sh
 git rev-list --count v2.0.8   # 846
@@ -29,15 +40,7 @@ git log --first-parent --merges --format=%s v1.0.0..v2.0.8 | grep -c '^Merge pul
 git log --first-parent --no-merges --format=%s v1.0.0..v2.0.8 | grep -cE '\(#[0-9]+\)$'   # 35
 ```
 
-| Figure at v2.0.8 | What it means |
-|---|---|
-| 804 of 846 commits, and 583 of the 595 that are not merges | They carry a `Co-Authored-By` trailer naming a Claude model. The command below lists the non-merge commits without one: release squashes up to 1.0, git's own revert messages, Renovate updates and one outside contribution. |
-| 609 commits | They name Claude as their author. Most of the rest name a person as author and carry the trailer as well: the author field records whose git identity made the commit, and the trailer records that Claude Code took part. |
-| 660 commits | They carry a `Claude-Session` trailer, a link to the session that produced them ([what that means](#what-the-commit-trailers-mean)). |
-| 30 tags | The release tags, v0.1.3 to v2.0.8. |
-| `e552d6e`, 511 files | The first commit, on 2026-07-22, imports the ancestor harness this one was forked from. The [CHANGELOG](../CHANGELOG.md)'s lineage note says so, and the oldest changelog entries are the ancestor's. |
-| 72 entries up to v1.0.0, 1 of them a pull request | Before 1.0, changes reached `main` as direct commits, including whole releases squashed into one, so the per-change trail is coarse there. |
-| 108 entries from v1.0.0 to v2.0.8: 73 merges and 35 squashes | Since 1.0, every change reached `main` through a pull request. |
+To list the non-merge commits that carry no trailer:
 
 ```sh
 git log --no-merges v2.0.8 --format='%(trailers:key=Co-Authored-By,valueonly,separator=%x2C)%x09%h %s' | awk -F'\t' '$1 !~ /Claude/ {print $2}'
@@ -51,7 +54,7 @@ git log --no-merges v2.0.8 --format='%(trailers:key=Co-Authored-By,valueonly,sep
 | **The maintainer** | Decides what is worth doing; reads and merges pull requests; makes the calls an agent is not trusted to make alone, such as a reviewed row for a new dependency or a change to the enforcement surface; cuts each release by pushing its tag; and answers for every change, whoever typed it. Holds repository administration and receives security reports ([GOVERNANCE.md](../GOVERNANCE.md)). |
 | **The collaborator** | Holds write access and may merge a pull request that passes the required checks ([GOVERNANCE.md](../GOVERNANCE.md)). |
 | **Renovate and outside contributors** | Dependency updates and outside pull requests, through the same checks. |
-| **The gates and CI** | Judge every change the same way, whoever wrote it. The required checks on `main` apply to the maintainer's pull requests too, and [SECURITY.md](../SECURITY.md) records that nobody, the administrator included, can bypass them. |
+| **The gates and CI** | Judge every change the same way, whoever wrote it. The required checks on `main` apply to the maintainer's pull requests too: the ruleset on `main` names no bypass actor ([SECURITY.md](../SECURITY.md)). An administrator could still change the ruleset itself. |
 
 Review here means the maintainer reading a pull request and deciding to merge it, with the
 gates and CI as the judge of what they test. No rule requires a second person's approval;

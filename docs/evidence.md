@@ -147,6 +147,7 @@ statement; the `npm view` row above does.
 |---|---|---|---|---|
 | Since v1.0.0, every change on `main` arrived as a pull-request merge or squash | [Pull requests only](#pull-requests-only), below | `0`: no entry on `main`'s first-parent line that is neither | None in the repository; the ruleset on `main` refuses a direct push | Repository ruleset |
 | `main` requires a pull request and the required checks, and blocks force-pushes and deletion. It requires no approving review | [The ruleset](#the-ruleset), below | The rule types `deletion`, `non_fast_forward`, `pull_request` and `required_status_checks`; `0` required approvals; then the names of the required checks | None | Repository ruleset |
+| The ruleset on `main` names no bypass actor, so it binds the administrator too. An administrator can still change the ruleset itself | [The ruleset](#the-ruleset), below: the last command | `{"bypass_actors":[],"name":"main: pull request and checks"}` with an administrator's token. GitHub leaves `bypass_actors` out for anyone who cannot edit the ruleset, and the command then prints `null`, so the answer is conclusive only with an admin token | None | Repository ruleset |
 | AI assistance is disclosed in commit trailers | [Trailers](#trailers), below | At `v2.0.8`: 804 of the 846 commits carry a `Co-Authored-By` trailer naming a Claude model | None: the committing tool writes the trailer, so it is a disclosure, not a proof | none |
 | A tag whose CI is red is not published: v0.11.0 was refused | [The refused tag](#the-refused-tag), below | `Not Found (HTTP 404)` for the release, and `failure` for the tag's `release.yml` run | [tests/gates/wait-for-workflows.test.mjs](../tests/gates/wait-for-workflows.test.mjs) | `release` waits for green `selftest` and `lint` runs on the tagged commit |
 | Mistakes are corrected in a later entry, not rewritten | `grep -rn '### Corrections to the record' CHANGELOG.md docs/changelog/` | One line per release that carries the section | None: a convention | none |
@@ -171,6 +172,8 @@ gh api repos/cogvera-labs/next-expo-supabase-agent-harness/rules/branches/main \
   --jq '.[] | select(.type == "pull_request") | .parameters.required_approving_review_count'
 gh api repos/cogvera-labs/next-expo-supabase-agent-harness/rules/branches/main \
   --jq '.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context'
+gh api repos/cogvera-labs/next-expo-supabase-agent-harness/rulesets --jq '.[] | select(.target == "branch") | .id' \
+  | while read -r id; do gh api "repos/cogvera-labs/next-expo-supabase-agent-harness/rulesets/$id" --jq '{name, bypass_actors}'; done
 ```
 
 ### Trailers

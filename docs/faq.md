@@ -90,11 +90,11 @@ developer.
 
 ### How slow is it?
 
-The Measured cost section of the [README](../README.md) gives the wall times CI recorded for a
-warm and a cold `pnpm validate` and for a full Stop hook run on a GitHub-hosted Linux runner;
-they are that runner's numbers, not a promise about your machine. Locally, the gates that
-support stamps skip their check and print `STAMPED` when their inputs have not changed since
-their last green run, and CI never honours a stamp
+The [Measured cost](../README.md#measured-cost) section of the README gives the wall times CI
+recorded for a warm and a cold `pnpm validate` and for a full Stop hook run on a GitHub-hosted
+Linux runner; they are that runner's numbers, not a promise about your machine. Locally, the
+gates that support stamps skip their check and print `STAMPED` when their inputs have not
+changed since their last green run, and CI never honours a stamp
 ([stamped gates](../template/base/docs/harness/README.md#stamped-gates)).
 
 ## Supabase and security
@@ -167,7 +167,8 @@ or at the pull request instead
 On macOS, CI runs `init` and `pnpm validate` without Docker and fails if any gate skips except
 `types-drift`, which needs the database; the database gates are proven on Linux only. Windows
 is not proven: the installer's unit tests run there, but no CI lane runs a scaffold, and
-`pnpm validate` has never run in CI on Windows (the README's Limitations). The
+`pnpm validate` has never run in CI on Windows (the README's
+[Limitations](../README.md#limitations)). The
 [first-run runbook](../template/base/docs/runbooks/first-run.md) also asks Windows users to put
 the Supabase CLI on PATH, because the RLS step does not use the workspace copy there.
 
@@ -187,14 +188,15 @@ yes: `init` retrofits it, keeps your configs, parks the harness's copies beside 
 `.claude/settings.json`. `gate-integrity` stays red until each parked config is merged or
 accepted after review, and an existing workflow file is kept, so your CI runs no harness gate
 until you add the chain to it. A repository on npm, yarn or bun, or without
-`pnpm-workspace.yaml`, is refused (the [README](../README.md), "Who this is for").
+`pnpm-workspace.yaml`, is refused (the README's
+[Who this is for](../README.md#who-this-is-for)).
 
 ### Can I use it for a web-only app?
 
 Not today. `init` writes both apps, and the mobile gates judge `apps/mobile`: without it,
 `expo-policy` and `native-deps` skip on a laptop but fail closed in CI, and `parity` fails on
-the mobile paths its register names. CI runs the frozen step list, so a project cannot drop
-those gates (the [README](../README.md), "Who this is for").
+the mobile paths its register names. CI runs the frozen step list, so a project cannot
+quietly drop those gates (the README's [Who this is for](../README.md#who-this-is-for)).
 
 ### Do I need the Claude Code plugin?
 
@@ -242,13 +244,13 @@ the [evidence page](evidence.md) lists what is and is not measured.
 
 Agents write most changes; a human maintainer reviews, merges and releases them and answers
 for them, and the gates judge both. There is one maintainer, so no change is approved by a
-second person, but every change to `main` lands through a pull request whose required checks
-nobody can bypass ([SECURITY.md](../SECURITY.md),
-[Building with agents](building-with-agents.md)).
+second person, but every change to `main` lands through a pull request, and the ruleset on
+`main` names no bypass actor, so its required checks apply to the maintainer's pull requests
+too ([SECURITY.md](../SECURITY.md), [Building with agents](building-with-agents.md)).
 
 ### Do I have to credit the harness in my app?
 
 No. The repository is licensed Apache-2.0, and everything under `template/`, which is what
 `init` writes into your project, is "Apache-2.0 OR 0BSD": you may choose either, so
-scaffolded code carries no attribution requirement (the [README](../README.md) and
-[REUSE.toml](../REUSE.toml)).
+scaffolded code carries no attribution requirement (the README's
+[License](../README.md#license) section and [REUSE.toml](../REUSE.toml)).

@@ -138,9 +138,10 @@ The run of 2026-11-16, against commit `3902a3b` (the v2.0.8 release), scored
   ([GOVERNANCE.md](GOVERNANCE.md)). Every change still goes through a pull
   request and the full CI matrix.
 - **Branch-Protection: 4.** A ruleset on `main` requires a pull request and
-  passing checks, and blocks force-pushes and deletion. Nobody, the
-  administrator included, can bypass the required checks or push to `main`
-  directly. For the reason above, the ruleset requires no approving review, no
+  passing checks, and blocks force-pushes and deletion. The ruleset names no
+  bypass actor, so the required checks and the pull-request rule apply to the
+  administrator too; changing the ruleset itself remains an administrator's
+  act. For the reason above, the ruleset requires no approving review, no
   code-owner review and no approval of the most recent push, and those settings
   make up the rest of the score.
 - **CII-Best-Practices: 2.** The project's entry on the
@@ -151,10 +152,10 @@ The run of 2026-11-16, against commit `3902a3b` (the v2.0.8 release), scored
 - **Vulnerabilities: 8.** Two advisories, GHSA-mh32-jxcr-mh9f and
   GHSA-r3h5-4585-7x3w, against `astro` 7.4.1 in `docs-site/pnpm-lock.yaml`, the
   lockfile of the documentation site's build. `astro` is not in the npm package
-  or in a scaffolded project. Renovate's pull request
+  or in a scaffolded project. At the time of that run, Renovate's pull request
   [#300](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/pull/300),
-  open since 2026-11-13, moves it to 7.4.7, which fixes both. Until it merges,
-  the nightly OSV scan in `hygiene.yml` reports the same two.
+  opened on 2026-11-13, was open; it moves `astro` to 7.4.7, which fixes both.
+  Until it merges, the nightly OSV scan in `hygiene.yml` reports the same two.
 - **Contributors: 6.** Scorecard found recent contributors from two
   organizations, and gives full marks at three. A project with one maintainer
   gains here only as other people contribute.
