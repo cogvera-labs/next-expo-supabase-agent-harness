@@ -125,7 +125,7 @@ The integrator fills in Status.
 
 | # | Maintainer action, in order | Status |
 |---|---|---|
-| 1 | Nightly lanes: save the maestro-smoke artifact before 2026-11-20 12:21 UTC and pin the culprit; merge #300, then #283; re-run corpus-fidelity; cut 2.0.9, as published scaffolds still crash `lint`; legs A and E wait on upstream or the protected lane; calendar reds 2026-12-01 and 12-09 | in part: this branch pins typescript-eslint 8.72.2 in the seeded catalog; the rest is pending |
+| 1 | Nightly lanes: save the maestro-smoke artifact before 2026-11-20 12:21 UTC and pin the culprit; merge #300, then #283; re-run corpus-fidelity; cut 2.0.9, as published scaffolds still crash `lint`; legs A and E wait on upstream or the protected lane; calendar reds 2026-12-01 and 12-09 | in part. Done: typescript-eslint is pinned at 8.72.2 in the seeded catalog (#302); the artifact is saved, and the culprit, expo-sqlite 57.0.5 (its prebuilt Android library carries arm64-v8a only), is pinned off at 57.0.4, with `maestro-smoke` green on that branch (#303); `corpus-fidelity` passed on a re-run; the upgrade lane pins both held releases into each baseline's own catalog, so legs A and E are green without waiting for upstream (#307). Pending: #300 and #283, 2.0.9, the calendar reds |
 | 2 | About set to the shared description; the 20 topics; the repository pinned on the org profile | pending |
 | 3 | npm: a release after this branch (new README on npm, changelog entries); deprecate below 2.0.8, `0.0.0-stage` included; a second maintainer with 2FA | pending |
 | 4 | Verify the docs site in Search Console and Bing, with the sitemap; consider an org root site or custom domain | pending |
@@ -146,11 +146,11 @@ The integrator fills in Status.
 | 7 | Descriptive release titles (`release.yml`) | pending |
 | 8 | Decide `argument-hint` and the Agent Skills standard (`scripts/lib/plugin-folder.mjs`) | pending |
 | 9 | The write guard judges each path against its own checkout (found during execution; see Limits) | done (#306): a path inside `.claude/worktrees/<id>/` is judged against that worktree; not confirmed with a live agent worktree |
-| 10 | `scripts/hygiene.mjs` reports a directory entry from `git ls-files` (a nested repository) instead of failing with EISDIR | pending |
+| 10 | `scripts/hygiene.mjs` reports a directory entry from `git ls-files` (a nested repository) instead of failing with EISDIR | done (#304): the entry is a finding that names the way out; the submodule case shares the code path and has no test |
 | 11 | `check-claims` compares the README's "≈" timings with the committed measurement: a changed "warm ≈" figure still passes today | pending |
 | 12 | The standards-claim sweep (`scripts/lib/standards-claim.mjs`) also reads `docs/changelog/*.md`, which it lost when the old sections moved there | pending |
 | 13 | `check-plugin-manifest` requires the plugin's and the marketplace entry's descriptions to be equal | pending |
-| 14 | `tests/canary/injections.json`: the `upgrade-linux` note still says "five-leg upgrade matrix" | pending |
+| 14 | `tests/canary/injections.json`: the `upgrade-linux` note still says "five-leg upgrade matrix" | done (#305): the note states no count, and a test fails on any leg count in the registry |
 | 15 | `init --dry-run` prints "written: N file(s)" although it writes nothing | pending |
 | 16 | `template/base/tools/eslint-rules/index.mjs` names the three sanctioned transport throws; `check-migrations.mjs` and the stack's warrant regex use `YYYYMMDD-slug.md` ADR names | pending |
 

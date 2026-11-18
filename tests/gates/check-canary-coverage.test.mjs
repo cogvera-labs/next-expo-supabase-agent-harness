@@ -403,6 +403,15 @@ test('LIVE LOCKSTEP (static): the shipped registry closes over the factory gates
   }
 })
 
+test('LIVE (static): no registry note counts the upgrade matrix legs', () => {
+  // The matrix gains a leg whenever a release vintage leaves leg A, so a count written into
+  // a note is wrong one release later. selftest.yml's upgrade-linux matrix lists the legs.
+  const counted = readFileSync(REGISTRY, 'utf8').match(
+    /\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen)-leg\b/gi,
+  )
+  assert.deepEqual(counted ?? [], [], 'tests/canary/injections.json states a leg count that nothing recomputes')
+})
+
 test('GREEN: a synthetic factory universe fully covered by the registry is CLEAN', () => {
   const reg = { ...greenRegistry(), ...syntheticFactorySections() }
   const { registryPath, contractPath } = fixture(reg)

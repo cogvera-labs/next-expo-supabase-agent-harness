@@ -1,0 +1,17 @@
+{
+  "//": "Upstream releases the seeded catalog is held back from. `broken` lists the releases that fail, `hold` is the version pinned in their place, and `why` says what fails. template/base/pnpm-workspace.yaml is seeded, so `update` cannot move an existing install's range off a broken release: the project pins it by hand, and scripts/ci/apply-catalog-holds.mjs makes the same edit for the upgrade lane, whose legs install earlier releases with their own ranges. A hold applies only where a scaffold's range admits a broken release. Remove a row once a release that fixes the fault is pinned in the seeded catalog.",
+  "holds": [
+    {
+      "name": "typescript-eslint",
+      "broken": ["8.73.0"],
+      "hold": "8.72.2",
+      "why": "8.73.0 adds no-unsafe-class-instance-assignment to strictTypeChecked, and the rule overflows the stack on a recursive conditional type such as react-native's animated style props, so `lint` crashes on apps/mobile's PressableScale.tsx"
+    },
+    {
+      "name": "expo-sqlite",
+      "broken": ["57.0.5"],
+      "hold": "57.0.4",
+      "why": "57.0.5's prebuilt Android library carries libexpo-sqlite.so for arm64-v8a only (expo/expo#53673), so on an x86_64 emulator or a 32-bit device the kv store cannot load and every key reads as absent"
+    }
+  ]
+}
