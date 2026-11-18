@@ -46,16 +46,12 @@ Only `installer/`, `template/` and a few root files go into the npm package (`fi
   `.github/workflows/`, `tests/canary/injections.json` and `.claude/`. The escape is
   `HARNESS_ALLOW_SELF_EDIT=1` in the environment Claude Code started with, a human-in-the-loop
   act by design, so the change is deliberate and lands in a reviewed diff. Setting it from a
-  shell command does not reach the hook.
+  shell command does not reach the hook. A path inside an agent's worktree
+  (`.claude/worktrees/<id>/`) is judged against that worktree, so the same paths are protected
+  there and the rest are open.
 - **No shell writes around it.** Some redirects, copies and interpreter writes into those
   paths get past the bash guard. Using that gap defeats the guardrail this repository exists to
   demonstrate. When such a path needs a change, describe it, with draft text, for a human.
-- **Agent worktrees.** Claude Code puts an agent's worktree under `.claude/worktrees/`, and the
-  write guard judges paths relative to the main checkout, so it refuses every edit inside one
-  until the protected guard is fixed (follow-up 9 in the
-  [research record](design/research/20261118-discoverability-and-trust/README.md#plan-and-status)).
-  Work in a scratch clone outside the repository instead, never through shell writes into the
-  worktree.
 - **Bash guard.** [pretool-bash-guard.mjs](.claude/hooks/pretool-bash-guard.mjs) re-exports the
   guard every project gets. It matches command text, quoted strings, commit messages and
   `grep` patterns included. Commit with `-F` and a message file, remove scratch directories
