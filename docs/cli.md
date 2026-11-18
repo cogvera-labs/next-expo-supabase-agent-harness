@@ -1,5 +1,7 @@
 # CLI reference
 
+Every command, flag, placeholder and exit code of the `next-expo-supabase-agent-harness` CLI, and how to run it.
+
 ```sh
 npx --yes next-expo-supabase-agent-harness@<latest|version> <command> [flags]
 ```
@@ -7,6 +9,9 @@ npx --yes next-expo-supabase-agent-harness@<latest|version> <command> [flags]
 `@latest` runs the newest release and `@<version>` an exact one. The older
 `github:cogvera-labs/next-expo-supabase-agent-harness#<tag>` spelling fetches the
 repository at a git ref instead; npm 12 refuses it unless run with `--allow-git=root`.
+
+There is no `create-…` alias today, so `npm create` and `pnpm create` cannot start this
+CLI; `npx next-expo-supabase-agent-harness@latest init` is the supported entry.
 
 With a global install (`npm i -g next-expo-supabase-agent-harness`) the command is
 `next-expo-supabase-agent-harness <command> [flags]`, at the version you installed.
@@ -18,10 +23,36 @@ would move the install backwards. The error names both versions and the
 `npx next-expo-supabase-agent-harness@latest <command>` to run instead.
 
 `help`, `--help` or no command prints a shorter version of this page.
-`tests/gates/cli-docs-sync.test.mjs` fails if this page stops matching the
-installer source on commands, flags, modules, tiers or placeholders.
+[tests/gates/cli-docs-sync.test.mjs](../tests/gates/cli-docs-sync.test.mjs) fails if this
+page stops matching the installer source on commands, flags, modules, tiers or
+placeholders. The source is [installer/cli.mjs](../installer/cli.mjs), with one file per
+command in [installer/commands/](../installer/commands/).
 
 The CLI has no runtime dependencies. It needs Node 22 or newer.
+
+## Why `npm i` and then `init` stops
+
+`npm i next-expo-supabase-agent-harness` without `-g` installs the CLI into the current
+folder as a dependency: npm writes a `package.json`, a `package-lock.json` and
+`node_modules/` there. `init` then finds a project that does not use pnpm, and stops with
+exit code 1:
+
+```text
+error: package-lock.json detected — the harness requires pnpm (every gate invokes `pnpm exec`, and the workspace catalog pins the toolchain). Migrate to pnpm first: …
+```
+
+The migration that message describes is for an existing npm project. Here the folder holds
+nothing but the CLI, so start again in a new empty folder, or delete the three entries
+`npm i` wrote, and run the CLI through `npx` or a global install:
+
+```sh
+mkdir my-app && cd my-app
+npx --yes next-expo-supabase-agent-harness@latest init
+```
+
+Deleting only the lockfile is not enough. With a `package.json` present, `init` treats the
+folder as an existing project to retrofit, and refuses it for having no
+`pnpm-workspace.yaml`.
 
 ## Commands
 
