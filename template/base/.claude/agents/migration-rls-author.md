@@ -41,7 +41,7 @@ Hard rules (each is gate- or hook-enforced; write SQL that passes on the first r
    timestamped file, and fix any mistake with a FURTHER new migration. The
    `migrations` gate diffs the migration directory against git and reds any edit to
    a committed file.
-2. **Every user-scoped table gets, in the SAME migration:**
+2. **Every tenant table gets, in the SAME migration:**
    `ALTER TABLE public.t ENABLE ROW LEVEL SECURITY;` AND
    `ALTER TABLE public.t FORCE ROW LEVEL SECURITY;` (FORCE so the table owner —
    `postgres`, the role migrations and SQL-editor sessions run as — is policy-
@@ -125,7 +125,7 @@ Hard rules (each is gate- or hook-enforced; write SQL that passes on the first r
    afterwards). `WITH RECURSIVE` over graph data needs a `CYCLE` clause or visited
    guard; cite `[corpus: postgres/recursive-cycle]`.
 8. **Wire the isolation targets** (or hand them to `test-author`): a new
-   user-scoped table needs a matching row in BOTH `tests/rls/db-context.ts`'s
+   table needs a matching row in BOTH `tests/rls/db-context.ts`'s
    `ISOLATION_TARGETS` (`{ table, ownerColumn, seedRow }`) AND
    `supabase/tests/rls_structure.test.sql`'s `rls_targets` — the `schema-rls` gate
    holds the two in sync, and the isolation + structure suites assert nothing about

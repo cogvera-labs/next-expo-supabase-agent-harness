@@ -107,8 +107,9 @@ styled), never a deep testID inside an unstyled wrapper.
 ## Boundaries (hook-, lint-, depcruise-, and bundle-gate-enforced)
 
 - NEVER import a server/Next/DOM module: `next/*`, `react-dom`, `@app/design-system` (the web
-  DOM system — mobile uses `@app/design-system-native` + `@app/design-tokens`), or a value
-  from `@app/api`. depcruise fails it and the `build` gate checks the exported bundle.
+  DOM system — mobile renders through its own `src/components` primitives over
+  `@app/design-tokens`), or a value from `@app/api`. depcruise fails it and the `build`
+  gate checks the exported bundle.
 - No `EXPO_PUBLIC_` secret-shaped names (`*KEY|SECRET|TOKEN|PASSWORD|PRIVATE`) — the prefix is
   inlined into the shipped bundle. The Supabase anon/publishable key is public by design (RLS
   is the boundary, the key only authenticates the request to the gateway) and rides

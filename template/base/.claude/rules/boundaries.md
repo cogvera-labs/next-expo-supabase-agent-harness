@@ -47,7 +47,8 @@ each later upstream change to the census for them to merge
 - `packages/api ↛ next/*` — the reversibility wall: the router stays framework-neutral so
   it can be promoted to its own `apps/api` by moving one `route.ts`.
 - `apps/mobile ↛ web-only packages` — no `@app/design-system` (DOM), no `react-dom`, no
-  `next`; the mobile design system is `@app/design-system-native`.
+  `next`; mobile renders its controls through its own `src/components` primitives,
+  styled from `@app/design-tokens`.
 - `apps/web ↛ react-native` — and no `@app/design-system-native`.
 - `@app/errors` and `@app/events` are the BOTTOM of the graph (they import nothing) and
   are universally importable from either surface, census entry or not.
@@ -58,7 +59,9 @@ Procedures (`@app/api`) and web Server Actions return ONE envelope on the DATA c
 `ActionOutcome<T>` from `@app/errors`. A domain failure is a returned
 `outcomeErr(appError.X())`, never a thrown error — throwing flattens the discriminated
 `AppError` a screen switches on into an HTTP status, and "someone else deleted this note"
-becomes "something went wrong". Exactly two things bypass the envelope, because both are
-transport facts a handler could not produce: the auth middleware's UNAUTHORIZED and the
-version-skew guard's CONFLICT. A `.input()` parse failure is the framework's, not yours.
+becomes "something went wrong". Exactly three things bypass the envelope, because all
+three are transport facts a handler could not produce: the auth middleware's UNAUTHORIZED,
+the version-skew guard's CONFLICT and the rate-limit guard's TOO_MANY_REQUESTS, each
+thrown by tRPC middleware (a Server Action returns its rate limit on the envelope, as
+`appError.rateLimited()`). A `.input()` parse failure is the framework's, not yours.
 The `app-error-only` ESLint rule is the static half of this doctrine.

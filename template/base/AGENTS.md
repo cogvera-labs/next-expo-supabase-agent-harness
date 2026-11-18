@@ -19,8 +19,8 @@ SOURCE: docs/harness/README.md.
   change = config plugin from the reviewed allowlist (`tools/expo-plugins.json`).
   Data flows through the tRPC client (`src/lib/trpc/client.ts`) or a vertical's
   `./client`; the Supabase session lives in `LargeSecureStore`
-  (`src/lib/supabase/**` — AES-256-CTR key in expo-secure-store, ciphertext in
-  AsyncStorage), never JS-visible storage.
+  (`src/host/large-secure-store.ts` — AES-256-CTR key in expo-secure-store,
+  ciphertext in AsyncStorage), never JS-visible storage.
 - **packages/api** — `@app/api`: the framework-neutral tRPC v11 router
   (`publicProcedure` → `authedProcedure` → `orgProcedure`; the version-skew
   guard on the base). Imports NO `next/*` — the reversibility wall. Mobile takes
@@ -55,13 +55,14 @@ an Edge Function's own `deno.json` + `deno.lock`, which it deploys with).
 
 - `pnpm validate` — **THE GATE**: `node tools/validate.mjs`, the 37-step chain
   from `tools/harness.config.mjs` (see below). Must be green before a turn ends.
-- `pnpm typecheck` (`tsc -b`) · `pnpm lint` / `pnpm lint:fix` · `pnpm format`
-  (`biome check --write .`) · `pnpm knip` · `pnpm arch` (depcruise).
+- `pnpm typecheck` (`tsc -b . apps/web apps/mobile`) · `pnpm lint` / `pnpm lint:fix` ·
+  `pnpm format` (`biome check --write .`) · `pnpm knip` · `pnpm arch` (depcruise).
 - `pnpm test` (`vitest run`) · `pnpm test:mobile` (jest-expo, the RN half) ·
   `pnpm test:rls` (`node tests/rls/run-rls.mjs` — live isolation vs the supabase stack:
   pgTAP + the supabase-js client suite).
 - `pnpm db:up` (`supabase start`) · `pnpm db:reset` · `pnpm db:test` (pgTAP) ·
-  `pnpm db:types` (regenerate the Supabase type mirror) · `pnpm gen` (types + tokens).
+  `pnpm db:types` (regenerate the Supabase type mirror) · `pnpm gen` (that mirror,
+  the tokens, the contract inventories, the web routes and the grant assertions).
 - `pnpm dev:web` · `pnpm dev:mobile` · `pnpm mutation`.
 - `node tools/harness-status.mjs` — install state, parked files, last turn, reviewers owed.
 
@@ -138,9 +139,9 @@ an Edge Function's own `deno.json` + `deno.lock`, which it deploys with).
   session cookie.
 - **The single error channel.** Procedures (`@app/api`) and web Server Actions return
   `ActionOutcome<T>` from `@app/errors` on the DATA channel; a domain failure is a
-  returned `outcomeErr(appError.X())`, never a thrown error. Only two transport facts
-  bypass it: the auth middleware's UNAUTHORIZED and the version-skew CONFLICT. The
-  `app-error-only` ESLint rule is the static half.
+  returned `outcomeErr(appError.X())`, never a thrown error. Only three transport facts
+  bypass it, all tRPC middleware throws: UNAUTHORIZED, the version-skew CONFLICT and the
+  rate-limit TOO_MANY_REQUESTS. The `app-error-only` ESLint rule is the static half.
 - **Boundaries.** `verticals ⊥ verticals`; `shared ↛ verticals`; `platform/* →
   {errors,events}` only; `packages/api ↛ next/*` (reversibility wall); `apps/mobile ↛
   web-only packages`; `apps/web ↛ react-native`. The dual-barrel `exports` census is
@@ -174,8 +175,8 @@ an Edge Function's own `deno.json` + `deno.lock`, which it deploys with).
 - **Mobile-bundle purity:** `apps/mobile` never imports a server-graph or
   service-role module, `next`, `react-dom`, or `@app/design-system` (DOM). It
   reaches data through the tRPC client (`src/lib/trpc/**`) or a vertical's `./client`,
-  and holds its Supabase session only in `LargeSecureStore` (`src/lib/supabase/**`) —
-  never JS-visible storage, never a log line.
+  and holds its Supabase session only in `LargeSecureStore`
+  (`src/host/large-secure-store.ts`) — never JS-visible storage, never a log line.
 - **The public config is `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE` /
   `EXPO_PUBLIC_*` transport only**; the service-role key and any provider secret stay
   server-env.

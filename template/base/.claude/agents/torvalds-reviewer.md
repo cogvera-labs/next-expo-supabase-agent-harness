@@ -49,9 +49,10 @@ against this rubric, ranking every finding CRITICAL / HIGH / MEDIUM / LOW with a
     the per-request RLS-scoped one; raw rows escaping without the row→DTO map, or an
     internal column leaking past the explicit projection (`select('*')` is banned);
     `createServiceRoleClient_BYPASSES_RLS` / `SUPABASE_SERVICE_ROLE_KEY` anywhere but an
-    ADR-governed Edge Function (`supabase/functions/**`); a user-scoped table missing
-    `FORCE ROW LEVEL SECURITY`, a `FOR ALL` policy, a predicate that is not the
-    `(select auth.uid())` initPlan pattern, or an INSERT/UPDATE policy missing
+    ADR-governed Edge Function (`supabase/functions/**`); a table missing
+    `FORCE ROW LEVEL SECURITY`, a `FOR ALL` policy, a predicate outside the two
+    initPlan forms `tools/tenancy.json` allows (a per-user `owner_id =
+    (SELECT auth.uid())` scope included), or an INSERT/UPDATE policy missing
     `WITH CHECK`; a server-side `getSession()` (it does not verify the signature — use
     `getUser()`/`getClaims()`); a secret-shaped `NEXT_PUBLIC_` / `EXPO_PUBLIC_` name
     (`KEY|SECRET|TOKEN|PASSWORD|PRIVATE` — inlined into the shipped bundle); `@app/api`

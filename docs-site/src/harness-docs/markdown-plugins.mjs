@@ -1,11 +1,12 @@
-// Sätteri plugins for the in-place corpus (Sätteri is Astro 7's default Markdown processor).
+// Sätteri plugins for the pages read in place: the template docs and the repository documents
+// (Sätteri is Astro 7's default Markdown processor).
 //
 // astro.config.mjs passes them to satteri({ mdastPlugins, hastPlugins }), so they run BEFORE
 // the plugins Starlight and starlight-links-validator push onto the same processor later.
 // That order is what makes the gate ids below the ids that the heading anchor links, the
 // table of contents, Pagefind's sub-results and the link validator all see.
 import { existsSync, statSync } from 'node:fs'
-import { dirname, posix, resolve } from 'node:path'
+import { dirname, join, posix, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { slug as githubSlug } from 'github-slugger'
 import { DEFAULT_BRANCH, GITHUB_REPO, loadCorpus, repoRelative } from './corpus.mjs'
@@ -14,12 +15,19 @@ const corpusPage = (fileURL) => (fileURL ? loadCorpus().byAbsPath.get(fileURLToP
 
 // Block-level containers: raw HTML directly inside one of these is a block, not inline text.
 const FLOW_PARENTS = new Set(['root', 'blockquote', 'listItem', 'footnoteDefinition'])
+// Tags GitHub renders that read the same here, written bare (`<details open>` aside).
+const RENDERED_TAG = /^<\/?(?:details|summary|kbd|sub|sup|br)(?:\s+open)?\s*\/?>$/i
+const onlyRenderedTags = (value) => {
+  const tags = value.match(/<[^>]*>/g) ?? []
+  return tags.length > 0 && tags.every((tag) => RENDERED_TAG.test(tag))
+}
 
 /**
- * Raw HTML in the corpus is shown as text. GitHub's tag filter displays `<tenant column>` or
- * `<feature-name>` literally; a browser would read them as tags, and a `<Title>` would start
- * a <title> element that swallows the rest of the page. HTML comments (cspell directives,
- * the GENERATED banners) stay comments.
+ * Raw HTML in a page read in place is shown as text. GitHub's tag filter displays
+ * `<tenant column>` or `<feature-name>` literally; a browser would read them as tags, and a
+ * `<Title>` would start a <title> element that swallows the rest of the page. HTML comments
+ * (cspell directives, the GENERATED banners) stay comments, and so do the few bare tags GitHub
+ * renders the same way, such as a `<details>` block with its `<summary>`.
  */
 function rawHtmlAsText() {
   return {
@@ -27,6 +35,7 @@ function rawHtmlAsText() {
     html(node, ctx) {
       const value = node.value.trim()
       if (value.startsWith('<!--') && value.endsWith('-->')) return
+      if (onlyRenderedTags(value)) return
       const text = { type: 'text', value: node.value }
       ctx.replaceNode(node, FLOW_PARENTS.has(ctx.parent(node)?.type) ? { type: 'paragraph', children: [text] } : text)
     },
@@ -75,32 +84,55 @@ function titleFromFirstH1() {
 }
 
 /**
- * Relative links. A link to another corpus page becomes that page's route; it is resolved
- * against the path both files have in an installed project's docs/, so a module page can
- * link into the base docs exactly as it does after `init`. A link to any other file in the
- * repository becomes its GitHub page. A link to nothing fails the build.
+ * The page the site renders for a relative link, or undefined. A template doc's link is
+ * resolved first against the path both files have in an installed project's docs/, so a
+ * module page can link into the base docs exactly as it does after `init`. Any link is then
+ * resolved against the repository, which is how a repository document reaches a template doc
+ * (`../template/base/docs/...`), another repository document, or a folder's README.
+ */
+function linkedPage(page, path) {
+  const { byAbsPath, byInstallPath } = loadCorpus()
+  if (page.installPath) {
+    const installed = posix.normalize(posix.join(posix.dirname(page.installPath), path))
+    const hit = byInstallPath.get(installed) ?? byInstallPath.get(posix.join(installed, 'README.md'))
+    if (hit) return hit
+  }
+  const target = resolve(dirname(page.absPath), path)
+  return byAbsPath.get(target) ?? byAbsPath.get(join(target, 'README.md'))
+}
+
+/** The repository file a relative link names, as a GitHub URL; a link that leaves the repository, or names nothing, fails the build. */
+function repositoryUrl(page, url, path, suffix, image) {
+  const target = resolve(dirname(page.absPath), path)
+  const repoPath = repoRelative(target)
+  if (repoPath.startsWith('..')) throw new Error(`${page.repoPath}: relative link "${url}" leaves the repository`)
+  if (!existsSync(target)) throw new Error(`${page.repoPath}: relative link "${url}" resolves to ${repoPath}, which does not exist`)
+  // An image is shown from the raw file; anything else links to its page on GitHub.
+  if (image) return `${GITHUB_REPO.replace('//github.com/', '//raw.githubusercontent.com/')}/${DEFAULT_BRANCH}/${repoPath}`
+  const kind = statSync(target).isDirectory() ? 'tree' : 'blob'
+  return `${GITHUB_REPO}/${kind}/${DEFAULT_BRANCH}/${repoPath}${suffix}`
+}
+
+/**
+ * Relative links and images. A link to a page the site renders becomes that page's route; a
+ * link to any other file in the repository becomes its GitHub page, and an image its raw file.
+ * A link to nothing fails the build.
  */
 function rewriteRelativeLinks(page, base) {
-  const { byInstallPath } = loadCorpus()
-  const rewrite = (url) => {
+  const rewrite = (url, image) => {
     if (!url || /^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith('#') || url.startsWith('/')) return undefined
     const [pathPart, hash] = url.split('#', 2)
+    const path = decodeURI(pathPart)
     const suffix = hash ? `#${hash}` : ''
-    const installed = posix.normalize(posix.join(posix.dirname(page.installPath), decodeURI(pathPart)))
-    const hit = byInstallPath.get(installed) ?? byInstallPath.get(posix.join(installed, 'README.md'))
+    const hit = image ? undefined : linkedPage(page, path)
     if (hit) return `${base}${hit.route}/${suffix}`
-    const target = resolve(dirname(page.absPath), decodeURI(pathPart))
-    const repoPath = repoRelative(target)
-    if (repoPath.startsWith('..')) throw new Error(`${page.repoPath}: relative link "${url}" leaves the repository`)
-    if (!existsSync(target)) throw new Error(`${page.repoPath}: relative link "${url}" resolves to ${repoPath}, which does not exist`)
-    const kind = statSync(target).isDirectory() ? 'tree' : 'blob'
-    return `${GITHUB_REPO}/${kind}/${DEFAULT_BRANCH}/${repoPath}${suffix}`
+    return repositoryUrl(page, url, path, suffix, image)
   }
   const visit = (node, ctx) => {
-    const next = rewrite(node.url)
+    const next = rewrite(node.url, node.type === 'image')
     if (next !== undefined) ctx.setProperty(node, 'url', next)
   }
-  return { name: 'harness-rewrite-relative-links', link: visit, definition: visit }
+  return { name: 'harness-rewrite-relative-links', link: visit, definition: visit, image: visit }
 }
 
 /** Text of the nearest preceding top-level <h2>, for a node whose parent is the root. */
