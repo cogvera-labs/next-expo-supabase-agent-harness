@@ -1,0 +1,155 @@
+# Getting started
+
+Go from an empty folder to a Next.js and Expo monorepo on Supabase whose first Claude Code
+turn ends with every check green.
+
+This page is the tutorial. The [CLI reference](cli.md) lists every command and flag, and
+[How it works](how-it-works.md) explains what the hooks and gates do. Words the project uses
+in a specific sense are defined in the [glossary](glossary.md).
+
+## What you need
+
+- **Node 22 or newer.**
+- **pnpm 11.** If you do not have it, `corepack enable` provides the exact version the
+  scaffold pins in its `packageManager` field.
+- **Docker, running.** `pnpm db:up` starts the local Supabase stack in containers, and the
+  row-level security tests that run at the end of every turn need it.
+- **Git.**
+- **Claude Code** (the `claude` command). Its hooks are what send the agent back to work while
+  a check fails. Keep it at or above the version that the scaffold's
+  [`tools/cc-floor.json`](../template/base/tools/cc-floor.json) requires; that floor is
+  derived from the published advisories the file records.
+- **Optional: the `gitleaks` binary.** Without it the pre-commit secrets scan prints a skip
+  notice. The `secrets` gate inside `pnpm validate` runs either way.
+
+CI proves the scaffold on Linux, and on macOS without the database gates. No CI lane runs a
+scaffold on Windows; see
+[Does it work on Windows or macOS?](faq.md#does-it-work-on-windows-or-macos)
+
+## Create the project and run the first turn
+
+Run these commands in order. It is the order the harness tests, and each step needs the one
+before it.
+
+```sh
+mkdir my-app && cd my-app
+npx --yes next-expo-supabase-agent-harness@latest init
+git init          # before pnpm install: the prepare script (lefthook install) needs a repository
+pnpm install
+git add -A && git commit -m "chore: scaffold"   # the first commit must include pnpm-lock.yaml
+pnpm db:up        # with Docker running; the first run downloads the Supabase images
+pnpm validate
+claude            # Claude Code: ask for one small change
+```
+
+**Use `npx` or a global install, never a local `npm i`.** A local
+`npm i next-expo-supabase-agent-harness` in the project folder writes a `package-lock.json`,
+and `init` refuses to run in a folder that has one, because the harness requires pnpm. To
+install the CLI once instead, run `npm i -g next-expo-supabase-agent-harness` and then
+`next-expo-supabase-agent-harness init`. A global install stays at the version you installed,
+so run `npm i -g next-expo-supabase-agent-harness@latest` before an `update`: `update` refuses
+to run from a CLI older than the project.
+
+What each step does:
+
+1. **`init`** asks for the project's details before it writes anything: its name, its package
+   name, the app identifier, the Supabase project ref, the GitHub owner and a few more. Each
+   question shows a default in brackets that Enter accepts, and `init --yes` accepts them all.
+   The scaffold is written into the current folder. The CLI reference lists every
+   [placeholder](cli.md#placeholders). To pin a release, put a version number from the
+   [Releases](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/releases) page
+   (the tag without its `v`) in place of `latest`.
+2. **`git init`** comes before the install because the scaffold's `prepare` script installs
+   the lefthook commit hooks, and they need a repository.
+3. **`pnpm install`** installs the workspace and, through `prepare`, the commit hooks.
+4. **The first commit** must include `pnpm-lock.yaml`. The shipped workflows install with
+   `--frozen-lockfile`, which fails without it, and the `version-sync` gate fails on a missing
+   lockfile. The commit hooks run on this commit: Biome on the staged files, gitleaks if it is
+   installed, and commitlint on the message.
+5. **`pnpm db:up`** runs `supabase start`, which applies the migrations to a local database.
+   [Local development](../template/base/docs/runbooks/local-development.md) lists what it
+   starts and on which ports.
+6. **`pnpm validate`** runs the validate chain, the ordered list of
+   [gates](glossary.md#gate) that CI also runs. A gate whose prerequisite is missing on your
+   machine prints `SKIPPED` and still fails closed in CI: a skip is not a pass.
+7. **`claude`** opens Claude Code in the folder. Ask for one small change.
+
+## What the first turn looks like
+
+When the agent tries to end its turn, the [Stop hook](glossary.md#stop-hook-and-stop-chain)
+runs the Stop chain: the validate gates, the RLS isolation suites against your local
+database, both unit suites with coverage, and the checks after them. While any step fails,
+it sends the agent back to work with that step's output. `pnpm validate` does not run the RLS
+suites, so a green `pnpm validate` alone does not mean the turn can end.
+
+On a clean scaffold with the stack running, every step is green. Depending on the change, the
+turn may also need a passing verdict from a reviewer subagent, and per-file coverage for each
+changed source file. Some steps print NOTE lines on a new scaffold; they do not fail the turn.
+
+If the stack is not running, the RLS step fails closed and tells the agent to run
+`pnpm db:up`, which the shipped settings let it run without asking. Without Docker that
+cannot succeed, so the turn ends red at Claude Code's [block cap](glossary.md#block-cap), and
+the harness records it.
+
+The [first-run runbook](../template/base/docs/runbooks/first-run.md) shows the exact
+messages for both cases and what the next turn reports.
+
+## Run the apps
+
+Copy `.env.example` to `.env` and fill in the publishable key that `pnpm db:up` prints. Then
+start the web app with `pnpm dev:web`, which also serves the tRPC API, and the mobile app with
+`pnpm dev:mobile`. [Local development](../template/base/docs/runbooks/local-development.md)
+explains the order and how a phone reaches your machine.
+
+## Next steps
+
+### Build a feature
+
+Ask Claude Code for a feature, or run `/new-feature <name>` in a session. The command follows
+the vertical-slice recipe in one turn: the migration and its row-level security, the RLS
+tests, the data function, the tRPC procedure (and a web Server Action), the web screen, the
+mobile screen, tests and provenance, ending on a green gate. It hands the migration, the data
+layer and the tests to author subagents. For a change that touches auth, row-level security,
+migrations, the native config or the API contract, the project's instructions ask for a spec
+first, in `specs/<feature>.md`, signed off by a person. See the scaffold's
+[`AGENTS.md`](../template/base/AGENTS.md) and the
+[vertical-slice skill](../template/base/.claude/skills/authoring-vertical-slice/SKILL.md).
+
+### Start from a worked example instead
+
+Run `init --with-demo` in place of `init` in an empty folder. It adds one feature end to end
+on both apps: the `@app/notes` vertical, its screens, routes and migrations, and its rows in
+the registers. `eject` takes it out again; the [CLI reference](cli.md#eject) explains how.
+
+### Keep the harness current
+
+Commit your work, then run `npx --yes next-expo-supabase-agent-harness@latest update --dry-run`
+to see what would change, and the same command without `--dry-run` to apply it. Harness-owned
+files that still match their record are replaced. A file you changed is kept, and the
+incoming version is parked under `.harness/pending/` for you to merge. `update --rollback`
+restores the tree from before the last update. A new gate can arrive as NOTE lines with a
+deadline, a [ramp](glossary.md#ramp), instead of failing on the day you update. See
+[`update`](cli.md#update) and the
+[upgrade runbook](../template/base/docs/runbooks/harness-upgrade.md).
+
+### Use the agents in other repositories
+
+The harness's agents, slash commands and skills also come as a Claude Code plugin, for
+sessions in projects the harness did not install. Add its marketplace with
+`claude plugin marketplace add cogvera-labs/next-expo-supabase-agent-harness`, then run
+`claude plugin install next-expo-supabase-agent-harness@next-expo-supabase-agent-harness`.
+The plugin carries no hooks, gates or permission rules, and inside a harness-installed project
+you do not need it. See the [plugin README](../plugin/README.md).
+
+### Choose what else to install
+
+`init --tier core|standard|strict` chooses which opt-in modules come with the scaffold, and
+`enable <module>` and `disable <module>` change them later. See [Tiers](cli.md#tiers) and
+[Modules](cli.md#modules).
+
+### Read further
+
+- [How it works](how-it-works.md): each enforcement layer, what it binds and what it cannot.
+- [FAQ](faq.md): the questions people ask most, with the doc behind each answer.
+- [Comparison](comparison.md): other starters and agent tools, and when to choose them.
+- [Glossary](glossary.md): the project's terms.
