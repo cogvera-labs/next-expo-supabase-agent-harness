@@ -226,9 +226,10 @@ the shape a real request arrives with.
 
 ## Gates that check this layer
 
-- `schema-rls` (`tools/check-rls-manifest.mjs`): every user-scoped table must be covered by
-  `ENABLE` + `FORCE` + four per-op policies, a leading-column owner index, and initPlan-shaped
-  predicates, OR exempted in the write-guard-protected `tools/rls-exempt.json` (a human
+- `schema-rls` (`tools/check-rls-manifest.mjs`): every table the migrations declare must be
+  covered by `ENABLE` + `FORCE` + four per-op policies, an index led by its scope column (the
+  gate's "owner column": `org_id` on a tenant table), and initPlan-shaped predicates, OR
+  exempted in the write-guard-protected `tools/rls-exempt.json` (a human
   decision — never edit it). It closes over `ISOLATION_TARGETS` in `tests/rls/db-context.ts`
   and holds it in sync with `rls_targets` in `supabase/tests/rls_structure.test.sql`. From
   1.1.0 it also reds a privilege `anon` or `authenticated` holds that no policy admits, a

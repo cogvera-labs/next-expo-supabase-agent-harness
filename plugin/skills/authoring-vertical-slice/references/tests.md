@@ -23,7 +23,7 @@ stack via `pnpm db:up`/`supabase start`, exports `SUPABASE_URL`/`SUPABASE_ANON_K
 `SUPABASE_SERVICE_ROLE_KEY`, then runs both halves). Skips are LOUD locally and FAIL CLOSED in
 CI — a SKIPPED line is never a pass.
 
-For every new user-scoped table you add TWO registry rows:
+For every new table you add TWO registry rows:
 
 1. **`rls_targets`** in `supabase/tests/rls_structure.test.sql` — `(table_name, owner_column)`.
 2. **`ISOLATION_TARGETS`** in `tests/rls/db-context.ts` — `{ table, ownerColumn, seedRow }`.

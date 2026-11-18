@@ -13,6 +13,22 @@ The machine-checked source for most of this is
 release until they are discharged, and calendar rows turn the nightly run red
 when they fall due.
 
+## How to read this roadmap
+
+- **What is open today:** "Now: overdue", "Open findings", the 2.1.0 deadlines
+  in "2.0.0, and the deadlines it moved to 2.1.0", "Through mid-2027: dated
+  external changes", "When something outside this project changes", "Project
+  health" and "What this project will not do".
+- **History:** the rest of the 2.0.0 section, "The 2026-09 work plan" and
+  "Field-report upgrades" record work that shipped in 1.0.4, 1.1.0 and 2.0.0.
+  They stay here because
+  [`tests/gates/work-plan-status.test.mjs`](tests/gates/work-plan-status.test.mjs)
+  holds them to the design record they came from,
+  [`design/FIELD-UPGRADES-2026-09.md`](design/FIELD-UPGRADES-2026-09.md). Where
+  they say a ramp holds "until 1.2.0", that deadline arrived at 2.0.0, because
+  1.2.0 was never cut.
+- What each release contains is in the [CHANGELOG](CHANGELOG.md).
+
 ## Now: overdue
 
 - **Make the nightly run able to raise an alarm again.** It had been red every
@@ -37,15 +53,27 @@ when they fall due.
   Server Actions DoS); 2.0.3 moves the floor and the pin to 16.4.1 (15.5.28 on
   the 15 line). Red again on seven Moderate advisories upstream published on
   2026-11-03; 2.0.8 moves the floor and the pin to 16.4.5 (15.5.29 on the 15
-  line) and records all seven. This bullet leaves the list once a
-  scheduled run of the released tree is green end to end.
+  line) and records all seven. The bullet was to leave the list once a
+  scheduled run of the released tree was green end to end, and on 2026-11-11
+  and 2026-11-12 it was. From 2026-11-13 the scheduled runs of the same tree
+  are red again, with no change to this repository: on the device lane's
+  right-to-left journey in `maestro-smoke`; from 2026-11-17, on a
+  typescript-eslint release that crashes the scaffold's `lint` step (the
+  catalog now pins 8.72.2, the release before it, while the upgrade lanes
+  install an older release's catalog and stay red); on two `astro` advisories
+  in the documentation site's lockfile (Renovate's #300 fixes them); and on
+  intermittent fetch failures in `corpus-fidelity`.
 - **Find why the scheduled device lane's perf-harness phase goes red.** The
   mutation journey of issue #10 has passed since 1.0.0 fixed it, but
   `maestro-smoke` still failed on seven of the fourteen scheduled runs from
   2026-08-17 to 2026-09-29 read for #10, each time on the perf-harness
-  marker. 1.0.4 makes the next red print the on-screen verdict, with each
+  marker. 1.0.4 made the next red print the on-screen verdict, with each
   breached cap and its measured value (the 1.0.4 CHANGELOG, "What stays
-  open"); the fix follows from that line.
+  open"). By 2.0.4 the lane was red on about two nights in three, those lines
+  named `droppedFrames` over its cap of 12 nearly every time, and the same
+  commit passed on other nights. 2.0.4 prints the measured values on a pass
+  too, so the caps can be re-baselined from the lane's printed values; that
+  re-baseline is the maintainer's decision (the 2.0.4 CHANGELOG).
 
 ## Open findings
 
@@ -64,11 +92,11 @@ when they fall due.
   2.1.260 to 2.1.294 treat a key they do not know: print mode ignores a
   settings file that fails validation, which would drop every hook.
 
-## Next: 2.0.0
+## 2.0.0, and the deadlines it moved to 2.1.0
 
 1.1.0 opened a set of dated advisory notes for existing installs, all but three
-of them dated 1.2.0. This lineage goes from 1.1.0 to 2.0.0 directly and never
-cuts 1.2.0, so those deadlines arrive at 2.0.0, and its version bump settled
+of them dated 1.2.0. This lineage went from 1.1.0 to 2.0.0 directly and never
+cut 1.2.0, so those deadlines arrived at 2.0.0, and its version bump settled
 each one (issue #86):
 
 - Eighteen sites across fifteen gates are enforcing for installs below 1.1.0:
@@ -80,27 +108,33 @@ each one (issue #86):
 - Two ramps existed to carry something to this release, and it went with them:
   the `i18n` gate's 1.0.x regular expressions and `file:line` allowlist entries,
   and the dated `lint` exemption for the seeded delete-account function.
-- `uuid` 7 was re-reviewed at 2.0.0 and is still not discharged upstream. Its
+- `uuid` 7 was re-reviewed at 2.0.0 and was still not discharged upstream. Its
   removal target moved to 2.1.0, and `version-sync`'s arrival note re-opened
-  until 2.1.0.
+  until 2.1.0. The upstream discharge arrived in 2.0.4, which deleted the row
+  from `tools/eol.json`; the arrival note still runs to 2.1.0 for installs
+  that keep their own row (the 2.0.4 CHANGELOG).
 - `reviewer-verdicts`' round budget moved to 2.1.0, beside the reviewer ledger
   v2 whose change set it judges. The 2.1.0 release owes all three of that
   step's ramps.
 - The Supabase CLI config census, still blocked upstream on
   supabase/cli#5894, was re-checked and re-dated to 2.1.0.
 
-The rest of 2.0.0 is the breaking field-report upgrades below.
+The rest of 2.0.0 was the breaking field-report upgrades below.
 
 ## The 2026-09 work plan: one stack of pull requests
 
 Issue #37 indexed the field-report items below and the follow-ups found while
 shipping 1.0.2 and 1.0.3, one issue per item. On 2026-10-01 every one of them
-except #51 has a pull request in one stack of fifty-two, each based on the one
-before it. The maintainer merges them in order with merge commits, and tags
-each release on its last position once that position is merged: 1.0.4 on
-position 18, 1.1.0 on 48 and 2.0.0 on 52. Until then none of those three
-releases exists, and where this file says something is built in 1.0.4, 1.1.0
-or 2.0.0 it describes a pull request.
+except #51 had a pull request in one stack of fifty-two, each based on the one
+before it. The plan was to merge them in order with merge commits, and to tag
+each release on its last position once that position was merged: 1.0.4 on
+position 18, 1.1.0 on 48 and 2.0.0 on 52.
+
+All three releases shipped, and where this file says something is built in
+1.0.4, 1.1.0 or 2.0.0, that release contains it. Two tags moved from the plan:
+1.1.0 is on the merge of #172, which brought npm publishing (#161) after
+position 48, and 2.0.0 is on the merge of #216, after three more pull requests
+(#214, #215 and #216) joined the stack.
 
 The field-report items are the bullets under "Field-report upgrades" below,
 each with its pull request, and the design record's status table lists them
@@ -162,7 +196,7 @@ does, its section says so.
   unchanged CLI and an unchanged database, a stamped step prints as `STAMPED`,
   and stamp inputs cover the libraries a gate imports. Stamping `unit` and
   `mobile-unit` needs a wrapper that changes floored commands. It was left for
-  1.1.0, and no 1.1.0 issue schedules it yet.
+  1.1.0, which did not build it, and no later release has.
   ([N01](design/FIELD-UPGRADES-2026-09.md#n01-input-stamped-stop-steps),
   issue #42, pull request #95)
 - **Stop-step and gate-event telemetry.** Untrimmed local records of step
@@ -491,8 +525,9 @@ let it close, and none has a date because none is in this project's hands.
   ([GOVERNANCE.md](GOVERNANCE.md), Continuity). A second person with
   administrator access would mean changes get reviewed by someone other than
   their author, and that the project could continue without its founder.
-- Keep meeting the OpenSSF Best Practices criteria and the OSPS Baseline as
-  they evolve, and keep the OpenSSF Scorecard results public.
+- Keep meeting the OSPS Baseline as it evolves, and keep the OpenSSF Scorecard
+  results public. On the OpenSSF Best Practices site the "passing" badge is
+  still in progress ([SECURITY.md](SECURITY.md), "Known Scorecard findings").
 
 ## What this project will not do
 

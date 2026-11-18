@@ -16,7 +16,7 @@ import { spawnSync } from 'node:child_process'
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { test } from 'node:test'
+import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import {
   SHELL_AND_WRITE_TOOLS,
@@ -44,9 +44,24 @@ function run(args) {
   return { code: r.status, out: `${r.stdout ?? ''}${r.stderr ?? ''}` }
 }
 
+// Every temporary tree this file makes, removed once when the file's tests end. Each surface
+// copy holds the whole plugin and the template's .claude/ (tens of megabytes), and until these
+// were removed every run left them all in the OS temp folder (#276); with several agents running
+// the suite at once, that filled a disk.
+const made = []
+after(() => {
+  for (const dir of made) rmSync(dir, { recursive: true, force: true })
+})
+/** @param {string} prefix */
+function tempDir(prefix) {
+  const dir = mkdtempSync(join(tmpdir(), prefix))
+  made.push(dir)
+  return dir
+}
+
 /** The live plugin surface, copied: the green baseline a single skew is measured against. */
 function surfaceCopy() {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-plugin-'))
+  const dir = tempDir('nsah-plugin-')
   for (const rel of ['.claude-plugin', 'plugin', 'LICENSE']) {
     cpSync(join(REPO, rel), join(dir, rel), { recursive: true })
   }
@@ -289,7 +304,7 @@ test("pluginCopy: an agent keeps only its own keys, a block scalar whole, and dr
 // By type, not by name: Markdown, text, JSON, YAML and five image formats, no `#!` start, and
 // no package manager configuration.
 test('generatedFiles copies only the file types the plugin directory accepts, so the slice scaffolder stays the installed project\'s', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-plugin-types-'))
+  const dir = tempDir('nsah-plugin-types-')
   const skill = join(dir, 'template/base/.claude/skills/s')
   mkdirSync(join(skill, 'scripts'), { recursive: true })
   for (const [rel, body] of [

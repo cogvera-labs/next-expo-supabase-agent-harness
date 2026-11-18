@@ -31,7 +31,7 @@ sections.
 
 ## INVARIANTS
 
-- **FORCE, in the creating migration.** Every user-scoped table declared in
+- **FORCE, in the creating migration.** Every table declared in
   `supabase/schemas/*.sql` has both `ENABLE ROW LEVEL SECURITY` and
   `FORCE ROW LEVEL SECURITY` in the SAME `supabase/migrations/<timestamp>_<slice>.sql`
   that creates it — `ENABLE` alone leaves the table OWNER (`postgres`, the role that
@@ -53,8 +53,8 @@ sections.
   anonymous request must match NO policy rather than a policy that evaluates false.
   SOURCE: RLS performance — the initPlan sub-select pattern [corpus: postgres/rls-initplan]
 - **WITH CHECK on every INSERT and UPDATE.** INSERT has no existing row, so `WITH CHECK`
-  on the NEW row is the whole defence against writing under another user's owner column;
-  UPDATE without `WITH CHECK` lets an owner rewrite the owner column and hand the row
+  on the NEW row is the whole defence against writing under another tenant's scope column;
+  UPDATE without `WITH CHECK` lets a writer rewrite the scope column and hand the row
   away. Flag an INSERT/UPDATE policy carrying only `USING`. SOURCE: PostgreSQL row
   security — WITH CHECK validates the new row [corpus: postgres/rls-force]
 - **REVOKE from all three, then GRANT exactly.** The creating migration `REVOKE ALL … FROM
@@ -74,13 +74,14 @@ sections.
   migration grants it explicitly, per table. Flag any `GRANT … TO service_role` or
   `GRANT ALL ON ALL TABLES` (the shape a generated `supabase db diff` draft hands you,
   restoring the blanket authority this arrangement removes) without a merged ADR.
-- **Owner column LEADING in an index.** Every policy filters by the owner column on every
-  statement, so an index whose LEADING column is that owner column (a PRIMARY KEY on it
-  counts, e.g. `profiles.id`) is what turns the qual into an Index Cond; owner-second, or
-  no index, degrades the policy to a sequential scan a two-row database never shows. When
-  the table is keyset-paginated the same index carries the ORDER BY tail so one index
-  serves the policy, the sort, and the cursor range (`notes_owner_id_created_at_id_idx` is
-  the worked pattern).
+- **Scope column LEADING in an index.** Every policy filters by the table's scope column
+  (`schema-rls` calls it the owner column: `org_id` on a tenant table, `id` on `profiles`)
+  on every statement, so an index whose LEADING column is that column (a PRIMARY KEY on it
+  counts) is what turns the qual into an Index Cond; scope-second, or no index, degrades
+  the policy to a sequential scan a two-row database never shows. When the table is
+  keyset-paginated the same index carries the ORDER BY tail so one index serves the
+  policy, the sort, and the cursor range (`(org_id, created_at DESC, id DESC)` is the
+  worked pattern).
 - **Exemptions are a human decision.** A table skips the above ONLY via a reviewed
   `{ "table", "reason" }` entry in the write-guard-protected `tools/rls-exempt.json`
   (`{{SECURITY_OWNERS}}` sign-off) — an empty reason or a diff that adds an entry is a
@@ -105,8 +106,9 @@ sections.
 - **The data layer returns `ActionOutcome`, never a raw row.** The vertical DAL
   (`packages/verticals/*/src/data/**`), the `@app/api` procedures, and the `apps/web`
   Server Actions all return `ActionOutcome<T>` from `@app/errors` on the DATA channel — a
-  domain failure is a returned `outcomeErr(appError.X())`, never a throw (the two
-  sanctioned throws are transport auth UNAUTHORIZED and the skew guard's CONFLICT). Flag a
+  domain failure is a returned `outcomeErr(appError.X())`, never a throw (the three
+  sanctioned throws are transport auth UNAUTHORIZED, the skew guard's CONFLICT and the
+  rate-limit guard's TOO_MANY_REQUESTS). Flag a
   raw driver row, a stack string, or an internal column escaping to the wire: the
   projection is an EXPLICIT column list (`select('*')` is banned — it welds the payload to
   the physical table, so a later embedding / moderation / tombstone column silently
