@@ -125,6 +125,49 @@ test('a path that resolves outside the project passes, as it always did', () => 
   assertAllowed('Write', write(`${ROOT}-sibling/scripts/hygiene.mjs`))
 })
 
+// Claude Code checks an agent's worktree out under `.claude/worktrees/<id>/` and leaves
+// CLAUDE_PROJECT_DIR on the main checkout, so every file in a worktree spells as `.claude/...`.
+// The guard judges such a path against the worktree's own root: the worktree is a checkout
+// of this repository, with the same enforcement surface inside it.
+const WORKTREE = '.claude/worktrees/agent-a1b2c3'
+
+test("a worktree's unprotected files pass, however the path is spelled", () => {
+  assertAllowed('Write', write(`${WORKTREE}/README.md`))
+  assertAllowed('Edit', write(`${ROOT}/${WORKTREE}/docs/guide.md`))
+  assertAllowed('Write', write(`./${WORKTREE}/template/base/app/page.tsx`))
+  assertAllowed('Edit', write(`${WORKTREE}/scripts/../docs/guide.md`))
+  assertAllowed('NotebookEdit', notebook(`${ROOT}/${WORKTREE}/docs/probe.ipynb`))
+  assertAllowed('Write', write('.claude\\worktrees\\agent-a1b2c3\\README.md'))
+})
+
+test("a worktree's enforcement surface stays protected, and the deny names the whole path", () => {
+  assertProtected('Write', write(`${WORKTREE}/scripts/hygiene.mjs`), `${WORKTREE}/scripts/hygiene.mjs`)
+  assertProtected('Edit', write(`${ROOT}/${WORKTREE}/.claude/settings.json`), `${WORKTREE}/.claude/settings.json`)
+  assertProtected('Edit', write(`${WORKTREE}/.claude/hooks/pretool-write-guard.mjs`), `${WORKTREE}/.claude/hooks/pretool-write-guard.mjs`)
+  assertProtected('Write', write(`${WORKTREE}/template/base/tools/validate.mjs`), `${WORKTREE}/template/base/tools/validate.mjs`)
+  assertProtected('Edit', write(`${WORKTREE}/tests/canary/injections.json`), `${WORKTREE}/tests/canary/injections.json`)
+  assertProtected('Edit', write(`${WORKTREE}/template/migrations.json`), `${WORKTREE}/template/migrations.json`)
+  assertProtected('Write', write(`${WORKTREE}/.github/workflows/selftest.yml`), `${WORKTREE}/.github/workflows/selftest.yml`)
+  assertProtected('Write', write(`${WORKTREE}/docs/../installer/cli.mjs`), `${WORKTREE}/installer/cli.mjs`)
+  assertProtected('NotebookEdit', notebook(`${WORKTREE}/scripts/probe.ipynb`), `${WORKTREE}/scripts/probe.ipynb`)
+  assertProtected('Write', write('.claude\\worktrees\\agent-a1b2c3\\scripts\\hygiene.mjs'), `${WORKTREE}/scripts/hygiene.mjs`)
+})
+
+test('only a file inside a worktree is re-rooted: the worktrees directory itself stays `.claude/`', () => {
+  assertProtected('Write', write('.claude/worktrees/notes.md'), '.claude/worktrees/notes.md')
+  assertProtected('Write', write(`${WORKTREE}/../settings.json`), '.claude/worktrees/settings.json')
+  assertProtected('Write', write(`${WORKTREE}/../../settings.json`), '.claude/settings.json')
+  // One level only: a worktree nested inside a worktree's own `.claude/` is that worktree's
+  // `.claude/`, which is protected.
+  assertProtected(
+    'Write',
+    write(`${WORKTREE}/.claude/worktrees/inner/README.md`),
+    `${WORKTREE}/.claude/worktrees/inner/README.md`,
+  )
+  // A worktree-shaped path anywhere else is an ordinary path.
+  assertAllowed('Write', write('docs/.claude/worktrees/agent-a1b2c3/scripts/x.mjs'))
+})
+
 test('a tool input with no path passes', () => {
   assertAllowed('Write', { content: '// probe\n' })
   assertAllowed('NotebookEdit', { new_source: 'print(1)\n' })

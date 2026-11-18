@@ -80,7 +80,16 @@ const root = resolve(toPosix(process.env.CLAUDE_PROJECT_DIR ?? process.cwd()))
 const rel = toPosix(relative(root, resolve(root, toPosix(raw))))
 if (rel === '' || rel === '..' || rel.startsWith('../') || isAbsolute(rel)) pass()
 
-if (process.env.HARNESS_ALLOW_SELF_EDIT !== '1' && PROTECTED.some((re) => re.test(rel))) {
+// Claude Code checks an agent's worktree out under `.claude/worktrees/<id>/` and leaves the
+// project dir on the main checkout, so every file in a worktree would read as `.claude/**`.
+// A worktree is a checkout of this repository: judge the path against the worktree's own
+// root, where its README is open and its scripts/ and .claude/ are protected. Only a file
+// inside a worktree is re-rooted, and only once; anything else under `.claude/` stays
+// `.claude/`. The deny still names the whole path.
+const worktree = /^\.claude\/worktrees\/[^/]+\/(.+)$/.exec(rel)
+const subject = worktree ? worktree[1] : rel
+
+if (process.env.HARNESS_ALLOW_SELF_EDIT !== '1' && PROTECTED.some((re) => re.test(subject))) {
   denyTool(
     'PreToolUse',
     `Blocked: ${rel} is the harness's own enforcement surface (gate scripts, guard hooks, factory closure checks, installer library, CI workflows, the canary registry). Editing it is a human-in-the-loop act — re-run with HARNESS_ALLOW_SELF_EDIT=1 so the change is deliberate and lands in the PR diff. This is the same rule the harness ships to consumers, applied to the harness.`,
