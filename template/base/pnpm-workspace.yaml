@@ -39,7 +39,10 @@ catalog:
   tsx: ^4.23.0
   '@biomejs/biome': 2.6.2 # exact: formatter drift would churn the format gate
   eslint: ^9.39.4 # 9.x line: typescript-eslint 8.x peers eslint ^9
-  typescript-eslint: ^8.63.0
+  # exact: 8.73.0 (2026-11-16) added no-unsafe-class-instance-assignment to strictTypeChecked,
+  # and it overflows the stack on apps/mobile's PressableScale.tsx, so `lint` crashed on every
+  # fresh scaffold. 8.72.2 is the last release before it; Renovate proposes the next one.
+  typescript-eslint: 8.72.2
   eslint-plugin-jsx-a11y: ^6.10.2 # the WEB half of the a11y floor (0.4.0); react-native-a11y is the native half
   eslint-plugin-react-hooks: ^7.1.1 # includes the React Compiler rule set (merged in v6)
   eslint-plugin-react-native: ^5.0.0
