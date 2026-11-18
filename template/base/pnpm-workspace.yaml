@@ -202,7 +202,10 @@ catalog:
   # (src/lib/kv.ts). Nothing here opens a SQL database: the data tier is Supabase
   # Postgres. The sync API is the point (an async read cannot serve a render pass
   # without a flash of empty state), which is why AsyncStorage does not replace it.
-  expo-sqlite: ~57.0.1
+  # exact: 57.0.5 (2026-11-12) ships its prebuilt Android library for arm64-v8a only
+  # (expo/expo#53673), so on an x86_64 emulator or a 32-bit device the store cannot load and
+  # src/lib/kv.ts reads every key as absent. 57.0.4 is the last release with all four ABIs.
+  expo-sqlite: 57.0.4
   expo-status-bar: ~57.0.1
   expo-system-ui: ~57.0.1 # backs userInterfaceStyle (root view background / appearance) — required for the automatic light/dark surface on Android
   # expo-updates is deliberately NOT in the base catalog: OTA machinery must not
