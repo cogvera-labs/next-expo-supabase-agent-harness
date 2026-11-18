@@ -229,10 +229,16 @@
       "dependencyDashboardApproval": true
     },
     {
-      "description": "expo-sqlite 57.0.5 ships its prebuilt Android library for arm64-v8a only (expo/expo#53673), so the catalog holds 57.0.4 and this skips that one release. tests/gates/catalog-held-releases.test.mjs holds the pair; remove both once a fixed release is pinned.",
+      "description": "expo-sqlite 57.0.5 ships its prebuilt Android library for arm64-v8a only (expo/expo#53673), so the catalog holds 57.0.4 and this skips that one release. The hold is a row in scripts/ci/catalog-holds.json, and tests/gates/catalog-held-releases.test.mjs keeps the row, the pin and this rule together; remove the row and this rule once a fixed release is pinned.",
       "matchFileNames": ["template/base/pnpm-workspace.yaml"],
       "matchPackageNames": ["expo-sqlite"],
       "allowedVersions": "!/^57\\.0\\.5$/"
+    },
+    {
+      "description": "typescript-eslint 8.73.0 adds no-unsafe-class-instance-assignment to strictTypeChecked, and the rule overflows the stack on a recursive conditional type, so `lint` crashes in a fresh scaffold. The catalog holds 8.72.2 and this skips that one release; the hold is a row in scripts/ci/catalog-holds.json, kept with the pin and this rule by tests/gates/catalog-held-releases.test.mjs. A later release still reaches a pull request, where `bootstrap-linux` lints a scaffold with it.",
+      "matchFileNames": ["template/base/pnpm-workspace.yaml"],
+      "matchPackageNames": ["typescript-eslint"],
+      "allowedVersions": "!/^8\\.73\\.0$/"
     },
     {
       "description": "next minors move the App Router contract. Patches, which carry the security floor, still flow.",
