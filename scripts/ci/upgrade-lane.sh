@@ -232,6 +232,20 @@ echo "$FLOOR_OUT"
 FLOOR_RAISED=0
 case "$FLOOR_OUT" in *'raised to the security floor'*) FLOOR_RAISED=1 ;; esac
 
+# ── 5a-ter. releases the catalog is held back from ───────────────────────────────
+# pnpm-workspace.yaml is seeded, so this baseline keeps its own ranges, and the install in §1
+# resolved the newest release each one admits. When that release is broken upstream, a fresh
+# scaffold is protected by an exact pin in the seeded catalog and an existing project by the
+# same pin made by hand. `update` cannot make it. Left alone, a broken release reds every leg
+# that must reach a green chain, for a fault no change in this repository can fix. The lane
+# plays the consumer again: scripts/ci/catalog-holds.json names each held release, and the
+# script pins it only where this baseline's range admits the broken one.
+say "held releases"
+HOLDS_OUT="$(node "$ROOT/scripts/ci/apply-catalog-holds.mjs" "$SCAFFOLD")"
+echo "$HOLDS_OUT"
+HOLDS_APPLIED=0
+case "$HOLDS_OUT" in *'held off a broken release'*) HOLDS_APPLIED=1 ;; esac
+
 say "dependency obligations"
 PARKED="$SCAFFOLD/.harness/pending/dependencies.json"
 if [ -f "$PARKED" ]; then
@@ -273,13 +287,13 @@ else
   echo "  none parked — this baseline's catalog already satisfies every obligation"
 fi
 
-# ONE install for both edits above. Gated on either having happened, because a leg whose
-# baseline already meets the floor and parks no obligation has nothing to reinstall — and
-# asserting the lockfile moved on that leg would demand a change nobody made.
-if [ -f "$PARKED" ] || [ "$FLOOR_RAISED" = 1 ]; then
+# ONE install for the edits above. Gated on any of them having happened, because a leg whose
+# baseline already meets the floor, admits no held release and parks no obligation has nothing
+# to reinstall — and asserting the lockfile moved on that leg would demand a change nobody made.
+if [ -f "$PARKED" ] || [ "$FLOOR_RAISED" = 1 ] || [ "$HOLDS_APPLIED" = 1 ]; then
   LOCK_BEFORE="$(lock_digest "$SCAFFOLD/pnpm-lock.yaml")"
 
-  say "pnpm install (after applying the security floor and any obligations)"
+  say "pnpm install (after applying the security floor, the held releases and any obligations)"
   node "$ROOT/scripts/ci/pnpm-install-retry.mjs" --no-frozen-lockfile
 
   # The assertion that would have caught the original defect: the lockfile MOVED. An
@@ -293,7 +307,7 @@ if [ -f "$PARKED" ] || [ "$FLOOR_RAISED" = 1 ]; then
   # digest across the install is the claim itself, and it holds whether or not the scaffold
   # ever commits its lockfile.
   [ "$(lock_digest "$SCAFFOLD/pnpm-lock.yaml")" != "$LOCK_BEFORE" ] ||
-    die "applying the security floor and the parked obligations did not change pnpm-lock.yaml — the pins resolved to nothing, so the dependency the config needs is still absent"
+    die "applying the security floor, the held releases and the parked obligations did not change pnpm-lock.yaml — the pins resolved to nothing, so the dependency the config needs is still absent or the broken release is still installed"
   echo "  pnpm-lock.yaml regenerated"
 fi
 
