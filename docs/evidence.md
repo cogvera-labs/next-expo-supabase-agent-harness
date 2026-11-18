@@ -13,7 +13,8 @@ the `v2.0.8` tag. Where a check could not be run while writing, the page says so
 - **A plain clone**, which also fetches the release tags several commands compare against:
   `git clone https://github.com/cogvera-labs/next-expo-supabase-agent-harness.git`
 - **Node 22 or newer.** The `node` commands need nothing installed, except the one row that
-  says `pnpm install` (pnpm 11, which `corepack enable` provides).
+  says `pnpm install` (pnpm 11, which `corepack enable` provides). If `corepack` is not on
+  your PATH (Node.js 25 and later no longer bundle it), run `npm install -g corepack` first.
 - **[`jq`](https://jqlang.org/), the [GitHub CLI](https://cli.github.com/) (`gh`) and npm**
   for the rows that read JSON, GitHub and the npm registry.
 - **Docker** only for the database lanes, which this page leaves to CI (see

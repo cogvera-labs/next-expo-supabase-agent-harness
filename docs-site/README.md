@@ -99,9 +99,10 @@ pnpm --dir docs-site run dev      # a local server
 ```
 
 The site has its own lockfile and pnpm root. It needs Node 22.22 or newer (CI uses Node 24)
-and the pnpm version in `package.json` (`corepack enable` provides it). "Last updated" dates
-come from `git log`, so a shallow clone stamps every page with one date. CI also sets
-`ASTRO_TELEMETRY_DISABLED=1`.
+and the pnpm version in `package.json` (`corepack enable` provides it). If `corepack` is not
+on your PATH (Node.js 25 and later no longer bundle it), run `npm install -g corepack` first.
+"Last updated" dates come from `git log`, so a shallow clone stamps every page with one date.
+CI also sets `ASTRO_TELEMETRY_DISABLED=1`.
 
 ## Checks that cover this folder
 

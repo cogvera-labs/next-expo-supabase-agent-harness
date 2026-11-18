@@ -47,14 +47,19 @@ the database gates. The installer's unit tests run on Linux, Windows and macOS.
 ## Quick start
 
 <a id="requirements"></a>You need Node 22 or newer, pnpm 11 (`corepack enable` picks up the
-pinned version), Docker for the local Supabase stack, and Claude Code. In an empty folder:
+pinned version), Docker for the local Supabase stack, and Claude Code. If `corepack` is not on
+your PATH (Node.js 25 and later no longer bundle it), run `npm install -g corepack` first. In
+an empty folder:
 
 ```sh
 npx --yes next-expo-supabase-agent-harness@latest init
 ```
 
 `init` asks for the project's details, each with a default, and writes the scaffold into
-the folder. Then:
+the folder. Until a release after 2.0.8 is out, change one line of its `pnpm-workspace.yaml`
+before `pnpm install`, as the
+[known issue in Getting started](docs/getting-started.md#create-the-project-and-run-the-first-turn)
+describes. Then:
 
 ```sh
 git init          # first: the prepare script (lefthook install) needs a repository

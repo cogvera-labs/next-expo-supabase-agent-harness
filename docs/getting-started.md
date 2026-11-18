@@ -11,7 +11,8 @@ in a specific sense are defined in the [glossary](glossary.md).
 
 - **Node 22 or newer.**
 - **pnpm 11.** If you do not have it, `corepack enable` provides the exact version the
-  scaffold pins in its `packageManager` field.
+  scaffold pins in its `packageManager` field. If `corepack` is not on your PATH (Node.js 25
+  and later no longer bundle it), run `npm install -g corepack` first.
 - **Docker, running.** `pnpm db:up` starts the local Supabase stack in containers, and the
   row-level security tests that run at the end of every turn need it.
 - **Git.**
@@ -41,6 +42,13 @@ pnpm db:up        # with Docker running; the first run downloads the Supabase im
 pnpm validate
 claude            # Claude Code: ask for one small change
 ```
+
+> **Known issue (2026-11-18).** Releases up to 2.0.8 let a new install resolve
+> typescript-eslint 8.73.0, which crashes the `lint` gate with
+> `RangeError: Maximum call stack size exceeded`. Until a release after 2.0.8 is out, change
+> `typescript-eslint` under `catalog:` in `pnpm-workspace.yaml` to `8.72.2` after `init` and
+> before `pnpm install`. A project that already resolved 8.73.0 makes the same change, runs
+> `pnpm install` again and commits the new `pnpm-lock.yaml`.
 
 **Use `npx` or a global install, never a local `npm i`.** A local
 `npm i next-expo-supabase-agent-harness` in the project folder writes a `package-lock.json`,
@@ -83,8 +91,11 @@ it sends the agent back to work with that step's output. `pnpm validate` does no
 suites, so a green `pnpm validate` alone does not mean the turn can end.
 
 On a clean scaffold with the stack running, every step is green. Depending on the change, the
-turn may also need a passing verdict from a reviewer subagent, and per-file coverage for each
-changed source file. Some steps print NOTE lines on a new scaffold; they do not fail the turn.
+turn may also need per-file coverage for each changed source file and passing verdicts from
+reviewer subagents: `torvalds-reviewer` and `citation-verifier` are owed on every non-empty
+diff, and the other reviewers when the diff touches their paths. That diff is taken against
+the branch's upstream, so until the repository has one, the reviewer step prints a NOTE
+instead of judging. Some steps print NOTE lines on a new scaffold; they do not fail the turn.
 
 If the stack is not running, the RLS step fails closed and tells the agent to run
 `pnpm db:up`, which the shipped settings let it run without asking. Without Docker that
@@ -102,6 +113,16 @@ start the web app with `pnpm dev:web`, which also serves the tRPC API, and the m
 explains the order and how a phone reaches your machine.
 
 ## Next steps
+
+### Protect `main`
+
+Push the project to GitHub and add a ruleset on `main` that requires a pull request and the
+`quality-gate` workflow's `gate-summary` check, which fails when any lane it waits for fails
+(GitHub lists it as `gate-summary (mark THIS one required)`). For the CODEOWNERS sign-off
+these docs describe, also require review from code owners, and check that
+`.github/CODEOWNERS` names real accounts: `init` ran before the folder had a git remote, so
+unless you typed your own account, it names the placeholder `@your-github-owner`. Without
+these settings, CI reports but does not block.
 
 ### Build a feature
 

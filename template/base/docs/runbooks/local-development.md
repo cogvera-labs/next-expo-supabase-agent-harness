@@ -11,7 +11,8 @@ before mobile if you want the tRPC path live.
 
 - **Docker** running — the Supabase local stack is containers.
 - **Node ≥ 22** and **pnpm 11** (the repo pins both; `corepack enable` picks up the
-  `packageManager` pin).
+  `packageManager` pin). If `corepack` is not on your PATH (Node.js 25 and later no longer
+  bundle it), run `npm install -g corepack` first.
 - `pnpm install` once at the root.
 - `cp .env.example .env` and fill in the local values. The web (`NEXT_PUBLIC_*`) and
   mobile (`EXPO_PUBLIC_*`) publishable keys are printed by `pnpm db:up` /
