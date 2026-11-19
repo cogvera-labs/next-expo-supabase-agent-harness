@@ -16,7 +16,7 @@ import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { pathToFileURL } from 'node:url'
 import { loadCorpus, pageSourcePaths, sitePages } from '../../docs-site/src/harness-docs/corpus.mjs'
-import { PAGE_TITLE_MAX, TITLE_MAX, TITLE_SUFFIX, documentTitle, llmsTxtLink, setDocumentTitle, verificationTags } from '../../docs-site/src/harness-docs/head.mjs'
+import { PAGE_TITLE_MAX, TITLE_MAX, TITLE_SUFFIX, documentTitle, llmsTxtLink, setDocumentTitle, verificationTags, wholeTitle } from '../../docs-site/src/harness-docs/head.mjs'
 import { lastCommitDates, lastmodByUrl } from '../../docs-site/src/harness-docs/page-dates.mjs'
 import { firstH1 } from '../../docs-site/src/harness-docs/site-index.mjs'
 
@@ -52,6 +52,10 @@ test("a page's own <title> stays, and Starlight's default takes the suffix", () 
   const home = [defaults()[0], ...own]
   setDocumentTitle(home, own, 'Claude Code harness for Next.js, Expo and Supabase')
   assert.equal(home[1].content, 'Claude Code harness for Next.js, Expo and Supabase')
+
+  // The loader measures the same <title> for the build log.
+  assert.equal(wholeTitle([], 'Gates catalog'), `Gates catalog${TITLE_SUFFIX}`)
+  assert.equal(wholeTitle(own, 'Home'), own[0].content)
 
   const untitled = [defaults()[0]]
   setDocumentTitle(untitled, [], 'Gates catalog')

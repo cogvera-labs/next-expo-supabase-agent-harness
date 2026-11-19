@@ -43,8 +43,9 @@ What a page tells a search engine, or a client that reads `llms.txt`, beyond its
   title is the package name, which would take more than half of the 60 characters a
   `<title>` is held to (about what a search result shows before it cuts the rest); it stays
   in the header and in `og:site_name`. A title in `page-meta.mjs` is limited to what the
-  suffix leaves, and the build log names a page whose heading is longer than that and has no
-  shorter title there. The home page states its whole `<title>` in its frontmatter.
+  suffix leaves, and the home page states its whole `<title>` in its frontmatter. The build
+  log names any page whose `<title>` comes out longer: a heading with no shorter title in
+  `page-meta.mjs`, or the title of one of the site's own pages.
 - **Sitemap `<lastmod>`.** Each sitemap entry carries the commit date of the page's source
   file. It comes from the same `git log` call as the page's "Last updated" line and its
   JSON-LD `dateModified` ([`src/harness-docs/page-dates.mjs`](src/harness-docs/page-dates.mjs)),

@@ -22,15 +22,16 @@ export const PAGE_TITLE_MAX = TITLE_MAX - TITLE_SUFFIX.length
 export const documentTitle = (pageTitle) => `${pageTitle}${TITLE_SUFFIX}`
 
 /**
- * Put the site's <title> into a page's head, in place of the "<page title> | <site title>"
- * that Starlight writes. `ownHead` is the head the page itself asked for: a <title> there is
- * already whole (the home page's, or one the loader built from a page-meta.mjs title) and
- * stays as it is.
+ * The <title> a page ends up with. `ownHead` is the head the page itself asked for: a
+ * <title> there is already whole (the home page's, or one the loader built from a
+ * page-meta.mjs title) and stays as it is. Any other page gets its title and the suffix.
  */
+export const wholeTitle = (ownHead, pageTitle) => ownHead.find((entry) => entry.tag === 'title')?.content ?? documentTitle(pageTitle)
+
+/** Put that <title> into a page's head, in place of the "<page title> | <site title>" that Starlight writes. */
 export function setDocumentTitle(head, ownHead, pageTitle) {
-  if (ownHead.some((entry) => entry.tag === 'title')) return
   const title = head.find((entry) => entry.tag === 'title')
-  if (title) title.content = documentTitle(pageTitle)
+  if (title) title.content = wholeTitle(ownHead, pageTitle)
 }
 
 /**

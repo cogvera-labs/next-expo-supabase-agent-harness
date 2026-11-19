@@ -16,7 +16,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join, posix, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { DEFAULT_BRANCH, GITHUB_REPO, REPO_ROOT, loadCorpus, pageSourcePaths, repoRelative, sitePages } from './corpus.mjs'
-import { PAGE_TITLE_MAX, TITLE_MAX, documentTitle } from './head.mjs'
+import { PAGE_TITLE_MAX, TITLE_MAX, documentTitle, wholeTitle } from './head.mjs'
 import { lastCommitDates } from './page-dates.mjs'
 import { fillSiteValues } from './site-values.mjs'
 
@@ -55,12 +55,16 @@ const titleHead = (title) => [
   { tag: 'meta', attrs: { property: 'og:title', content: title } },
 ]
 
-/** Say so in the build log when a page's own heading makes its <title> longer than a search result shows. */
-function noteTitle(page, heading, logger) {
-  if (page.meta.title || heading.length <= PAGE_TITLE_MAX) return
-  logger.warn(
-    `${page.repoPath}: its heading is ${String(heading.length)} characters, so its <title> is over ${String(TITLE_MAX)}; give it a title of at most ${String(PAGE_TITLE_MAX)} in page-meta.mjs`,
-  )
+/**
+ * Say so in the build log when a page's <title> is longer than a search result shows: a
+ * heading with no shorter title in page-meta.mjs, or one of the site's own pages' titles.
+ */
+function noteTitle(page, data, logger) {
+  if (typeof data.title !== 'string') return
+  const { length } = wholeTitle(Array.isArray(data.head) ? data.head : [], data.title)
+  if (length <= TITLE_MAX) return
+  const remedy = page.local ? 'shorten the title in its frontmatter' : `give it a title of at most ${String(PAGE_TITLE_MAX)} characters in page-meta.mjs`
+  logger.warn(`${page.repoPath}: its <title> is ${String(length)} characters, and a search result shows about ${String(TITLE_MAX)}; ${remedy}`)
 }
 
 /** Say so in the build log when a page's description is the first paragraph cut short, or missing. */
@@ -94,7 +98,6 @@ async function renderReadInPlace(page, source, renderMarkdown, logger) {
   if (typeof frontmatter.title !== 'string' || frontmatter.title === '') {
     throw new Error(`${page.repoPath}: no top-level "# " heading to take the page title from`)
   }
-  noteTitle(page, frontmatter.title, logger)
   noteDescription(page, frontmatter.description, logger)
   const head = page.meta.title ? { head: titleHead(page.meta.title) } : {}
   return { body: source, input, rendered, data: { ...frontmatter, ...head, editUrl: editUrlFor(page, source) } }
@@ -104,6 +107,7 @@ async function renderReadInPlace(page, source, renderMarkdown, logger) {
 async function renderPage(page, renderMarkdown, dates, logger) {
   const source = await readFile(page.absPath, 'utf8')
   const out = page.local ? await renderSitePage(page, source, renderMarkdown) : await renderReadInPlace(page, source, renderMarkdown, logger)
+  noteTitle(page, out.data, logger)
   const lastUpdated = dates.get(page.repoPath)
   if (lastUpdated && out.data.lastUpdated === undefined) out.data = { ...out.data, lastUpdated }
   return out
