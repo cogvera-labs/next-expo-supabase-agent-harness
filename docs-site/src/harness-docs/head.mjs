@@ -1,5 +1,6 @@
 // What the site puts in a page's <head> beyond Starlight's own tags, for search engines and
-// for clients that read llms.txt.
+// for clients that read llms.txt: the end of the <title>, the link to llms.txt, and the tags
+// that prove to a search engine who owns the site.
 //
 // This file imports nothing: the route middleware runs it inside the built site, and
 // tests/gates/docs-site.test.mjs runs it without the site's dependencies installed.
@@ -40,3 +41,31 @@ export function setDocumentTitle(head, ownHead, pageTitle) {
  * @param {string} base Astro's `base`, without a trailing slash
  */
 export const llmsTxtLink = (base) => ({ tag: 'link', attrs: { rel: 'describedby', href: `${base}/llms.txt` } })
+
+// The <meta> name each service reads its code from.
+const VERIFICATION_META = { google: 'google-site-verification', bing: 'msvalidate.01' }
+// A code is base64 or hexadecimal text. A space, a quote or an angle bracket in the value
+// means that more than the code was pasted.
+const VERIFICATION_CODE = /^[A-Za-z0-9+/=_-]+$/
+
+/**
+ * The tags that prove to Google Search Console and Bing Webmaster Tools who owns the site,
+ * one for each code that is set. An empty code writes no tag. A code is the value of the
+ * tag's `content` attribute alone: the whole <meta> tag, pasted in its place, fails the
+ * build here, where the message says what to paste, and never reaches a page as a tag the
+ * service cannot read.
+ *
+ * @param {Record<string, string>} codes a code for `google`, for `bing`, or for both
+ */
+export function verificationTags(codes) {
+  return Object.entries(codes).flatMap(([service, code]) => {
+    if (!Object.hasOwn(VERIFICATION_META, service)) {
+      throw new Error(`SITE_VERIFICATION has a code for "${service}"; the site writes tags for ${Object.keys(VERIFICATION_META).join(' and ')}`)
+    }
+    if (code === '') return []
+    if (typeof code !== 'string' || !VERIFICATION_CODE.test(code)) {
+      throw new Error(`SITE_VERIFICATION.${service} must be the value of the tag's content attribute alone, not the whole <meta> tag: got ${JSON.stringify(code)}`)
+    }
+    return [{ tag: 'meta', attrs: { name: VERIFICATION_META[service], content: code } }]
+  })
+}

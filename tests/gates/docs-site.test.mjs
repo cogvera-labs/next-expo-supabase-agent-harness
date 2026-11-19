@@ -16,7 +16,7 @@ import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { pathToFileURL } from 'node:url'
 import { loadCorpus, pageSourcePaths, sitePages } from '../../docs-site/src/harness-docs/corpus.mjs'
-import { PAGE_TITLE_MAX, TITLE_MAX, TITLE_SUFFIX, documentTitle, llmsTxtLink, setDocumentTitle } from '../../docs-site/src/harness-docs/head.mjs'
+import { PAGE_TITLE_MAX, TITLE_MAX, TITLE_SUFFIX, documentTitle, llmsTxtLink, setDocumentTitle, verificationTags } from '../../docs-site/src/harness-docs/head.mjs'
 import { lastCommitDates, lastmodByUrl } from '../../docs-site/src/harness-docs/page-dates.mjs'
 import { firstH1 } from '../../docs-site/src/harness-docs/site-index.mjs'
 
@@ -66,6 +66,28 @@ test('a page links the llms.txt at the site base, with the relation the llms.txt
     tag: 'link',
     attrs: { rel: 'describedby', href: '/next-expo-supabase-agent-harness/llms.txt' },
   })
+})
+
+// ---- search-engine verification --------------------------------------------------------
+
+// Made-up codes in the two shapes the services issue: base64 text, and hexadecimal.
+const GOOGLE_SAMPLE = 'sample_Google-code+123/abc='
+const BING_SAMPLE = '0123456789ABCDEF0123456789ABCDEF'
+
+test('a verification tag is written for each code that is set, and none for an empty one', () => {
+  assert.deepEqual(verificationTags({ google: '', bing: '' }), [])
+  assert.deepEqual(verificationTags({ google: GOOGLE_SAMPLE, bing: '' }), [{ tag: 'meta', attrs: { name: 'google-site-verification', content: GOOGLE_SAMPLE } }])
+  assert.deepEqual(verificationTags({ google: GOOGLE_SAMPLE, bing: BING_SAMPLE }), [
+    { tag: 'meta', attrs: { name: 'google-site-verification', content: GOOGLE_SAMPLE } },
+    { tag: 'meta', attrs: { name: 'msvalidate.01', content: BING_SAMPLE } },
+  ])
+})
+
+test('a whole tag pasted as a code, a padded code and an unknown service fail before they reach a page', () => {
+  const wholeTag = `<meta name="google-site-verification" content="${GOOGLE_SAMPLE}" />`
+  assert.throws(() => verificationTags({ google: wholeTag, bing: '' }), /SITE_VERIFICATION\.google must be the value of the tag's content attribute alone/)
+  assert.throws(() => verificationTags({ google: '', bing: ` ${BING_SAMPLE}` }), /SITE_VERIFICATION\.bing must be the value/)
+  assert.throws(() => verificationTags({ google: '', bing: '', yandex: 'abc' }), /has a code for "yandex"/)
 })
 
 // ---- the sitemap's <lastmod> -----------------------------------------------------------

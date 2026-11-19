@@ -13,12 +13,18 @@ import { defineConfig } from 'astro/config'
 import starlightLinksValidator from 'starlight-links-validator'
 import starlightLlmsTxt from 'starlight-llms-txt'
 import { DEFAULT_BRANCH, GITHUB_REPO, REPO_ROOT, REPOSITORY_DOCS, SITE_DIR, SITE_TITLE, repositoryDocDirs } from './src/harness-docs/corpus.mjs'
-import { llmsTxtLink } from './src/harness-docs/head.mjs'
+import { llmsTxtLink, verificationTags } from './src/harness-docs/head.mjs'
 import { harnessHastPlugins, harnessMdastPlugins } from './src/harness-docs/markdown-plugins.mjs'
 import { LEAD_GROUPS, harnessSidebar, llmsPageIndex, sitemapLastmod } from './src/harness-docs/site-index.mjs'
 
 const site = 'https://cogvera-labs.github.io'
 const base = '/next-expo-supabase-agent-harness'
+// The codes Google Search Console and Bing Webmaster Tools issue for their "HTML tag" method.
+// Paste each between its quotes: the value of the tag's `content` attribute, not the whole
+// tag. A code is public, and every page then carries it; while a code is empty, no tag is
+// written. They tie the site to the maintainer's accounts, so a copy of the site that
+// someone else publishes must empty both.
+const SITE_VERIFICATION = { google: '', bing: '' }
 const title = SITE_TITLE
 // The project's one-sentence description, the same as the landing page's tagline.
 const description =
@@ -116,6 +122,7 @@ export default defineConfig({
         { tag: 'meta', attrs: { property: 'og:image:width', content: '1280' } },
         { tag: 'meta', attrs: { property: 'og:image:height', content: '640' } },
         llmsTxtLink(base),
+        ...verificationTags(SITE_VERIFICATION),
         {
           tag: 'script',
           attrs: { type: 'application/ld+json' },

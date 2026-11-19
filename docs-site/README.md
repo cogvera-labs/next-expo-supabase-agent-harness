@@ -57,6 +57,13 @@ What a page tells a search engine, or a client that reads `llms.txt`, beyond its
   recommends for pointing a page at the file that covers it. The link validator does not
   read a `<head>`, so nothing checks this link at build time: it resolves for as long as
   `starlight-llms-txt` stays in `astro.config.mjs`.
+- **Ownership tags.** To verify the site in Google Search Console or Bing Webmaster Tools,
+  choose the service's "HTML tag" method and paste its code into `SITE_VERIFICATION` at the
+  top of [`astro.config.mjs`](astro.config.mjs): the value of the tag's `content` attribute,
+  not the whole tag. Every page then carries `<meta name="google-site-verification">` or
+  `<meta name="msvalidate.01">`. While a code is empty, no tag is written. The codes are
+  public, and they tie the site to the maintainer's accounts, so a copy of the site that
+  someone else publishes must empty both.
 
 ## Links
 
@@ -111,6 +118,7 @@ site page cannot show literal double braces. Write no other number that can go s
 - A stale exclusion in `corpus.mjs`, or an empty template docs tree.
 - A `page-meta.mjs` entry for a page the site does not render, an unknown field, or a field
   over its limit (description 155 characters, title 38, label 32).
+- A `SITE_VERIFICATION` code that is more than the code, such as a whole `<meta>` tag.
 - A route in `LEAD_GROUPS` that names no page, or a repository document in no group.
 - An unknown build-time value in a site page.
 - A relative link that leaves the repository or names nothing; an internal link, `#anchor`
