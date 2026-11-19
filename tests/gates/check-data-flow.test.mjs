@@ -16,8 +16,7 @@
 // DELETE CASCADE and demoted to SET NULL by a later ALTER.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -30,6 +29,7 @@ import {
   parseColumnFacts,
   splitStatements,
 } from '../../template/base/tools/lib/sql-parse.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(new URL('../../template/base/tools/check-data-flow.mjs', import.meta.url))
 const TOOLS = fileURLToPath(new URL('../../template/base/tools', import.meta.url))
@@ -77,7 +77,7 @@ function plantSchemaTree(dir, demo) {
  * @param {{ policy?: any, edit?: (p: any) => void, extraSql?: string, schemaEdit?: (s: string) => string, manifest?: {harnessVersion: string, baseVersion: string}, demo?: boolean }} [opts]
  */
 function fixture({ policy, edit, extraSql, schemaEdit, manifest, demo = true } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-dataflow-'))
+  const dir = tempDir('epah-dataflow-')
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   mkdirSync(join(dir, 'docs/runbooks'), { recursive: true })
   cpSync(join(TOOLS, 'lib'), join(dir, 'tools/lib'), { recursive: true })

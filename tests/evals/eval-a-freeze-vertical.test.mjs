@@ -2,12 +2,12 @@
 // a freeze writes one that passes it. A dummy vertical stands in for the real ones, which
 // the maintainer generates (#194).
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { after, test } from 'node:test'
 import { checkVertical, freezeVertical, main } from '../../scripts/eval-a-freeze-vertical.mjs'
 import { writeManifest } from '../../scripts/lib/evals.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const made = []
 after(() => {
@@ -15,7 +15,7 @@ after(() => {
 })
 
 function tree(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-eval-vertical-'))
+  const dir = tempDir('epah-eval-vertical-')
   made.push(dir)
   for (const [rel, text] of Object.entries(files)) {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })

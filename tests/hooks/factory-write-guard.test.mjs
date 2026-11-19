@@ -17,11 +17,11 @@
 // `node` is spawned, so this runs on the Windows leg of installer-unit too.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { dirname, join } from 'node:path'
+import { rmSync } from 'node:fs'
+import { dirname } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const HOOK = fileURLToPath(new URL('../../.claude/hooks/pretool-write-guard.mjs', import.meta.url))
 
@@ -33,7 +33,7 @@ function cleanEnv() {
   return e
 }
 
-const ROOT = mkdtempSync(join(tmpdir(), 'epah-factory-write-guard-'))
+const ROOT = tempDir('epah-factory-write-guard-')
 after(() => rmSync(ROOT, { recursive: true, force: true }))
 
 /**

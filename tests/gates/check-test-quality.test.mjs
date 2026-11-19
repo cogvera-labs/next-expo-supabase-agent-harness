@@ -10,11 +10,11 @@
 // never matches.)
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(
   new URL('../../template/base/tools/check-test-quality.mjs', import.meta.url),
@@ -23,7 +23,7 @@ const LIB = fileURLToPath(new URL('../../template/base/tools/lib', import.meta.u
 
 /** @param {{files: Record<string,string>, allow?: unknown, manifest?: string}} opts */
 function fixture({ files, allow, manifest }) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-testq-'))
+  const dir = tempDir('epah-testq-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   cpSync(LIB, join(dir, 'tools/lib'), { recursive: true })
   cpSync(SCRIPT, join(dir, 'tools/check-test-quality.mjs'))

@@ -10,11 +10,11 @@
 // malformed/stale = red), and titleKey resolution against the i18n catalog.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-route-manifest.mjs', import.meta.url),
@@ -70,7 +70,7 @@ function fixture({
   catalog = SHIPPED_CATALOG,
   srcDir = true,
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-routegate-'))
+  const dir = tempDir('epah-routegate-')
   if (srcDir) mkdirSync(join(dir, 'apps/mobile/src'), { recursive: true })
   mkdirSync(join(dir, 'tools'), { recursive: true })
   if (routes !== null) writeFileSync(join(dir, 'apps/mobile/src/routes.ts'), asText(routes))
@@ -315,7 +315,7 @@ test('unreachableStates: a null state needs a reviewed row; the row goes stale w
 })
 
 test('skip asymmetry: no mobile surface → loud local SKIP (exit 0), CI fail-closed (exit 1)', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-routegate-'))
+  const dir = tempDir('epah-routegate-')
   const local = runGate(dir, { ci: false })
   assert.equal(local.code, 0, local.out)
   assert.ok(local.out.includes('SKIPPED'), local.out)

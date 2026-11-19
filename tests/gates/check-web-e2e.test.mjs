@@ -6,11 +6,11 @@
 // wired in tests/canary/injections.json#lanes.web-e2e — it must stay green and non-vacuous.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { chmodSync, mkdirSync, writeFileSync } from 'node:fs'
 import { delimiter, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(new URL('../../template/base/tools/check-web-e2e.mjs', import.meta.url))
 
@@ -63,7 +63,7 @@ const AXE_ONLY_SPEC = [
 // scaffold looks before the corresponding piece exists.
 /** @param {{ config?: boolean, specs?: Array<{ name: string, content: string }> }} [knobs] */
 function fixture({ config = true, specs = [{ name: 'home.spec.ts', content: VALID_SPEC }] } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-webe2e-'))
+  const dir = tempDir('epah-webe2e-')
   mkdirSync(join(dir, 'apps/web'), { recursive: true })
   if (config) {
     writeFileSync(

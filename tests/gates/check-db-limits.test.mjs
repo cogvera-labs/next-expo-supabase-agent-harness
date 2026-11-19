@@ -9,11 +9,11 @@
 
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const GATE_SRC = join(ROOT, 'template/base/tools/check-db-limits.mjs')
@@ -73,7 +73,7 @@ ${extra}`
  *           sources?: Record<string, string> }} [opts]
  */
 function fixture({ mig = migration(), config, configToml = CONFIG_TOML, sources = {} } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nesah-dblimits-'))
+  const dir = tempDir('nesah-dblimits-')
   for (const [rel, content] of Object.entries(sources)) {
     mkdirSync(join(dir, rel.slice(0, rel.lastIndexOf('/'))), { recursive: true })
     writeFileSync(join(dir, rel), content)

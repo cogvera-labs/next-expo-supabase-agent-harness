@@ -11,8 +11,7 @@
 
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -22,6 +21,7 @@ import { fileURLToPath } from 'node:url'
 // (the check-query-shapes.test.mjs precedent).
 import { renderActions, renderEvents } from '../../template/base/tools/lib/inventory.mjs'
 import { parseJsonc } from '../../template/base/tools/lib/jsonc.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-contract-drift.mjs', import.meta.url),
@@ -131,7 +131,7 @@ const GREEN_SOLUTION = ['packages/schema', 'packages/contracts']
 // so the regen-diff branch engages.
 /** @param {{ packages?: any, solution?: any, inventory?: boolean }} [opts] */
 function fixture({ packages = GREEN_PACKAGES, solution = GREEN_SOLUTION, inventory = false } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nesah-contract-'))
+  const dir = tempDir('nesah-contract-')
   for (const [rel, spec] of Object.entries(packages)) {
     mkdirSync(join(dir, rel), { recursive: true })
     if (spec.pkg != null) {

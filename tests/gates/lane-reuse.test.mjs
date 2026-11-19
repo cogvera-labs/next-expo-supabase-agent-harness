@@ -15,12 +15,12 @@
 // SOURCE: tests/gates/wait-for-workflows.test.mjs (the stand-in gh transport)
 import assert from 'node:assert/strict'
 import { execFileSync, spawnSync } from 'node:child_process'
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { delimiter, join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { formatMarker, judgeReuse, MARKER_TAG, readMarkers } from '../../template/base/tools/lib/lane-reuse.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TRANSPORT = fileURLToPath(new URL('../../template/base/tools/ci/lane-reuse.mjs', import.meta.url))
 const LIB = fileURLToPath(new URL('../../template/base/tools/lib/lane-reuse.mjs', import.meta.url))
@@ -262,7 +262,7 @@ after(() => {
 })
 /** @param {string} prefix */
 function scratch(prefix) {
-  const dir = mkdtempSync(join(tmpdir(), prefix))
+  const dir = tempDir(prefix)
   made.push(dir)
   return dir
 }

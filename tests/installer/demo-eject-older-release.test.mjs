@@ -7,13 +7,13 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { execFileSync, spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { eject } from '../../installer/commands/eject.mjs'
 import { renderEntry, walkTemplate } from '../../installer/lib/copy.mjs'
 import { fileMode } from '../../installer/lib/manifest.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const CLI = join(ROOT, 'installer/cli.mjs')
@@ -30,7 +30,7 @@ function run(cli, args) {
 const made = []
 /** @param {string} tag */
 function tmp(tag) {
-  const dir = mkdtempSync(join(tmpdir(), `epah-demo-older-${tag}-`))
+  const dir = tempDir(`epah-demo-older-${tag}-`)
   made.push(dir)
   return dir
 }

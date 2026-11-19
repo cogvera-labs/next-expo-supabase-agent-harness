@@ -11,8 +11,7 @@
 // apps/mobile map red, the missing jest.config.js red, and the merge legs.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -23,6 +22,7 @@ import {
   parseCoverageExcludes,
   parsePerFileFloors,
 } from '../../template/base/tools/check-diff-coverage.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TOOLS = fileURLToPath(new URL('../../template/base/tools', import.meta.url))
 const GATE = join(TOOLS, 'check-diff-coverage.mjs')
@@ -439,7 +439,7 @@ test("expandBraces: jest's {ts,tsx} braces expand; brace-free globs pass through
  *           jestMap?: object|null }} [opts]
  */
 function gitFixture({ vitestConfig, jestConfig = null, vitestMap = null, jestMap = null } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-diffcov-'))
+  const dir = tempDir('epah-diffcov-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   cpSync(join(TOOLS, 'lib'), join(dir, 'tools/lib'), { recursive: true })
   cpSync(GATE, join(dir, 'tools/check-diff-coverage.mjs'))
@@ -690,7 +690,7 @@ test('GREEN: a covered handler clears the floors like any other file', () => {
 })
 
 test('outside a git repo: loud SKIP locally, FAIL in CI (never a silent pass)', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-diffcov-nogit-'))
+  const dir = tempDir('epah-diffcov-nogit-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   cpSync(join(TOOLS, 'lib'), join(dir, 'tools/lib'), { recursive: true })
   cpSync(GATE, join(dir, 'tools/check-diff-coverage.mjs'))

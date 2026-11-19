@@ -10,19 +10,18 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseFrontmatter, splitList } from '../../template/base/tools/lib/agent-roster.mjs'
 // A NAMESPACE import for the 1.1.0 surface (#62, #71, #72): a case that reaches a missing
 // export fails in ITS case, and every older case in this file still runs.
 import * as roster from '../../template/base/tools/lib/agent-roster.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TOOLS = fileURLToPath(new URL('../../template/base/tools', import.meta.url))
 const AGENTS_TEMPLATE = fileURLToPath(new URL('../../template/base/AGENTS.md', import.meta.url))
@@ -58,7 +57,7 @@ function fixture({
   roster,
   files,
 }) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-docs-'))
+  const dir = tempDir('epah-docs-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   cpSync(join(TOOLS, 'lib'), join(dir, 'tools/lib'), { recursive: true })
   cpSync(join(TOOLS, 'harness.config.mjs'), join(dir, 'tools/harness.config.mjs'))

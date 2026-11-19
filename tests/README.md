@@ -14,6 +14,7 @@ The tests a project gets are in the template ([template/README.md](../template/R
 | [canary/](canary/) | The can-fail-proof registry, described below. | [check-canary-coverage.mjs](../scripts/check-canary-coverage.mjs): its closure in the Stop gate, its full run in `installer-unit` |
 | [evals/](evals/) | Evals A and B of the duplication sweep, and the digests that keep the sweep's output identical across machines ([evals/README.md](evals/README.md)). | `lint.yml` with the parser installed; a Windows job for the digests; `installer-unit` without the parser cases |
 | [fixtures/](fixtures/) | `released/<version>/`: files exactly as an earlier release shipped them, stored as `*.txt`, for tests of how `update` and the gates treat an old copy. `reviewer-eval/<case>/`: the reviewer eval's corpus ([evals/README.md](evals/README.md)). | Read by the suites above |
+| [helpers/](helpers/) | [temp-dir.mjs](helpers/temp-dir.mjs), which every suite makes its temporary directories with, and the test that it removes them ([Temporary directories](#temporary-directories)). | Imported by the suites above; its test in `installer-unit` |
 
 `release.yml` runs every suite again on a release tag before anything is published.
 
@@ -48,6 +49,18 @@ node scripts/check-canary-coverage.mjs
 
 Which suites to run for which kind of change is in the root [AGENTS.md](../AGENTS.md) and in
 [CONTRIBUTING.md](../CONTRIBUTING.md#local-development).
+
+## Temporary directories
+
+A test makes a temporary directory with `tempDir(prefix)` from
+[helpers/temp-dir.mjs](helpers/temp-dir.mjs), not with `mkdtemp`. Nothing clears the OS temp
+folder between runs, so the helper removes every directory it made once the file's tests have
+ended, whether they passed or failed. A directory lives for the whole file: tests may share one
+made at module scope, read it after a fixture function returns, or pass it to a child process.
+The helper's cleanup runs before a file's own `after()` hooks, so those must not read one.
+
+The helper removes only what was made through it. A script under test that makes a temporary
+directory of its own, in a child process, has to remove it itself.
 
 ## The can-fail-proof registry
 

@@ -12,10 +12,10 @@
 import { after, test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const SCRIPT = 'scripts/generate-skill-references.mjs'
@@ -53,7 +53,7 @@ after(() => {
 })
 
 function mirror() {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-skill-refs-'))
+  const dir = tempDir('epah-skill-refs-')
   made.push(dir)
   for (const rel of MIRRORED) {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })

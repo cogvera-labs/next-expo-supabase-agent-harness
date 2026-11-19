@@ -5,12 +5,12 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { detect, detectContext } from '../../installer/lib/detect.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
-const dir = (prefix) => mkdtempSync(join(tmpdir(), prefix))
+const dir = (prefix) => tempDir(prefix)
 const writePkg = (d, pkg) => writeFileSync(join(d, 'package.json'), JSON.stringify(pkg))
 
 const git = (d, args) =>

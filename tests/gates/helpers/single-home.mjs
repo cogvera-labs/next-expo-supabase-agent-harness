@@ -9,12 +9,12 @@
 // THE TREE. The library reads the working directory as a project root (the gates run from
 // one), so a fixture is a temp directory the test chdirs into for the length of one call.
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { test } from 'node:test'
 import { loadParser } from '../../../template/base/tools/lib/i18n-tree.mjs'
+import { tempDir } from '../../helpers/temp-dir.mjs'
 
 export const ts = await loadParser()
 const REQUIRE_TS = process.env.HARNESS_TEST_REQUIRE_TYPESCRIPT === '1'
@@ -52,7 +52,7 @@ function writeTree(dir, files) {
  * @param {Record<string, string>} files @param {(dir: string) => T} fn @returns {T}
  */
 export function inTree(files, fn) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-sh-'))
+  const dir = tempDir('epah-sh-')
   const cwd = process.cwd()
   const done = () => {
     process.chdir(cwd)

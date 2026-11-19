@@ -19,8 +19,7 @@
 // SOURCE: https://supabase.com/docs/guides/platform/backups
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -28,6 +27,7 @@ import {
   judgeBackupPosture,
   postureShapeProblems,
 } from '../../template/base/tools/lib/backup-posture.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const SHIPPED = join(ROOT, 'template/base/tools/backup-posture.json')
@@ -328,7 +328,7 @@ test('the shipped posture ships the tolerance UNSET, and says so', () => {
 
 // ---- the LANE's own red-proof: the shipped script, driven to a failure ------------------
 test('the shipped script reds on a recorded response with no recovery mechanism', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'backup-posture-'))
+  const dir = tempDir('backup-posture-')
   const posturePath = join(dir, 'backup-posture.json')
   const fixturePath = join(dir, 'response.json')
   writeFileSync(posturePath, JSON.stringify(POSTURE))
@@ -347,7 +347,7 @@ test('the shipped script reds on a recorded response with no recovery mechanism'
 })
 
 test('the shipped script GREENS on a recorded PITR response — and never calls the network', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'backup-posture-'))
+  const dir = tempDir('backup-posture-')
   const posturePath = join(dir, 'backup-posture.json')
   const fixturePath = join(dir, 'response.json')
   writeFileSync(posturePath, JSON.stringify(POSTURE))
@@ -363,7 +363,7 @@ test('the shipped script GREENS on a recorded PITR response — and never calls 
 })
 
 test('an unconfigured tree SKIPS loudly, and the skip states what is not being proven', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'backup-posture-'))
+  const dir = tempDir('backup-posture-')
   const posturePath = join(dir, 'backup-posture.json')
   writeFileSync(posturePath, JSON.stringify(POSTURE))
 
@@ -379,7 +379,7 @@ test('an unconfigured tree SKIPS loudly, and the skip states what is not being p
 })
 
 test('HARNESS_REQUIRE_BACKUP_EVIDENCE=1 turns the skip into a failure — the operator’s opt-in', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'backup-posture-'))
+  const dir = tempDir('backup-posture-')
   const posturePath = join(dir, 'backup-posture.json')
   writeFileSync(posturePath, JSON.stringify(POSTURE))
 
@@ -412,7 +412,7 @@ const NO_NET =
  * @param {{ projectId?: string, envRef?: string, require?: string }} opts
  */
 function runWithRef({ projectId, envRef = '', require = '' }) {
-  const dir = mkdtempSync(join(tmpdir(), 'backup-posture-'))
+  const dir = tempDir('backup-posture-')
   const posturePath = join(dir, 'backup-posture.json')
   writeFileSync(posturePath, JSON.stringify(POSTURE))
   if (projectId !== undefined) {

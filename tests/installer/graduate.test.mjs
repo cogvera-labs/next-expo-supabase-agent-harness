@@ -2,16 +2,16 @@
 // path (run validate → advance baseVersion when zero ramp NOTEs remain) is exercised
 // end-to-end against a real scaffold in the selftest CI matrix; here we lock the guards
 // that must hold without spawning a whole gate chain.
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { graduate } from '../../installer/commands/graduate.mjs'
 import { installerVersion } from '../../installer/lib/manifest.mjs'
+import { tempDir as emptyTempDir } from '../helpers/temp-dir.mjs'
 
 function tempDir(manifest) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-graduate-'))
+  const dir = emptyTempDir('epah-graduate-')
   if (manifest !== undefined) {
     mkdirSync(join(dir, '.harness'), { recursive: true })
     writeFileSync(join(dir, '.harness/manifest.json'), JSON.stringify(manifest, null, 2))

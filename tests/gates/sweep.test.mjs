@@ -11,8 +11,7 @@
 //     the code measured (rows 4 and 6, below).
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { after, before, test } from 'node:test'
@@ -32,6 +31,7 @@ import {
   SWEEP_FAMILIES,
   sweepMain,
 } from '../../template/base/tools/lib/sweep.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 import { BODY, GOLDEN, inTree, pkg, treeTest, ts } from './helpers/single-home.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
@@ -83,7 +83,7 @@ function gate(dir, args, { env = {}, node = [] } = {}) {
 }
 
 before(() => {
-  ROOT = mkdtempSync(join(tmpdir(), 'epah-sweep-'))
+  ROOT = tempDir('epah-sweep-')
   SCAFFOLDS.default = scaffold('default', [], true)
   SCAFFOLDS.demo = scaffold('demo', ['--with-demo'], true)
   SCAFFOLDS.bare = scaffold('bare', [], false)

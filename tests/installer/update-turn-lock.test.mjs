@@ -8,12 +8,12 @@
 // hold the tree hostage.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { update } from '../../installer/commands/update.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 
@@ -24,7 +24,7 @@ const SETS = [
 ]
 
 function initFixture() {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-turnlock-'))
+  const dir = tempDir('tpah-turnlock-')
   const res = spawnSync('node', [CLI, 'init', '--dir', dir, '--yes', ...SETS], { encoding: 'utf8' })
   assert.equal(res.status, 0, `init must succeed: ${res.stdout}${res.stderr}`)
   return dir

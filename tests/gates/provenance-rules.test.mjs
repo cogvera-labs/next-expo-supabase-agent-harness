@@ -10,8 +10,7 @@
 // red/green lives in check-sources.test.mjs.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   CITATION_DOMAINS,
@@ -36,6 +35,7 @@ import {
   parseMandatoryPromotions,
   payloadResolves,
 } from '../../template/base/tools/lib/provenance-rules.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 // ── exported shape: the decision taxonomy and its knobs ───────────────────────
 // NOTE: the harness repo root has no tools/decision-groups.json, so only the
@@ -407,7 +407,7 @@ test('payloadResolves: a corpus ref stays truthy across repeated calls (no globa
 })
 
 test('payloadResolves: a repo-relative path grounds only when it exists on disk', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-provres-'))
+  const dir = tempDir('epah-provres-')
   mkdirSync(join(dir, 'docs'))
   writeFileSync(join(dir, 'docs', 'decisions.md'), '# decisions\n')
   // Bare existing token, plus leading/trailing punctuation stripping.

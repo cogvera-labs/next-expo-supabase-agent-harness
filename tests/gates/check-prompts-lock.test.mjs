@@ -6,12 +6,12 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-prompts-lock.mjs', import.meta.url),
@@ -24,7 +24,7 @@ function run(dir) {
 
 // { prompts?: {relPath: content}, lock?: {relPath: sha} }
 function scaffold({ prompts = {}, lock = {} } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'prompts-'))
+  const dir = tempDir('prompts-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   writeFileSync(join(dir, 'tools/prompts.lock.json'), JSON.stringify(lock, null, 2))
   for (const [rel, content] of Object.entries(prompts)) {

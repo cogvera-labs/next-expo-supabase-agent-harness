@@ -15,11 +15,11 @@
 // Every domain this file authors itself is under the RFC 2606 `.test` TLD.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const MODULE = fileURLToPath(new URL('../../template/modules/store-metadata', import.meta.url))
 const TOOL = join(MODULE, 'tools/check-store-config.mjs')
@@ -53,7 +53,7 @@ const authored = () => ({
 
 /** @param {string} configText */
 function runGate(configText) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-store-config-'))
+  const dir = tempDir('epah-store-config-')
   cpSync(GATE_LIB_DIR, join(dir, 'tools/lib'), { recursive: true })
   cpSync(TOOL, join(dir, 'tools/check-store-config.mjs'))
   mkdirSync(join(dir, 'apps/mobile'), { recursive: true })

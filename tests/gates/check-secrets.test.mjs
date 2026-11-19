@@ -7,17 +7,17 @@
 // redaction docs), and a scanner that reds on those is a scanner nobody can ship.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { before, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 let scaffold
 
 before(() => {
-  scaffold = mkdtempSync(join(tmpdir(), 'epah-secrets-'))
+  scaffold = tempDir('epah-secrets-')
   const res = spawnSync(
     'node',
     [CLI, 'init', '--dir', scaffold, '--yes', '--set', 'PROJECT_NAME=Scan App', '--set', 'GITHUB_OWNER=o', '--set', 'SECURITY_OWNERS=@o/sec'],
@@ -204,7 +204,7 @@ test('RED: scanning ZERO files is a FAIL — a clean result over no input is not
   // empty. The gate script is invoked by absolute path from the scaffold (all its data
   // paths are cwd-relative, all its imports are script-relative), which is what makes a
   // genuinely empty tree constructible without also emptying the gate.
-  const empty = mkdtempSync(join(tmpdir(), 'epah-secrets-empty-'))
+  const empty = tempDir('epah-secrets-empty-')
   mkdirSync(join(empty, 'tools'), { recursive: true })
   writeFileSync(
     join(empty, 'tools/secret-patterns.json'),

@@ -16,12 +16,12 @@
 // SOURCE: scripts/lib/ramp-verdict.mjs · scripts/ci/upgrade-lane.sh (§7a)
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
 import { firedExpiries, judgeExpiries } from '../../scripts/lib/ramp-verdict.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const RED_LOG = `format: OK
 wiring: RAMP EXPIRED — the web a11y lint plugin was ramped from baseVersion 0.4.0 with a deadline of 0.5.0, and this install runs harness 0.5.0.
@@ -173,7 +173,7 @@ test('an expiry firing against an EMPTY expectation is the loudest disagreement'
 
 test('the shipped runner exits 1 on the canary and 0 on the happy path', () => {
   const script = fileURLToPath(new URL('../../scripts/ci/ramp-verdict.mjs', import.meta.url))
-  const dir = mkdtempSync(join(tmpdir(), 'ramp-verdict-'))
+  const dir = tempDir('ramp-verdict-')
   const run = (log, code) => {
     const path = join(dir, `v-${String(code)}-${String(log.length)}.log`)
     writeFileSync(path, log)

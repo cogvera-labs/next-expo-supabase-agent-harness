@@ -20,8 +20,7 @@
 // a --clockful spawn against the LIVE register would make this suite red on the calendar,
 // which is precisely the property the flag exists to keep out of the per-PR path).
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
@@ -33,6 +32,7 @@ import {
   timeProblems,
 } from '../../scripts/lib/obligations.mjs'
 import { cmpDotted, shippedRampSites } from '../../scripts/lib/ramp-sites.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const SCRIPT = join(ROOT, 'scripts/check-obligations.mjs')
@@ -115,7 +115,7 @@ function runFixture({
   tools = { 'check-widget.mjs': WIDGET_GATE },
   files = {},
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-obligations-'))
+  const dir = tempDir('epah-obligations-')
   const contents = {
     'scripts/check-obligations.mjs': SCRIPT_BYTES,
     'scripts/lib/obligations.mjs': LIB_BYTES,

@@ -23,13 +23,14 @@
 //   - no test runs `--live`, which spends model calls and stays on a maintainer's machine.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import * as evalLib from '../../scripts/reviewer-eval.mjs'
 import { owedByTurn } from '../../template/base/tools/lib/reviewer-verdicts.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 import { freshInstall } from '../installer/helpers/provenance-fixture.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
@@ -42,7 +43,7 @@ after(() => {
   for (const d of made) rmSync(d, { recursive: true, force: true })
 })
 const scratch = (prefix) => {
-  const d = mkdtempSync(join(tmpdir(), prefix))
+  const d = tempDir(prefix)
   made.push(d)
   return d
 }

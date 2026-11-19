@@ -12,8 +12,7 @@
 // precisely when the fact would otherwise be lost.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -29,6 +28,7 @@ import {
   recordTurnOutcome,
   serialize,
 } from '../../template/base/.claude/hooks/lib/turn-outcomes.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TEMPLATE = fileURLToPath(new URL('../../template/base/', import.meta.url))
 const LEDGER = '.harness/turn-outcomes.jsonl'
@@ -38,7 +38,7 @@ const LEDGER = '.harness/turn-outcomes.jsonl'
  * @param {{ red?: boolean, ledger?: string }} spec
  */
 function fixture({ red = false, ledger } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-turnlog-'))
+  const dir = tempDir('epah-turnlog-')
   cpSync(join(TEMPLATE, '.claude/hooks'), join(dir, '.claude/hooks'), {
     recursive: true,
   })
@@ -333,7 +333,7 @@ test('recordTurnOutcome swallows its own I/O failure — bookkeeping never decid
   // and the factory's own Stop gate), so a throw here would brick every turn on the machine
   // rather than lose one record. An unwritable path must degrade to a reported error and an
   // otherwise-correct answer.
-  const dir = mkdtempSync(join(tmpdir(), 'epah-turnlog-io-'))
+  const dir = tempDir('epah-turnlog-io-')
   const unwritable = join(dir, 'not-a-dir.txt', 'ledger.jsonl')
   writeFileSync(join(dir, 'not-a-dir.txt'), 'this is a file, so it cannot be a parent directory')
   const r = recordTurnOutcome({
@@ -350,7 +350,7 @@ test('recordTurnOutcome swallows its own I/O failure — bookkeeping never decid
 test('recordTurnOutcome reads the cap from the ENV it is handed, not from a global', () => {
   // Observed 2026-08-07: settings.json's `env` block does reach a hook process, so the
   // scaffold's CLAUDE_CODE_STOP_HOOK_BLOCK_CAP is a real input rather than a decoration.
-  const dir = mkdtempSync(join(tmpdir(), 'epah-turnlog-env-'))
+  const dir = tempDir('epah-turnlog-env-')
   const path = join(dir, 'ledger.jsonl')
   const r = recordTurnOutcome({
     blocked: true,
@@ -410,7 +410,7 @@ test('SESSION SCOPING: a cap-hit mark blocks ITS OWN session\'s next green turn,
 // blocking half lives in `installer update` (tests/installer/update-turn-lock.test.mjs).
 
 test('TURN LOCK: a fresh lock from another LIVE session is reported; the turn is never blocked', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-turnlock-'))
+  const dir = tempDir('epah-turnlock-')
   mkdirSync(join(dir, '.harness'), { recursive: true })
   writeFileSync(
     join(dir, '.harness/turn.lock'),
@@ -436,7 +436,7 @@ test('TURN LOCK: same session, a stale lock, and a dead pid are all silent', () 
     { session_id: 'other', pid: 2 ** 30, at: new Date().toISOString() }, // dead pid
   ]
   for (const lock of cases) {
-    const dir = mkdtempSync(join(tmpdir(), 'epah-turnlock-quiet-'))
+    const dir = tempDir('epah-turnlock-quiet-')
     mkdirSync(join(dir, '.harness'), { recursive: true })
     writeFileSync(join(dir, '.harness/turn.lock'), `${JSON.stringify(lock)}\n`)
     const r = recordTurnOutcome({

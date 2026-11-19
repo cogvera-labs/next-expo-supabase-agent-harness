@@ -7,8 +7,7 @@
 // which lint.yml's machinery-evals step sets.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
 import { after, test } from 'node:test'
@@ -18,6 +17,7 @@ import { readJson, writeJson } from '../../scripts/lib/evals.mjs'
 import { walkFiles } from '../../template/base/tools/lib/fs-walk.mjs'
 import { extractorDigest } from '../../template/base/tools/lib/shapes.mjs'
 import { treeTest, ts } from '../gates/helpers/single-home.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../scripts/eval-a.mjs', import.meta.url))
 const made = []
@@ -27,7 +27,7 @@ after(() => {
 
 /** A copy of tests/evals/a to change. */
 function scratchEval() {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-eval-a-dir-'))
+  const dir = tempDir('epah-eval-a-dir-')
   made.push(dir)
   cpSync(A_DIR, dir, { recursive: true })
   return dir

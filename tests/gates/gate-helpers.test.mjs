@@ -6,8 +6,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, posix } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 // Static for the in-process uses (0.8.0 — knip opacity + the Windows workaround,
@@ -19,6 +18,7 @@ import * as gateLib from '../../template/base/tools/lib/gate.mjs'
 // import of an export the register lacks would fail this whole file at link time instead of
 // failing the one test that needs it.
 import * as stampRegister from '../../template/base/tools/lib/stamp-inputs.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const { advisoryKey, hashInputs, noteAdvisory, noteComplete, noteMissingPrerequisite, rampNote } = gateLib
 const { STAMP_INPUTS } = stampRegister
@@ -31,7 +31,7 @@ const GATE_LIB = pathToFileURL(
 
 /** @param {string} script @param {{ env?: Record<string, string>, cwd?: string, args?: string[] }} [opts] */
 function runInFixture(script, { env = {}, cwd, args = [] } = {}) {
-  const dir = cwd ?? mkdtempSync(join(tmpdir(), 'epah-gatelib-'))
+  const dir = cwd ?? tempDir('epah-gatelib-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   const file = join(dir, 'tools', 'check-fake.mjs')
   writeFileSync(file, `import { fail, failures, ok, rampNote, skipOrFail, stampGate } from '${GATE_LIB}'\n${script}`)
@@ -114,7 +114,7 @@ const FAILING_SCRIPTS = {
 
 /** A fresh fixture dir whose tools/field-notes.json holds `content` (a string is written raw). */
 function notesDir(content) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-fieldnote-'))
+  const dir = tempDir('epah-fieldnote-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   writeFileSync(
     join(dir, 'tools', 'field-notes.json'),
@@ -174,7 +174,7 @@ test('an invalid notes file still exits 1 with FAIL and FIX intact, and prints t
 })
 
 test('a notes path that cannot be read (a directory) prints nothing and changes nothing', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-fieldnote-dir-'))
+  const dir = tempDir('epah-fieldnote-dir-')
   mkdirSync(join(dir, 'tools', 'field-notes.json'), { recursive: true })
   const bare = runInFixture(`fail('fake', 'boom')`)
   const r = runInFixture(`fail('fake', 'boom')`, { cwd: dir })
@@ -289,7 +289,7 @@ ok('fake', 'ran the real check')
 `
 
 test('stampGate: green run stamps; unchanged inputs print STAMPED; mutation re-runs; CI ignores stamps', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-stamp-'))
+  const dir = tempDir('epah-stamp-')
   writeFileSync(join(dir, 'input.txt'), 'v1\n')
 
   const first = runInFixture(STAMP_SCRIPT, { cwd: dir })
@@ -320,7 +320,7 @@ ok('fake', 'ran the real check')
 `
 
 test('stampGate: a changed salt forces a real run; the same salt rides the stamp', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-stampsalt-'))
+  const dir = tempDir('epah-stampsalt-')
   writeFileSync(join(dir, 'input.txt'), 'v1\n')
   const salted = (salt) => runInFixture(SALTED_SCRIPT, { cwd: dir, env: { X_SALT: salt } })
 
@@ -335,7 +335,7 @@ test('stampGate: a changed salt forces a real run; the same salt rides the stamp
 
 test('stampGate (in-process): the salt enters the recorded digest; no salt records hashInputs alone', () => {
   // In-process so the floor on tools/lib counts it: a miss returns recordGreen without exiting.
-  const dir = mkdtempSync(join(tmpdir(), 'epah-stampdigest-'))
+  const dir = tempDir('epah-stampdigest-')
   writeFileSync(join(dir, 'input.txt'), 'v1\n')
   const prev = process.cwd()
   const saved = { CI: process.env.CI, HARNESS_REQUIRE_TOOLCHAINS: process.env.HARNESS_REQUIRE_TOOLCHAINS }
@@ -387,7 +387,7 @@ test('stampGate (in-process): the salt enters the recorded digest; no salt recor
  * @param {{ min?: string, until?: string, gate?: string, subject?: unknown }} [opts]
  */
 async function rampInDir(manifest, { min = '0.1.5', until = '0.4.0', gate = 'fake', subject } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-ramp-'))
+  const dir = tempDir('epah-ramp-')
   if (manifest !== null) {
     mkdirSync(join(dir, '.harness'), { recursive: true })
     writeFileSync(join(dir, '.harness', 'manifest.json'), manifest)
@@ -443,7 +443,7 @@ test('rampNote: a manifest without baseVersion falls back to harnessVersion', as
 test('rampNote: corrupt or version-less manifest FAILS CLOSED with the FIX line (tampering, not a ramp)', () => {
   const script = `if (!rampNote('fake', '0.1.5', 'x', { until: '0.4.0' })) ok('fake', 'live')`
 
-  const corrupt = mkdtempSync(join(tmpdir(), 'epah-rampbad-'))
+  const corrupt = tempDir('epah-rampbad-')
   mkdirSync(join(corrupt, '.harness'), { recursive: true })
   writeFileSync(join(corrupt, '.harness', 'manifest.json'), '{ not json')
   const r1 = runInFixture(script, { cwd: corrupt })
@@ -451,7 +451,7 @@ test('rampNote: corrupt or version-less manifest FAILS CLOSED with the FIX line 
   assert.ok(r1.out.includes('not valid JSON'), r1.out)
   assert.ok(r1.out.includes('FIX[fake]:'), r1.out)
 
-  const versionless = mkdtempSync(join(tmpdir(), 'epah-rampbad-'))
+  const versionless = tempDir('epah-rampbad-')
   mkdirSync(join(versionless, '.harness'), { recursive: true })
   writeFileSync(join(versionless, '.harness', 'manifest.json'), '{"files":{}}')
   const r2 = runInFixture(script, { cwd: versionless })
@@ -741,7 +741,7 @@ test('contracts stamp: declared inputs and the manifest invalidate; excluded chu
   for (const p of ['package.json', 'tools/lib/event-catalogs.mjs', 'tools/lib/source-text.mjs']) {
     assert.ok(inputs.includes(p), `contracts: ${p} must be a declared stamp input — the event-catalog generator reads it`)
   }
-  const dir = mkdtempSync(join(tmpdir(), 'epah-stampreg-'))
+  const dir = tempDir('epah-stampreg-')
   const prev = process.cwd()
   process.chdir(dir)
   try {
@@ -812,7 +812,7 @@ function withReportDir(value, fn) {
 }
 
 test('noteMissingPrerequisite: records one JSON line in <dir>/<pid>.jsonl, creating the directory', () => {
-  const dir = join(mkdtempSync(join(tmpdir(), 'epah-parity-note-')), '3')
+  const dir = join(tempDir('epah-parity-note-'), '3')
   const printed = withReportDir(dir, () => noteMissingPrerequisite('fake', 'no database reachable'))
   assert.deepEqual(printed, [], 'it prints nothing')
   assert.deepEqual(readdirSync(dir), [`${process.pid}.jsonl`])
@@ -821,7 +821,7 @@ test('noteMissingPrerequisite: records one JSON line in <dir>/<pid>.jsonl, creat
 })
 
 test('noteMissingPrerequisite: does nothing when the variable is unset', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-parity-unset-'))
+  const dir = tempDir('epah-parity-unset-')
   const prev = process.cwd()
   process.chdir(dir)
   try {
@@ -834,7 +834,7 @@ test('noteMissingPrerequisite: does nothing when the variable is unset', () => {
 })
 
 test('noteMissingPrerequisite: a directory beneath a regular file does not throw and prints nothing', () => {
-  const root = mkdtempSync(join(tmpdir(), 'epah-parity-enotdir-'))
+  const root = tempDir('epah-parity-enotdir-')
   writeFileSync(join(root, 'a-file'), 'regular\n')
   const printed = withReportDir(join(root, 'a-file', 'report'), () =>
     assert.doesNotThrow(() => noteMissingPrerequisite('fake', 'reason')),
@@ -844,7 +844,7 @@ test('noteMissingPrerequisite: a directory beneath a regular file does not throw
 })
 
 test('skipOrFail records its gate and reason under the CI predicate, and never on a local skip', () => {
-  const reportDir = join(mkdtempSync(join(tmpdir(), 'epah-parity-skip-')), '0')
+  const reportDir = join(tempDir('epah-parity-skip-'), '0')
   const script = `skipOrFail('fake', 'toolchain missing')`
   const local = runInFixture(script, { env: { HARNESS_PARITY_REPORT_DIR: reportDir } })
   assert.equal(local.code, 0, local.out)
@@ -924,7 +924,7 @@ test('advisoryKey: the first 16 hex digits of sha256(producer|rule|subject), gol
 })
 
 test('noteAdvisory: with the variable unset it writes nothing, and prints the one NOTE line', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-advisory-unset-'))
+  const dir = tempDir('epah-advisory-unset-')
   const prev = process.cwd()
   process.chdir(dir)
   try {
@@ -942,7 +942,7 @@ test('noteAdvisory: with the variable unset it writes nothing, and prints the on
 })
 
 test('noteAdvisory and noteComplete: one line per record and one terminator per call, in <dir>/<pid>.jsonl', () => {
-  const dir = join(mkdtempSync(join(tmpdir(), 'epah-advisory-set-')), 'report')
+  const dir = join(tempDir('epah-advisory-set-'), 'report')
   const printed = withAdvisoryDir(dir, () => {
     noteAdvisory({ ...RECORD })
     noteAdvisory({ ...RECORD, rule: 'near-miss', subject: '@app/notes#a @app/supabase#b', counts: undefined, facts: undefined })
@@ -958,7 +958,7 @@ test('noteAdvisory and noteComplete: one line per record and one terminator per 
 })
 
 test('noteComplete: a producer outside the closed set, or a leg that is not a name, writes nothing and prints nothing', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-advisory-leg-'))
+  const dir = tempDir('epah-advisory-leg-')
   const printed = withAdvisoryDir(dir, () => {
     noteComplete({ producer: 'tenancy', leg: 'l0' })
     noteComplete({ producer: 'duplication', leg: 'L 0' })
@@ -970,7 +970,7 @@ test('noteComplete: a producer outside the closed set, or a leg that is not a na
 })
 
 test('noteAdvisory: an unwritable directory changes nothing but the record: no throw, nothing extra printed', () => {
-  const root = mkdtempSync(join(tmpdir(), 'epah-advisory-enotdir-'))
+  const root = tempDir('epah-advisory-enotdir-')
   writeFileSync(join(root, 'a-file'), 'regular\n')
   const printed = withAdvisoryDir(join(root, 'a-file', 'report'), () => {
     assert.equal(noteAdvisory({ ...RECORD }), true)
@@ -1005,7 +1005,7 @@ test('noteAdvisory: free text, an unknown family, a nested object four deep and 
     { ...RECORD, facts: [] },
     { producer: 'duplication' },
   ]
-  const dir = mkdtempSync(join(tmpdir(), 'epah-advisory-refused-'))
+  const dir = tempDir('epah-advisory-refused-')
   for (const record of refused) {
     const printed = withAdvisoryDir(dir, () => assert.equal(noteAdvisory(record), false, JSON.stringify(record)))
     assert.deepEqual(printed, [REFUSED_GOLDEN], JSON.stringify(record))
@@ -1050,7 +1050,7 @@ test('the NOTE goldens: an advisory line never holds `ramp`, and a ramp-withheld
 test('rampNote with `subject` writes one ramp-withheld record, and prints the same line as without it', async () => {
   const manifest = JSON.stringify({ harnessVersion: '0.1.5', baseVersion: '0.1.4' })
   const bare = await rampInDir(manifest)
-  const dir = join(mkdtempSync(join(tmpdir(), 'epah-advisory-ramp-')), 'report')
+  const dir = join(tempDir('epah-advisory-ramp-'), 'report')
   const prev = process.env.HARNESS_ADVISORY_REPORT_DIR
   process.env.HARNESS_ADVISORY_REPORT_DIR = dir
   let withSubject
@@ -1105,7 +1105,7 @@ test('every gate that records a missing prerequisite still loads over a lib/gate
     for (const m of src.matchAll(/^import\s*\{([^}]*)\}\s*from\s*'\.\/lib\/gate\.mjs'/gm)) {
       assert.ok(!NOTE_CALL_RE.test(m[1]), `${script}: a named import of noteMissingPrerequisite fails over a parked fork`)
     }
-    const dir = mkdtempSync(join(tmpdir(), 'epah-gatelib-fork-'))
+    const dir = tempDir('epah-gatelib-fork-')
     for (const file of [script, ...importClosure(script, [BASE_DIR])]) {
       mkdirSync(join(dir, posix.dirname(file)), { recursive: true })
       writeFileSync(join(dir, file), file === 'tools/lib/gate.mjs' ? forked : readFileSync(join(BASE_DIR, file), 'utf8'))
@@ -1146,7 +1146,7 @@ test('every gate that writes a leg terminator still runs over a lib/gate.mjs wit
     for (const m of src.matchAll(/^import\s*\{([^}]*)\}\s*from\s*'\.\/lib\/gate\.mjs'/gm)) {
       assert.ok(!COMPLETE_CALL_RE.test(m[1]), `${script}: a named import of noteComplete fails over a parked fork`)
     }
-    const dir = mkdtempSync(join(tmpdir(), 'epah-gatelib-fork-complete-'))
+    const dir = tempDir('epah-gatelib-fork-complete-')
     for (const file of [script, ...importClosure(script, [BASE_DIR])]) {
       mkdirSync(join(dir, posix.dirname(file)), { recursive: true })
       writeFileSync(join(dir, file), file === 'tools/lib/gate.mjs' ? forked : readFileSync(join(BASE_DIR, file), 'utf8'))

@@ -6,10 +6,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 
@@ -22,7 +22,7 @@ const SETS = [
 const FACTORY_ONLY = ['installer', 'template', 'scripts', '.claude-plugin', 'docs-site']
 
 test('init --consume removes the factory-only trees, docs-site/ among them', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-consume-'))
+  const dir = tempDir('epah-consume-')
   t.after(() => rmSync(dir, { recursive: true, force: true }))
   for (const tree of FACTORY_ONLY) {
     mkdirSync(join(dir, tree), { recursive: true })

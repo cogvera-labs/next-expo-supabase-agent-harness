@@ -16,7 +16,6 @@ import { execFileSync, spawnSync } from 'node:child_process'
 import {
   cpSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   readdirSync,
   rmSync,
@@ -24,11 +23,11 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { createServer } from 'node:net'
-import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TEMPLATE = fileURLToPath(new URL('../../template/base/', import.meta.url))
 const POSIX_ONLY =
@@ -43,7 +42,7 @@ after(() => {
 
 /** A throwaway install: the hook, its lib, tools/lib, the CLI and the trigger table. */
 function tree() {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-session-brief-'))
+  const dir = tempDir('epah-session-brief-')
   made.push(dir)
   mkdirSync(join(dir, '.claude/hooks/lib'), { recursive: true })
   cpSync(join(TEMPLATE, '.claude/hooks/session-brief.mjs'), join(dir, '.claude/hooks/session-brief.mjs'))

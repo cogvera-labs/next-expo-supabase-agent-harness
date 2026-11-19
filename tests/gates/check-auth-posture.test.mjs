@@ -11,11 +11,11 @@
 // TWICE: once because the reviewed key is missing, once because an unreviewed key is present.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-auth-posture.mjs', import.meta.url),
@@ -45,7 +45,7 @@ function fixture({
   edit,
   trail = true,
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-authposture-'))
+  const dir = tempDir('epah-authposture-')
   mkdirSync(join(dir, 'supabase'), { recursive: true })
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   cpSync(join(TOOLS, 'lib'), join(dir, 'tools/lib'), { recursive: true })

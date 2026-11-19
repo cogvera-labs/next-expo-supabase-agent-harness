@@ -7,8 +7,7 @@
 // injects. These helpers build those tables from the real template, so a fixture is always
 // the live owned surface plus the one or two variants the scenario is about.
 import assert from 'node:assert/strict'
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { init } from '../../../installer/commands/init.mjs'
@@ -16,6 +15,7 @@ import { update } from '../../../installer/commands/update.mjs'
 import { renderEntry, walkTemplate } from '../../../installer/lib/copy.mjs'
 import { fileMode, installerVersion, sha256 } from '../../../installer/lib/manifest.mjs'
 import { ownedMap, templateTrees } from '../../../scripts/lib/released-shas.mjs'
+import { tempDir } from '../../helpers/temp-dir.mjs'
 
 const TEMPLATE = fileURLToPath(new URL('../../../template/', import.meta.url))
 
@@ -67,7 +67,7 @@ export const parseReport = (out) => JSON.parse(out.slice(out.indexOf('{'), out.l
 
 /** @param {string} prefix @param {Record<string, unknown>} [opts] */
 export async function freshInstall(prefix, opts = {}) {
-  const dir = mkdtempSync(join(tmpdir(), prefix))
+  const dir = tempDir(prefix)
   const { result } = await captured(() =>
     init({
       dir,

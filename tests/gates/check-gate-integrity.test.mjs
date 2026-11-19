@@ -8,18 +8,18 @@ import { test, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { appendFileSync, chmodSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, mkdtempSync, statSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { appendFileSync, chmodSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ESCAPE_LISTS } from '../../template/base/tools/lib/enforcement-surface.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 
 let scaffold
 
 before(() => {
-  scaffold = mkdtempSync(join(tmpdir(), 'epah-gateint-'))
+  scaffold = tempDir('epah-gateint-')
   const res = spawnSync(
     'node',
     [
@@ -244,7 +244,7 @@ test('GREEN: APPENDING a project step to STOP_HOOK_STEPS stays green (extension 
 // no repository, which is precisely why the escape-list rule has never been exercised
 // there either.
 test('RED: an uncommitted PER_FILE_FLOORS edit reds; committing the same edit is green', () => {
-  const repo = mkdtempSync(join(tmpdir(), 'epah-gateint-git-'))
+  const repo = tempDir('epah-gateint-git-')
   const init = spawnSync(
     'node',
     [CLI, 'init', '--dir', repo, '--yes', '--set', 'PROJECT_NAME=Commit App', '--set', 'GITHUB_OWNER=o', '--set', 'SECURITY_OWNERS=@o/sec'],
@@ -311,7 +311,7 @@ test('RED: an uncommitted PER_FILE_FLOORS edit reds; committing the same edit is
 // while leaving it on disk reproduces that state exactly: bytes the installer wrote,
 // recorded in the manifest, and in no commit the consumer could diff it against.
 test('a planted escape list is a NOTE; tuning it or hand-creating one is still RED', () => {
-  const repo = mkdtempSync(join(tmpdir(), 'epah-gateint-plant-'))
+  const repo = tempDir('epah-gateint-plant-')
   const init = spawnSync(
     'node',
     [CLI, 'init', '--dir', repo, '--yes', '--set', 'PROJECT_NAME=Plant App', '--set', 'GITHUB_OWNER=o', '--set', 'SECURITY_OWNERS=@o/sec'],
@@ -395,7 +395,7 @@ after(() => {
  * @param {{ tier?: string, base?: string, harness?: string, commit?: boolean }} [opts]
  */
 function plantScaffold({ tier = 'core', base, harness, commit = true } = {}) {
-  const repo = mkdtempSync(join(tmpdir(), 'epah-gateint-release-'))
+  const repo = tempDir('epah-gateint-release-')
   PLANT_REPOS.push(repo)
   const init = spawnSync(
     'node',
@@ -598,7 +598,7 @@ test('missing manifest: fails CLOSED in CI, skips LOUDLY locally', () => {
 // writers, so bytes matching the record mean nobody has tuned them since. It must NOT weaken
 // the real case, hence both halves here.
 test('a config the INSTALLER rewrote is a NOTE; the same file hand-tuned is still RED', () => {
-  const repo = mkdtempSync(join(tmpdir(), 'epah-gateint-refresh-'))
+  const repo = tempDir('epah-gateint-refresh-')
   const init = spawnSync(
     'node',
     [CLI, 'init', '--dir', repo, '--yes', '--set', 'PROJECT_NAME=Refresh App', '--set', 'GITHUB_OWNER=o', '--set', 'SECURITY_OWNERS=@o/sec'],
@@ -688,7 +688,7 @@ test('nothing in a tsconfig directory name runs', { skip: process.platform === '
 let selfEditRepo = null
 function selfEditScaffold() {
   if (selfEditRepo !== null) return selfEditRepo
-  const repo = mkdtempSync(join(tmpdir(), 'epah-gateint-selfedit-'))
+  const repo = tempDir('epah-gateint-selfedit-')
   selfEditRepo = repo
   const init = spawnSync(
     'node',

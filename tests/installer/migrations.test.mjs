@@ -4,8 +4,7 @@
 // previous release tag.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -23,6 +22,7 @@ import { walkTemplate } from '../../installer/lib/copy.mjs'
 import { sha256 } from '../../installer/lib/manifest.mjs'
 import { update } from '../../installer/commands/update.mjs'
 import { init } from '../../installer/commands/init.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 // Capture the printed report (update logs only through printReport) so a test
 // can assert on notes/skipped/written without a scaffold-side JSON round-trip.
@@ -102,7 +102,7 @@ export const STOP_HOOK_STEPS = [
 })
 
 test('applyFileMigrations: sha-guarded removal, rename cleanup, module promotion', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-mig-'))
+  const dir = tempDir('tpah-mig-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   writeFileSync(join(dir, 'tools/stale.mjs'), 'old\n')
   writeFileSync(join(dir, 'tools/modified.mjs'), 'locally changed\n')
@@ -212,7 +212,7 @@ test('requiredConfigSteps returns steps introduced at or before the version', ()
 })
 
 test('update applies a synthetic migration end-to-end (remove + configStep + promotion)', async () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-updmig-'))
+  const dir = tempDir('tpah-updmig-')
   const code = await init({
     dir,
     tier: 'core',
@@ -323,7 +323,7 @@ test('the shipped seedOnInitOnly records target real template files only (no typ
 })
 
 test('update withholds absent seedOnInitOnly exemplars (noted once per cluster), refreshes owned, still plants non-matched; dry-run parity + idempotent', async (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-seedonly-'))
+  const dir = tempDir('epah-seedonly-')
   assert.equal(
     await init({
       dir,

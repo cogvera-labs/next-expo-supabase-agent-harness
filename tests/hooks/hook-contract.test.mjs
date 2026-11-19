@@ -16,16 +16,15 @@ import { spawnSync } from 'node:child_process'
 import {
   cpSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   rmSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { before, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TEMPLATE = fileURLToPath(new URL('../../template/base/', import.meta.url))
 const GUARD_RULES = new URL(
@@ -35,7 +34,7 @@ const GUARD_RULES = new URL(
 let proj
 
 before(() => {
-  proj = mkdtempSync(join(tmpdir(), 'epah-hooks-'))
+  proj = tempDir('epah-hooks-')
   cpSync(join(TEMPLATE, '.claude'), join(proj, '.claude'), { recursive: true })
   mkdirSync(join(proj, 'tools'), { recursive: true })
   // posttool-source-check imports the shared heuristic from ../../tools/lib/ —
@@ -113,7 +112,7 @@ test('guards pass on EMPTY stdin (legitimate no-input events)', () => {
 })
 
 test('guards fail CLOSED when guard-rules.mjs cannot load (removed module)', () => {
-  const broken = mkdtempSync(join(tmpdir(), 'epah-hooks-broken-'))
+  const broken = tempDir('epah-hooks-broken-')
   cpSync(join(TEMPLATE, '.claude'), join(broken, '.claude'), { recursive: true })
   // Delete the rule tables the guards depend on: a guard that cannot read its
   // rules must BLOCK (exit 2), never approve.
@@ -189,7 +188,7 @@ const SELF_EDIT = { HARNESS_ALLOW_SELF_EDIT: '1' }
 // registers a wildcard readOnly server, which is the honest spelling for a large
 // first-party server and exactly the configuration where shape-based denial is the only
 // thing standing between a read grant and `apply_migration`.
-const MCP_FIXTURE = mkdtempSync(join(tmpdir(), 'epah-mcp-'))
+const MCP_FIXTURE = tempDir('epah-mcp-')
 mkdirSync(join(MCP_FIXTURE, 'tools'), { recursive: true })
 writeFileSync(
   join(MCP_FIXTURE, 'tools/approved-tools.json'),
@@ -1349,21 +1348,21 @@ test('mcp-guard: a registered server does not admit a tool outside its list', ()
 })
 
 test('mcp-guard FAILS CLOSED with no registry — an absent policy is not an empty policy', () => {
-  const bare = mkdtempSync(join(tmpdir(), 'epah-mcp-bare-'))
+  const bare = tempDir('epah-mcp-bare-')
   const r = mcp('mcp__corpus_search__corpus_search', { CLAUDE_PROJECT_DIR: bare })
   assert.ok(denied(r), r.stdout)
   assert.match(r.stdout, /is missing/)
 })
 
 test('mcp-guard FAILS CLOSED on a corrupt or mis-shaped registry (tampering, not config)', () => {
-  const corrupt = mkdtempSync(join(tmpdir(), 'epah-mcp-corrupt-'))
+  const corrupt = tempDir('epah-mcp-corrupt-')
   mkdirSync(join(corrupt, 'tools'), { recursive: true })
   writeFileSync(join(corrupt, 'tools/approved-tools.json'), '{ not json')
   const bad = mcp('mcp__corpus_search__corpus_search', { CLAUDE_PROJECT_DIR: corrupt })
   assert.ok(denied(bad), bad.stdout)
   assert.match(bad.stdout, /not valid JSON/)
 
-  const shapeless = mkdtempSync(join(tmpdir(), 'epah-mcp-shape-'))
+  const shapeless = tempDir('epah-mcp-shape-')
   mkdirSync(join(shapeless, 'tools'), { recursive: true })
   writeFileSync(join(shapeless, 'tools/approved-tools.json'), '{"servers": "all of them"}')
   const r = mcp('mcp__corpus_search__corpus_search', { CLAUDE_PROJECT_DIR: shapeless })
@@ -1372,7 +1371,7 @@ test('mcp-guard FAILS CLOSED on a corrupt or mis-shaped registry (tampering, not
 })
 
 test('mcp-guard: a registered server with an EMPTY tools list approves nothing', () => {
-  const empty = mkdtempSync(join(tmpdir(), 'epah-mcp-empty-'))
+  const empty = tempDir('epah-mcp-empty-')
   mkdirSync(join(empty, 'tools'), { recursive: true })
   writeFileSync(
     join(empty, 'tools/approved-tools.json'),
@@ -1404,7 +1403,7 @@ test('mcp-guard fails CLOSED on malformed stdin and on unloadable rules', () => 
   const bad = runHook('pretool-mcp-guard.mjs', 'this is { not json')
   assert.equal(bad.code, 2, bad.stderr)
 
-  const broken = mkdtempSync(join(tmpdir(), 'epah-mcp-norules-'))
+  const broken = tempDir('epah-mcp-norules-')
   cpSync(join(TEMPLATE, '.claude'), join(broken, '.claude'), { recursive: true })
   rmSync(join(broken, '.claude/hooks/lib/guard-rules.mjs'))
   const res = spawnSync('node', [join(broken, '.claude/hooks/pretool-mcp-guard.mjs')], {
@@ -2090,7 +2089,7 @@ test('write-guard: an exempt-LOOKING link name cannot smuggle content into a che
 })
 
 test('write-guard: a link out of the project tree is DENIED (path-scoped guards cannot see it)', (t) => {
-  const outside = mkdtempSync(join(tmpdir(), 'epah-outside-'))
+  const outside = tempDir('epah-outside-')
   if (!trySymlink(outside, join(proj, 'escape'))) {
     rmSync(outside, { recursive: true, force: true })
     t.skip('symlinkSync needs privileges on this Windows runner')
@@ -2175,7 +2174,7 @@ test('ENV HYGIENE: the escape hatch still WORKS when a case passes it deliberate
 // tests/hooks/subagent-verdict-pathstate.test.mjs; this block owns REFUSAL.
 
 function verdictFixture() {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-verdict-refusal-'))
+  const dir = tempDir('epah-verdict-refusal-')
   cpSync(join(TEMPLATE, '.claude/agents'), join(dir, '.claude/agents'), { recursive: true })
   return dir
 }
@@ -2351,7 +2350,7 @@ test('subagent-verdict CONTROL: a parked tools/lib/agent-roster.mjs without the 
   // The hook reaches the reader through a NAMESPACE import: an install may keep a forked lib
   // that `update` parked, and a named import of an export it lacks fails at LINK time, before
   // a line of the hook runs — every SubagentStop would then die on a load error.
-  const root = mkdtempSync(join(tmpdir(), 'epah-verdict-parked-'))
+  const root = tempDir('epah-verdict-parked-')
   cpSync(join(TEMPLATE, '.claude'), join(root, '.claude'), { recursive: true })
   cpSync(join(TEMPLATE, 'tools/lib'), join(root, 'tools/lib'), { recursive: true })
   writeFileSync(
@@ -2424,7 +2423,7 @@ test('subagent-verdict CONTROL: a non-reviewer agent is not this hook’s busine
 // hook's deny still denies and its allow still allows, byte-identically.
 
 function launcherFixture() {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-launcher-'))
+  const dir = tempDir('epah-launcher-')
   cpSync(join(TEMPLATE, '.claude'), join(dir, '.claude'), { recursive: true })
   mkdirSync(join(dir, 'tools'), { recursive: true })
   cpSync(join(TEMPLATE, 'tools/lib'), join(dir, 'tools/lib'), { recursive: true })
