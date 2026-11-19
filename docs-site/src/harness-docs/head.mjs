@@ -1,4 +1,5 @@
-// What the site puts in a page's <head> beyond Starlight's own tags, for search engines.
+// What the site puts in a page's <head> beyond Starlight's own tags, for search engines and
+// for clients that read llms.txt.
 //
 // This file imports nothing: the route middleware runs it inside the built site, and
 // tests/gates/docs-site.test.mjs runs it without the site's dependencies installed.
@@ -30,3 +31,12 @@ export function setDocumentTitle(head, ownHead, pageTitle) {
   const title = head.find((entry) => entry.tag === 'title')
   if (title) title.content = documentTitle(pageTitle)
 }
+
+/**
+ * The <link> from a page to the llms.txt that covers it, for every page: the site's one
+ * llms.txt sits at its base and describes all the pages under it. rel="describedby" is the
+ * relation the llms.txt proposal recommends for this link (https://llmstxt.org/).
+ *
+ * @param {string} base Astro's `base`, without a trailing slash
+ */
+export const llmsTxtLink = (base) => ({ tag: 'link', attrs: { rel: 'describedby', href: `${base}/llms.txt` } })

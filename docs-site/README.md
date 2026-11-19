@@ -36,7 +36,7 @@ paragraph.
 
 ## Search metadata
 
-What a page tells a search engine, beyond its description:
+What a page tells a search engine, or a client that reads `llms.txt`, beyond its description:
 
 - **`<title>`.** A page's `<title>` is its title followed by ` | Claude Code harness`, the
   `TITLE_SUFFIX` in [`src/harness-docs/head.mjs`](src/harness-docs/head.mjs). The site's own
@@ -52,6 +52,11 @@ What a page tells a search engine, beyond its description:
   offer would be false, so the sitemap is written with no `<lastmod>` and the build log says
   so. `astro.config.mjs` lists `@astrojs/sitemap` itself in order to set the dates;
   Starlight's built-in sitemap has none.
+- **`llms.txt`.** Every page's `<head>` links the site's `llms.txt` with
+  `<link rel="describedby">`, the relation the [llms.txt proposal](https://llmstxt.org/)
+  recommends for pointing a page at the file that covers it. The link validator does not
+  read a `<head>`, so nothing checks this link at build time: it resolves for as long as
+  `starlight-llms-txt` stays in `astro.config.mjs`.
 
 ## Links
 

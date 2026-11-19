@@ -13,6 +13,7 @@ import { defineConfig } from 'astro/config'
 import starlightLinksValidator from 'starlight-links-validator'
 import starlightLlmsTxt from 'starlight-llms-txt'
 import { DEFAULT_BRANCH, GITHUB_REPO, REPO_ROOT, REPOSITORY_DOCS, SITE_DIR, SITE_TITLE, repositoryDocDirs } from './src/harness-docs/corpus.mjs'
+import { llmsTxtLink } from './src/harness-docs/head.mjs'
 import { harnessHastPlugins, harnessMdastPlugins } from './src/harness-docs/markdown-plugins.mjs'
 import { LEAD_GROUPS, harnessSidebar, llmsPageIndex, sitemapLastmod } from './src/harness-docs/site-index.mjs'
 
@@ -114,6 +115,7 @@ export default defineConfig({
         { tag: 'meta', attrs: { name: 'twitter:image:alt', content: OG_IMAGE_ALT } },
         { tag: 'meta', attrs: { property: 'og:image:width', content: '1280' } },
         { tag: 'meta', attrs: { property: 'og:image:height', content: '640' } },
+        llmsTxtLink(base),
         {
           tag: 'script',
           attrs: { type: 'application/ld+json' },

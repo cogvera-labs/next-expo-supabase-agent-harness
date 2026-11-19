@@ -16,7 +16,7 @@ import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { pathToFileURL } from 'node:url'
 import { loadCorpus, pageSourcePaths, sitePages } from '../../docs-site/src/harness-docs/corpus.mjs'
-import { PAGE_TITLE_MAX, TITLE_MAX, TITLE_SUFFIX, documentTitle, setDocumentTitle } from '../../docs-site/src/harness-docs/head.mjs'
+import { PAGE_TITLE_MAX, TITLE_MAX, TITLE_SUFFIX, documentTitle, llmsTxtLink, setDocumentTitle } from '../../docs-site/src/harness-docs/head.mjs'
 import { lastCommitDates, lastmodByUrl } from '../../docs-site/src/harness-docs/page-dates.mjs'
 import { firstH1 } from '../../docs-site/src/harness-docs/site-index.mjs'
 
@@ -56,6 +56,16 @@ test("a page's own <title> stays, and Starlight's default takes the suffix", () 
   const untitled = [defaults()[0]]
   setDocumentTitle(untitled, [], 'Gates catalog')
   assert.deepEqual(untitled, [defaults()[0]])
+})
+
+// ---- the link to llms.txt --------------------------------------------------------------
+
+// The build's link validator does not read a <head>, so the shape of this link is held here.
+test('a page links the llms.txt at the site base, with the relation the llms.txt proposal names', () => {
+  assert.deepEqual(llmsTxtLink('/next-expo-supabase-agent-harness'), {
+    tag: 'link',
+    attrs: { rel: 'describedby', href: '/next-expo-supabase-agent-harness/llms.txt' },
+  })
 })
 
 // ---- the sitemap's <lastmod> -----------------------------------------------------------
