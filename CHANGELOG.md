@@ -47,6 +47,147 @@ holds it:
 | [0.1.1](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#011--2026-07-19) | 2026-07-19 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
 | [0.1.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#010--2026-07-18) | 2026-07-18 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
 
+## [2.0.9] — 2026-11-19
+
+**A patch: a new scaffold passes its own gates again.** Every release through 2.0.8 seeded
+catalog ranges that admit two broken upstream releases: typescript-eslint 8.73.0, which
+crashes the `lint` gate, and expo-sqlite 57.0.5, whose Android library supports arm64 only.
+2.0.9 pins the seeded catalog off both. It also ships the repository's new front page and
+docs, instructions that teach the org-scoped tenancy the gates enforce, and newer releases
+of the actions the shipped workflows pin. No gate is added, the chain length does not
+change, and no ramp opens or moves. The `template/migrations.json` record withholds nothing
+and restates 2.0.0's twenty-vintage `rampExpiry` population. `scripts/lib/ramp-sites.mjs`
+`VINTAGES` grows by `2.0.8`.
+
+**An existing install sets the two pins by hand.** `pnpm-workspace.yaml` is seeded, so
+`update` leaves a project's catalog alone. An install meets either fault only once its
+lockfile resolves that release, and nothing reds on one that has not. The remedy is in
+`docs/runbooks/harness-upgrade.md`, 2.0.9 section.
+
+### Fixed
+
+- **New scaffolds no longer crash `lint`.** The seeded catalog pins `typescript-eslint` to
+  8.72.2. 8.73.0 added `no-unsafe-class-instance-assignment` to `strictTypeChecked`, and the
+  rule overflows the stack on a recursive conditional type such as react-native's animated
+  style props, so `lint` crashed on `apps/mobile`'s `PressableScale.tsx` in every scaffold
+  made since 2026-11-16. No upstream report of the crash existed on 2026-11-18. An existing
+  install keeps its own catalog and pins it the same way.
+- **The kv store loads again on x86_64 Android emulators and 32-bit devices.** The seeded
+  catalog pins `expo-sqlite` to 57.0.4. 57.0.5 ships its prebuilt Android library for
+  arm64-v8a only (expo/expo#53673), so anywhere else the store could not load, and theme,
+  locale and recent actions read as absent on every start. The scheduled `maestro-smoke`
+  lane, which runs an x86_64 emulator, failed its right-to-left journey on this from
+  2026-11-13. An existing install sets `expo-sqlite: 57.0.4` under `catalog:` in
+  `pnpm-workspace.yaml`, runs `pnpm install` and commits the new `pnpm-lock.yaml`.
+- **The upgrade lane pins a baseline off the releases the catalog is held back from.** Each
+  upgrade leg installs an earlier release with its own catalog, whose ranges admit the two
+  releases above, and `update` never writes a seeded catalog, so legs A and E failed in
+  `lint` although the template was fixed. `scripts/ci/catalog-holds.json` names each held
+  release, the version held in its place and why, and `scripts/ci/apply-catalog-holds.mjs`
+  pins a baseline's catalog entry where its range admits a broken release and the held
+  version too, as `scripts/ci/apply-framework-floor.mjs` does for the security floor. A
+  range that admits the broken release and not the held one fails by name. Factory only:
+  nothing changes for an install.
+- **The factory write guard judges a path in an agent's worktree against that worktree.**
+  Claude Code checks an agent's worktree out under `.claude/worktrees/<id>/`, and the guard
+  resolved every path against the main checkout, so each file there read as `.claude/**`
+  and was refused, a `README.md` as firmly as a hook. A path of that form is now judged as
+  the rest of the path against the same table: a worktree's `README.md` is open, and its
+  `scripts/`, `installer/`, workflows, canary registry and `.claude/` are protected as the
+  main checkout's are. Not confirmed with a live agent worktree. Factory only.
+- **`scripts/hygiene.mjs` names a nested repository instead of crashing.** A directory entry
+  from `git ls-files`, such as an untracked directory holding its own `.git`, is reported as
+  a finding with the way out, where the file sweep failed with `EISDIR`. The submodule case
+  shares the code path and has no test. Factory only.
+- **The canary registry's `upgrade-linux` note states no leg count.** It said "the five-leg
+  upgrade matrix" while the matrix had grown, and nothing recomputed the count. A test now
+  fails on any leg count in the registry. Factory only.
+
+### Changed
+
+- **The shipped docs link each gate to its code and teach the org-scoped tenancy shape
+  throughout.**
+  - Every gates-catalog section has a Source line, and the doctrine has a "Start here" map.
+  - Per-user `owner_id = auth.uid()` wording in the doctrine, commands, rules, agents and
+    skills is replaced by the `org_id` forms `AGENTS.md` and the tenancy ADR prescribe.
+    `/new-migration` and `/rls-check` taught the per-user scope until now.
+  - Three transport throws, not two, bypass the envelope: the rate-limit guard's
+    `TOO_MANY_REQUESTS` beside `UNAUTHORIZED` and the version-skew `CONFLICT`.
+  - The `boundaries` rule and the slice skill say that `apps/mobile` renders its controls
+    through its own `src/components` primitives, where they named
+    `@app/design-system-native`.
+  - `local-development.md` says that Node.js 25 and later need `npm install -g corepack`,
+    and describes the mobile app's data path as it is: reads and writes go through the tRPC
+    router the web app serves.
+  - These files are owned and reach an install with `update`, which re-records the
+    `tools/agents.lock.json` entry of each agent, command and skill file it re-plants.
+    `AGENTS.md` is seeded, so only a new scaffold gets its matching corrections; the
+    runbook's 2.0.9 section lists them.
+- **The repository explains itself.**
+  - A new README, a root `AGENTS.md`, folder READMEs, and a docs site rebuilt as a front
+    door that also renders `docs/*.md`.
+  - New pages: getting started, how it works, FAQ, comparison, glossary, evidence, building
+    with agents.
+  - CONTRIBUTING gains an AI-tools policy and a comment style; there is a new SUPPORT.md.
+  - Release notes before 2.0.0 live in `docs/changelog/`.
+  - `package.json` and `CITATION.cff` open with the sentence the README leads with, which
+    npm shows from this release.
+- **The shipped workflows pin newer releases of their actions, and deno 2.9.8.** Each
+  action stays pinned by commit SHA: step-security/harden-runner v2.22.4, actions/checkout
+  v7.0.1, actions/setup-node v6.5.0, actions/setup-java v5.7.0, gradle/actions/setup-gradle
+  v6.4.1, actions/upload-artifact v7.0.2, actions/download-artifact v8.0.2,
+  actions/attest-build-provenance v4.2.2, anchore/sbom-action v0.24.3, github/codeql-action
+  at codeql-bundle-v2.27.4, google/osv-scanner-action v2.7.1 and zizmorcore/zizmor-action
+  v0.8.1. No job, trigger, permission or step is added or removed. The workflows are owned
+  and reach an install with `update`. This repository's own workflows move with them, with
+  ossf/scorecard-action v2.5.0. Renovate proposed the deno bump once per tree and as
+  `v2.9.8`, and `tests/gates/workflow-lanes.test.mjs` holds `selftest.yml` and the shipped
+  `quality-gate.yml` to one exact `X.Y.Z`, so neither pull request could merge alone:
+  `renovate.json` now gives the deno pin its own group across both trees and strips the
+  leading `v`, and a test holds that rule in place.
+- **The template catalog moves Biome to 2.6.7, `next` to 16.4.6 and pnpm to 11.28.11.**
+  `biome.jsonc` names the 2.6.7 schema and is otherwise unchanged; it is owned and reaches
+  an install with `update`. An install keeps its own Biome pin (2.0.4 through 2.0.8 seeded
+  2.6.2), and a Biome older than the schema prints an information diagnostic saying that the
+  configuration schema version does not match the CLI version, which does not fail
+  `format`. The rest reaches new scaffolds only: `next` 16.4.6, a patch above the unchanged
+  16.4.5 floor; pnpm 11.28.11 in `packageManager` and `eas.json`; and `eas.json`'s node
+  22.23.5.
+- **The docs site's dependencies move, and Renovate's configuration is migrated.** The docs
+  site moves `astro` from 7.4.7 to 7.4.11, with `@astrojs/starlight` and
+  `@astrojs/markdown-satteri`, and `renovate.json` takes Renovate's own migration of renamed
+  options. Factory only.
+
+### Security
+
+- **The docs site moves off two `astro` advisories.** `astro` 7.4.7 fixes
+  GHSA-mh32-jxcr-mh9f (CVE-2026-126361) and GHSA-r3h5-4585-7x3w (CVE-2026-126364), which the
+  scheduled OSV scan over `docs-site/pnpm-lock.yaml` had been red on. The site is built
+  statically for GitHub Pages and nothing of it ships in the npm package. Factory only.
+
+### What stays open
+
+- **An install is not told that its lockfile holds a held release.** `update` names a pin
+  floor and `doctor` warns until it is met, but neither knows a release to stay off, so the
+  two pins above reach an existing install only through the runbook.
+- **`check-claims` does not read `docs/` or the docs site**, and `pages.yml` does not build a
+  pull request that touches `docs/`. Both are follow-ups in
+  `design/research/20261118-discoverability-and-trust/README.md`, "Plan and status".
+- **The factory's own Biome stays at 2.5.15.** Renovate's update of it to 2.6.7 passes CI
+  and fails the Stop gate's `format` step, which no workflow runs. That step runs Biome from
+  `template/base` and reaches the sibling trees by `../`, and 2.6.7 reads those trees without
+  the configuration's Tailwind parser option, so it reports parse errors in their CSS. One
+  run per tree with `--config-path` passes on both versions and checks the same files.
+- **The device lane's dropped-frame budget sits close to what a hosted emulator measures.**
+  The scheduled `maestro-smoke` run of 2026-11-18 failed its performance journey on 14
+  dropped frames against a budget of 12; the passing runs either side measured 5 to 9.
+  `tools/interaction-budget.json` is unchanged in this release.
+- **Four register dates fall due in the first half of December 2026**: the Supabase grants
+  row on 2026-12-01 and the AI Act transitional row on 2026-12-02 in
+  `scripts/obligations.json`, and the review windows of `tools/framework-floor.json` on
+  2026-12-08 and `tools/eol.json` on 2026-12-09. The scheduled lanes red on each until it
+  is re-read.
+
 ## [2.0.8] — 2026-11-11
 
 **A security patch.** Seven `next` advisories upstream published on 2026-11-03 covered the

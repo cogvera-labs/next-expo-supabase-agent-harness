@@ -4776,6 +4776,115 @@ npx next-expo-supabase-agent-harness@latest update --refresh-seeded tools/eol.js
 From 2.0.3 or earlier, read the 2.0.4 section's `tools/eol.json` re-reviewed first: the
 refreshed register has no `uuid` row.
 
+## 2.0.9 — a patch: two catalog pins held off broken upstream releases
+
+**No ramp here applies to any install.** 2.0.9 opens no ramp and moves no deadline. The
+population 2.0.0 reds is restated in this release's record, and the 1.1.0 and 2.0.0 sections
+above are still the sweep for an install below 1.1.0.
+
+**What `update` plants.** Owned files, re-planted when your copy still matches a released
+sha: the agents, commands, rules and skill files named below, `docs/harness/README.md`,
+`docs/harness/gates-catalog.md`, `docs/runbooks/local-development.md`, the workflows under
+`.github/workflows/`, `biome.jsonc`, this runbook, and the hooks under `.claude/hooks/`
+(their version stamps). Nothing is withheld, and no seeded file changes on an existing
+install, so the two pins below are yours to set.
+
+### Hold `typescript-eslint` at 8.72.2 and `expo-sqlite` at 57.0.4
+
+Every release through 2.0.8 seeded `typescript-eslint: ^8.63.0` and `expo-sqlite: ~57.0.1`
+in your catalog. Those ranges admit two releases that break a project:
+
+- **typescript-eslint 8.73.0** adds `no-unsafe-class-instance-assignment` to
+  `strictTypeChecked`. The rule overflows the stack on a recursive conditional type such as
+  react-native's animated style props, so `lint` crashes on
+  `apps/mobile/src/components/PressableScale.tsx` with
+  `RangeError: Maximum call stack size exceeded`.
+- **expo-sqlite 57.0.5** ships its prebuilt Android library for arm64-v8a only
+  ([expo/expo#53673](https://github.com/expo/expo/issues/53673)). On an x86_64 emulator or
+  a 32-bit device the kv store cannot load, so the saved theme, locale and recent actions
+  read as absent on every start.
+
+Your lockfile decides whether you have either one:
+
+```
+grep -nE 'typescript-eslint@8\.73\.0|expo-sqlite@57\.0\.5' pnpm-lock.yaml
+```
+
+No output means the lockfile holds an earlier release of each, and nothing changes until a
+dependency update or a regenerated lockfile resolves them again. Pin both either way, so
+that neither can arrive:
+
+```
+# in the pnpm-workspace.yaml catalog:
+#   typescript-eslint: 8.72.2
+#   expo-sqlite: 57.0.4
+pnpm install && git add pnpm-lock.yaml pnpm-workspace.yaml
+pnpm validate
+```
+
+`pnpm-workspace.yaml` is seeded, so `update` does not touch your pins, and no gate reads
+these two: nothing reds on an install that has not set them. Do not use
+`update --refresh-seeded pnpm-workspace.yaml` to take the pins: it replaces your whole
+catalog with the template's. Drop a pin once a later release of that package fixes its
+fault.
+
+### The instructions teach the org-scoped tenancy the gates enforce
+
+Through 2.0.8 some agent-facing files still described row-level security as keyed per user
+on `auth.uid()`, the scope the `tenancy` gate refuses on a tenant table. They now give the
+two forms `tools/tenancy.json` allows, `org_id = ANY((SELECT private.member_org_ids())::uuid[])`
+and the `private.member_ranks()` rank floor, with a leading `org_id` index: the
+`migration-rls-author`, `security-reviewer`, `test-author` and `torvalds-reviewer` agents,
+`/new-feature`, `/new-migration` and `/rls-check`, the `encryption` and
+`mobile-server-split` rules, the `authoring-e2ee-feature` skill, the slice skill's
+`migration-rls.md` and `tests.md` references, and the doctrine.
+
+The same pass corrects two other statements. Three tRPC middleware throws bypass the
+`ActionOutcome` envelope, not two: the rate-limit guard's `TOO_MANY_REQUESTS` beside
+`UNAUTHORIZED` and the version-skew `CONFLICT` (the `dal-author` and `security-reviewer`
+agents, `/new-action`, `/verify-invariants`, the `boundaries` rule and the slice skill's
+`dal-dto.md`). And `apps/mobile` renders its controls through its own `src/components`
+primitives over `@app/design-tokens`, where the `boundaries` rule and the slice skill's
+`mobile-screen.md` named `@app/design-system-native`.
+
+`update` plants all of these (owned) and re-records the `tools/agents.lock.json` entry of
+each agent, command and skill file it re-plants. `AGENTS.md` is seeded, so yours keeps its
+wording. The template's copy changed in four places, and you can make the same edits by
+hand: the session store's path is `src/host/large-secure-store.ts`, not
+`src/lib/supabase/**` (it is named twice); `pnpm typecheck` runs
+`tsc -b . apps/web apps/mobile`; `pnpm gen` regenerates the Supabase type mirror, the
+tokens, the contract inventories, the web routes and the grant assertions; and three
+transport facts bypass the envelope, the rate-limit `TOO_MANY_REQUESTS` among them.
+
+### The gates catalog links each gate's code, and local development is corrected
+
+`docs/harness/gates-catalog.md` gives every gate's section a Source line that links the
+script running it, or gives the step's command where it has no script of its own, and the
+doctrine opens with a "Start here" map. `docs/runbooks/local-development.md` says to run
+`npm install -g corepack` where `corepack` is not on your PATH (Node.js 25 and later do not
+bundle it), and describes the mobile app's data path as it is: sign-in goes to Supabase Auth
+directly, reads and writes go through the tRPC router the web app serves, and only a
+vertical that opts into Class-A reads straight from Supabase. So keep `pnpm dev:web` running
+while you work on mobile. `update` plants the three pages (owned), and nothing is left to
+you.
+
+### The workflows move to newer action releases, and deno to 2.9.8
+
+Each action in the shipped workflows stays pinned by commit SHA and moves to a newer
+release, and `quality-gate.yml`'s deno pin moves from 2.9.6 to 2.9.8. No job, trigger,
+permission or step is added or removed. `update` plants the workflows (owned): those every
+install has under `.github/workflows/`, and those of the modules you enabled. A workflow you
+have edited is kept, and the incoming copy is parked under `.harness/pending/` for you to
+merge.
+
+### `biome.jsonc` names the 2.6.7 schema
+
+`update` plants `biome.jsonc` (owned), which now names the Biome 2.6.7 schema and is
+otherwise unchanged. Your catalog is seeded, so your Biome pin stays where it is (2.0.4
+through 2.0.8 seeded 2.6.2), and a Biome older than the schema prints an information
+diagnostic saying that the configuration schema version does not match the CLI version. It
+does not fail `format`. Raising `@biomejs/biome` to 2.6.7 in the catalog clears it.
+
 ## RECOVERY — when an `update` is interrupted or fails
 
 Every real `update` (0.9.0+) records the pre-update state of every path it

@@ -521,25 +521,19 @@ test('tags at or above the version being cut, and below the lineage floor, are n
   assert.deepEqual(checkVintages(['v0.1.2', 'v0.1.3', 'v0.6.0'], '0.6.0', ['0.1.3']), [])
 })
 
-test('the GROWN list (2.0.8): v2.0.7 released means VINTAGES carries it, judged as the bump will', () => {
-  // The live-tag test below asks checkVintages about the CURRENT package version, and
-  // checkVintages skips tags >= the version being cut — so at package 0.9.5 the entry
-  // '0.9.5' is never demanded and its absence would stay green right up to the bump commit,
-  // where the same test reds with no code having changed. This is that wire, pulled early
-  // (0.8.0 pulled it for v0.7.0, 0.9.5 for v0.9.0, 0.9.9 for v0.9.5, 0.10.0 for v0.9.9,
-  // 0.11.0 for v0.10.0, 0.11.1 for v0.11.0, 1.0.0 for v0.11.1, 1.0.1 for v1.0.0, 1.0.2 for
-  // v1.0.1, 1.0.3 for v1.0.2, 1.0.4 for v1.0.3, 1.1.0 for v1.0.4, 2.0.0 for v1.1.0, 2.0.1
-  // for v2.0.0, 2.0.2 for v2.0.1, 2.0.3 for v2.0.2, 2.0.4 for v2.0.3, 2.0.5 for v2.0.4, 2.0.6 for v2.0.5, 2.0.7 for v2.0.6, and 2.0.8 for v2.0.7):
-  // the real released-tag set, judged as the 2.0.8 release will judge it, against the SHIPPED VINTAGES (the default argument — a
-  // local literal here would be the drift the one-definition test above exists to prevent).
-  // 2.0.0 was the first MAJOR hop since 1.0.0, and the first-segment compare is what orders
-  // every 1.x vintage below it.
+test('the GROWN list: the newest released tag is in VINTAGES, judged as the bump after it will', () => {
+  // The live-tag test below asks checkVintages about the current package version, and
+  // checkVintages skips tags at or above the version being cut. The newest release's entry
+  // is therefore never demanded until the bump commit, where that test would go red with
+  // no code changed. This case pulls that wire early: the real released-tag set, judged as
+  // the version being cut will judge it, against the shipped VINTAGES (the default
+  // argument: a local literal here would be the drift the one-definition test above
+  // prevents). Each bump adds the tag it follows to `tags` and names its own version.
   //
-  // 0.10.0 WAS THE HOP THIS TEST WARNED ABOUT from 0.9.5 onward — 0.9.9 -> 0.10.0 is the
-  // first minor to cross a two-digit segment, where a string compare would order '0.10.0'
-  // BELOW '0.9.9' and silently drop every vintage from the ledger at once. It crossed
-  // cleanly, and the cmpDotted assertions below are kept rather than retired: the hazard is
-  // permanent for every version above 0.9.x, so the case that names it stays.
+  // The comparison underneath is cmpDotted, numeric per segment. A string compare orders
+  // '0.10.0' below '0.9.9' and would drop every vintage from the ledger at once, and the
+  // first-segment compare is what orders every 1.x vintage below a 2.x version. The
+  // assertions at the end of this case keep the two-digit hop.
   const tags = [
     'v0.1.3',
     'v0.2.0',
@@ -570,8 +564,9 @@ test('the GROWN list (2.0.8): v2.0.7 released means VINTAGES carries it, judged 
     'v2.0.5',
     'v2.0.6',
     'v2.0.7',
+    'v2.0.8',
   ]
-  assert.deepEqual(checkVintages(tags, '2.0.8'), [])
+  assert.deepEqual(checkVintages(tags, '2.0.9'), [])
 
   // And the defect shape it guards: the list stopped at 0.9.0 — exactly the forgotten-entry
   // red the bump would otherwise be the first to surface. The comparison underneath is
