@@ -1,4 +1,4 @@
-# Glossary
+# Glossary: hooks, gates and guards
 
 The terms this project uses, each with a short definition, where it is defined or
 implemented, and the other names the code and docs use for it.
