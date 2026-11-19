@@ -128,8 +128,11 @@ export function harnessSidebar() {
   return [...leadGroups(), ...templateGroups()]
 }
 
-/** Plain-text title of the first `# ` heading outside code fences (for llms.txt labels only). */
-function firstH1(source) {
+/**
+ * Plain-text title of the first `# ` heading outside code fences: the label of a page's line
+ * in llms.txt, and what tests/gates/docs-site.test.mjs measures a page's <title> by.
+ */
+export function firstH1(source) {
   let fence = null
   for (const line of source.split('\n')) {
     const marker = /^\s{0,3}(`{3,}|~{3,})/.exec(line)?.[1][0]
@@ -206,7 +209,7 @@ export function llmsPageIndex(siteWithBase) {
   const line = ({ slug, label }) => {
     const page = pages.get(slug)
     // A site page's title is in its frontmatter, which is not read here; its sidebar label stands in.
-    const title = (page.local ? undefined : firstH1(readFileSync(page.absPath, 'utf8'))) ?? label ?? slug
+    const title = ('local' in page ? undefined : firstH1(readFileSync(page.absPath, 'utf8'))) ?? label ?? slug
     const description = descriptionOf(page)
     const about = description ? `${description} ` : ''
     return `- [${title}](${siteWithBase}${slug}/): ${about}Source: \`${page.repoPath}\`.`

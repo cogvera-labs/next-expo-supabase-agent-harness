@@ -28,6 +28,14 @@ cut at a word near 157 characters when it is longer than 160. Where that falls s
 description, a shorter `<title>` and a sidebar label; the page still shows its own heading.
 The build log names each page whose description was cut or missing.
 
+A page's `<title>` is its title followed by ` | Claude Code harness`, the `TITLE_SUFFIX` in
+[`src/harness-docs/head.mjs`](src/harness-docs/head.mjs). The site's own title is the package
+name, which would take more than half of the 60 characters a `<title>` is held to (about
+what a search result shows before it cuts the rest); it stays in the header and in
+`og:site_name`. A title in `page-meta.mjs` is limited to what the suffix leaves, and the build
+log names a page whose heading is longer than that and has no shorter title there. The home
+page states its whole `<title>` in its frontmatter.
+
 The sidebar opens with the groups in `LEAD_GROUPS` in
 [`src/harness-docs/site-index.mjs`](src/harness-docs/site-index.mjs) (Start here, Reference,
 Project), then one group per template docs folder. `llms.txt` lists every page in the same
@@ -86,7 +94,7 @@ site page cannot show literal double braces. Write no other number that can go s
 - Two pages claiming one route, or a page claiming the site root.
 - A stale exclusion in `corpus.mjs`, or an empty template docs tree.
 - A `page-meta.mjs` entry for a page the site does not render, an unknown field, or a field
-  over its limit (description 155 characters, title 40, label 32).
+  over its limit (description 155 characters, title 38, label 32).
 - A route in `LEAD_GROUPS` that names no page, or a repository document in no group.
 - An unknown build-time value in a site page.
 - A relative link that leaves the repository or names nothing; an internal link, `#anchor`
@@ -111,7 +119,12 @@ CI also sets `ASTRO_TELEMETRY_DISABLED=1`.
 ## Checks that cover this folder
 
 ESLint lints the `.mjs` files here with the repository's cognitive-complexity budget, and
-`scripts/hygiene.mjs` and REUSE cover every file. Two gaps:
+`scripts/hygiene.mjs` and REUSE cover every file.
+[`tests/gates/docs-site.test.mjs`](../tests/gates/docs-site.test.mjs) runs with the
+repository's test suites, without this folder's dependencies: it fails when a page's
+`<title>` would be longer than the limit. The modules it imports (`corpus.mjs`, `head.mjs`,
+`page-meta.mjs` and `site-index.mjs`) are type-checked by the root `tsc` through it. Two
+gaps:
 
 - A pull request that changes only the repository documents under `docs/` does not build the
   site, because `pages.yml` does not list `docs/**` among its paths. A broken link there

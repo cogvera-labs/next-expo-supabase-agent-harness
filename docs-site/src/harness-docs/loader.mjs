@@ -16,7 +16,8 @@ import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { dirname, join, posix, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { DEFAULT_BRANCH, GITHUB_REPO, REPO_ROOT, REPOSITORY_DOCS, SITE_DIR, SITE_TITLE, loadCorpus, repoRelative, sitePages } from './corpus.mjs'
+import { DEFAULT_BRANCH, GITHUB_REPO, REPO_ROOT, REPOSITORY_DOCS, SITE_DIR, loadCorpus, repoRelative, sitePages } from './corpus.mjs'
+import { PAGE_TITLE_MAX, TITLE_MAX, documentTitle } from './head.mjs'
 import { fillSiteValues } from './site-values.mjs'
 
 const git = (args) =>
@@ -62,9 +63,17 @@ const hasFrontmatter = (source) => (source.charCodeAt(0) === 0xfeff ? source.sli
 
 /** A short <title> and og:title from page-meta.mjs, where the H1 is long. The page still shows its H1. */
 const titleHead = (title) => [
-  { tag: 'title', content: `${title} | ${SITE_TITLE}` },
+  { tag: 'title', content: documentTitle(title) },
   { tag: 'meta', attrs: { property: 'og:title', content: title } },
 ]
+
+/** Say so in the build log when a page's own heading makes its <title> longer than a search result shows. */
+function noteTitle(page, heading, logger) {
+  if (page.meta.title || heading.length <= PAGE_TITLE_MAX) return
+  logger.warn(
+    `${page.repoPath}: its heading is ${String(heading.length)} characters, so its <title> is over ${String(TITLE_MAX)}; give it a title of at most ${String(PAGE_TITLE_MAX)} in page-meta.mjs`,
+  )
+}
 
 /** Say so in the build log when a page's description is the first paragraph cut short, or missing. */
 function noteDescription(page, description, logger) {
@@ -97,6 +106,7 @@ async function renderReadInPlace(page, source, renderMarkdown, logger) {
   if (typeof frontmatter.title !== 'string' || frontmatter.title === '') {
     throw new Error(`${page.repoPath}: no top-level "# " heading to take the page title from`)
   }
+  noteTitle(page, frontmatter.title, logger)
   noteDescription(page, frontmatter.description, logger)
   const head = page.meta.title ? { head: titleHead(page.meta.title) } : {}
   return { body: source, input, rendered, data: { ...frontmatter, ...head, editUrl: editUrlFor(page, source) } }

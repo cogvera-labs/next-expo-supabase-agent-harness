@@ -16,7 +16,7 @@ import { checkPageMeta, pageMetaFor } from './page-meta.mjs'
 
 export const GITHUB_REPO = 'https://github.com/cogvera-labs/next-expo-supabase-agent-harness'
 export const DEFAULT_BRANCH = 'main'
-/** The site title: the header, og:site_name, and the end of every <title>. */
+/** The site title: the header and og:site_name. A <title> ends with the shorter suffix in head.mjs. */
 export const SITE_TITLE = 'next-expo-supabase-agent-harness'
 
 /** The repository root: docs-site/src/harness-docs/ is three levels below it. */
