@@ -147,31 +147,52 @@ const TOOLCHAIN_STEPS = [
   ['eslint', ['exec', 'eslint', '.', '--max-warnings', '0']],
   ['types', ['exec', 'tsc', '--noEmit']],
   ['dead-code', ['exec', 'knip']],
-  // THE FOURTH, AND THE LAST ASYMMETRY OF ITS KIND (0.6.0). `format` is step ONE of every
-  // consumer's chain and it runs over the files the HARNESS ships — every gate script in
-  // template/base/tools, every source file in template/stack. Nothing on this side ever ran
-  // it. So a formatting break in a shipped gate script was invisible to a maintainer's turn
-  // and red on step one for every consumer who upgraded, which is the exact shape the
-  // paragraph above describes for eslint/tsc/knip and the reason those three moved here.
+  // `format` is step one of every consumer's chain, and it runs over the files the harness
+  // ships: every gate script in template/base/tools, every source file in template/stack.
+  // Run here, a formatting break in a shipped file blocks the maintainer's turn instead of
+  // reaching step one of every consumer who upgrades.
   //
-  // The 0.6.0 upgrade lane is what found it: check-auth-posture.mjs shipped one line over
-  // the width, `pnpm validate` died at `format` on the upgraded scaffold, and the lane
-  // correctly reported it as a REGRESSION rather than an expiry.
+  // One run per tree, each from inside its tree with template/base's biome.jsonc as its
+  // configuration: the one consumers get, never a factory copy that could drift from it. A
+  // scaffold merges the trees under one root, where that file governs all of them. Biome
+  // applies a configuration's parser options to the files under the directory it runs in,
+  // so a single run from template/base that reaches the other trees by `../` reads their
+  // Tailwind CSS without `css.parser.tailwindDirectives` and fails to parse it (Biome
+  // 2.6.7 does; 2.5.15 does not). Biome 2 refuses a nested root configuration, so a single
+  // run from template/ with that file is not an option either. The entry's own argv is
+  // empty, because each run carries its arguments.
+  // `--vcs-enabled=false` because the ignore file Biome wants is `gitignore` in dotless
+  // storage and only exists as `.gitignore` after a render; nothing under template/ is
+  // build output. tests/gates/factory-format-step.test.mjs holds the runs to the trees.
   //
-  // It runs from template/base so that TREE's biome.jsonc is the root config — the one
-  // consumers actually get, never a factory copy that could drift from it — and reaches the
-  // sibling trees by path, because a scaffold merges them under that single root. Biome 2.x
-  // refuses a nested root config, so pointing at it from here is not an option.
-  // `--vcs-enabled=false` because the ignore file it wants is `gitignore` in dotless storage
-  // and only exists as `.gitignore` after a render; nothing under template/ is build output.
-  //
-  // The BINARY, not `pnpm exec`: template/base holds no package.json, so pnpm dies there
-  // with ERR_PNPM_RECURSIVE_EXEC_NO_PACKAGE before biome ever runs. An absent binary is an
-  // ENOENT on spawn, which the skip branch below already reads as a missing toolchain.
+  // The binary, not `pnpm exec`: no tree holds a package.json at its root, so pnpm stops
+  // with ERR_PNPM_RECURSIVE_EXEC_NO_PACKAGE before Biome runs. An absent binary is an
+  // ENOENT on spawn, which runToolchainStep reads as a missing toolchain.
   [
     'format',
-    ['ci', '--vcs-enabled=false', '.', '../stack', '../demo', '../modules', '../presets'],
-    { cwd: 'template/base', command: join(ROOT, 'node_modules/.bin/biome') },
+    [],
+    {
+      command: join(ROOT, 'node_modules/.bin/biome'),
+      runs: [
+        { cwd: 'template/base', argv: ['ci', '--vcs-enabled=false', '.'] },
+        {
+          cwd: 'template/stack',
+          argv: ['ci', '--vcs-enabled=false', '--config-path=../base', '.'],
+        },
+        {
+          cwd: 'template/demo',
+          argv: ['ci', '--vcs-enabled=false', '--config-path=../base', '.'],
+        },
+        {
+          cwd: 'template/modules',
+          argv: ['ci', '--vcs-enabled=false', '--config-path=../base', '.'],
+        },
+        {
+          cwd: 'template/presets',
+          argv: ['ci', '--vcs-enabled=false', '--config-path=../base', '.'],
+        },
+      ],
+    },
   ],
   // THE RED-PROOF CORPUS ITSELF (0.7.0), scoped. tests/gates and tests/hooks are the
   // enforcement-of-enforcement suite — the proofs that every gate and hook can actually
@@ -219,39 +240,61 @@ for (const [name, argv] of STEPS) {
   }
 }
 // The optional third element overrides how a step is launched: `command` swaps the pnpm
-// launcher for a real binary (`format` runs biome from template/base so that tree's
-// biome.jsonc — the one consumers get — is the root config; `tests` runs this same node),
-// `cwd` moves it, and `env` overlays process.env — an entry whose value is undefined
-// DELETES the key (spawn drops undefined-valued entries), which is how `tests` scrubs the
-// escape hatch. Every step without a `command` is `pnpm <argv>` from here.
-for (const [name, argv, opts] of TOOLCHAIN_STEPS) {
+// launcher for a real binary (`format` runs biome; `tests` runs this same node), `cwd`
+// moves it, and `env` overlays process.env — an entry whose value is undefined DELETES the
+// key (spawn drops undefined-valued entries), which is how `tests` scrubs the escape
+// hatch. `runs` makes one step several launches, each with its own `cwd` and `argv`: the
+// step is red when any of them is. Every step without a `command` is `pnpm <argv>` from
+// here.
+/**
+ * Launch one toolchain step: once, or once per entry of `opts.runs`.
+ * @param {string} name
+ * @param {string[]} argv
+ * @param {{ command?: string, cwd?: string, env?: Record<string, string | undefined>, runs?: { cwd: string, argv: string[] }[] } | undefined} opts
+ * @returns {{ absent: string | null, reds: string[] }} `absent` is the launch that found no
+ *   toolchain; `reds` holds the report of every launch that failed.
+ */
+function runToolchainStep(name, argv, opts) {
   const command = opts?.command ?? 'pnpm'
-  const res = spawnSync(command, argv, {
-    encoding: 'utf8',
-    shell: process.platform === 'win32',
-    // A red `tests` run prints every failing assertion's diff; the 1MB default would
-    // ENOBUFS, and an ENOBUFS surfaces as res.error — which the absence branch below
-    // would misread as a missing toolchain. Roomy enough that it can never trip.
-    maxBuffer: 64 * 1024 * 1024,
-    ...(opts?.cwd === undefined ? {} : { cwd: opts.cwd }),
-    ...(opts?.env === undefined ? {} : { env: { ...process.env, ...opts.env } }),
-  })
-  const out = (res.stdout ?? '') + (res.stderr ?? '')
-  // No node_modules, no pnpm on PATH: the toolchain is absent, not the code broken. The
-  // output TEXT sniff applies only to pnpm-launched steps — a step naming its own binary
-  // signals absence as a spawn ENOENT (res.error), and its output may LEGITIMATELY contain
-  // "command not found" (the `tests` suite exercises toolchain-absent branches and prints
-  // their messages), which must never demote a red suite to a loud skip.
-  const toolchainAbsent =
-    res.error !== undefined ||
-    (opts?.command === undefined &&
-      /command not found|Command "[a-z]+" not found|ERR_PNPM_NO_SCRIPT/i.test(out))
-  if (toolchainAbsent) {
-    skipped.push(`${name} (${command} ${argv.join(' ')}) — toolchain absent; the \`lint\` workflow is the fail-closed backstop`)
+  const reds = []
+  for (const run of opts?.runs ?? [{ cwd: opts?.cwd, argv }]) {
+    const res = spawnSync(command, run.argv, {
+      encoding: 'utf8',
+      shell: process.platform === 'win32',
+      // A red `tests` run prints every failing assertion's diff; the 1MB default would
+      // ENOBUFS, and an ENOBUFS surfaces as res.error — which the absence branch below
+      // would misread as a missing toolchain. Roomy enough that it can never trip.
+      maxBuffer: 64 * 1024 * 1024,
+      ...(run.cwd === undefined ? {} : { cwd: run.cwd }),
+      ...(opts?.env === undefined ? {} : { env: { ...process.env, ...opts.env } }),
+    })
+    const out = (res.stdout ?? '') + (res.stderr ?? '')
+    const launch = `${command} ${run.argv.join(' ')}`
+    // No node_modules, no pnpm on PATH: the toolchain is absent, not the code broken. The
+    // output TEXT sniff applies only to pnpm-launched steps — a step naming its own binary
+    // signals absence as a spawn ENOENT (res.error), and its output may LEGITIMATELY contain
+    // "command not found" (the `tests` suite exercises toolchain-absent branches and prints
+    // their messages), which must never demote a red suite to a loud skip.
+    const toolchainAbsent =
+      res.error !== undefined ||
+      (opts?.command === undefined &&
+        /command not found|Command "[a-z]+" not found|ERR_PNPM_NO_SCRIPT/i.test(out))
+    if (toolchainAbsent) return { absent: launch, reds: [] }
+    if (res.status !== 0) {
+      const where = opts?.runs === undefined ? '' : ` (in ${run.cwd})`
+      reds.push(`=== ${name}: ${launch}${where}\n${out}`)
+    }
+  }
+  return { absent: null, reds }
+}
+for (const [name, argv, opts] of TOOLCHAIN_STEPS) {
+  const { absent, reds } = runToolchainStep(name, argv, opts)
+  if (absent !== null) {
+    skipped.push(`${name} (${absent}) — toolchain absent; the \`lint\` workflow is the fail-closed backstop`)
     continue
   }
-  if (res.status !== 0) {
-    failures.push(`=== ${name}: ${command} ${argv.join(' ')}\n${out}`)
+  if (reds.length > 0) {
+    failures.push(reds.join('\n'))
     failedGates.push(name)
   }
 }
