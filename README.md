@@ -56,10 +56,7 @@ npx --yes next-expo-supabase-agent-harness@latest init
 ```
 
 `init` asks for the project's details, each with a default, and writes the scaffold into
-the folder. Until a release after 2.0.8 is out, change one line of its `pnpm-workspace.yaml`
-before `pnpm install`, as the
-[known issue in Getting started](docs/getting-started.md#create-the-project-and-run-the-first-turn)
-describes. Then:
+the folder. Then:
 
 ```sh
 git init          # first: the prepare script (lefthook install) needs a repository
