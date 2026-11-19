@@ -59,8 +59,10 @@ ended, whether they passed or failed. A directory lives for the whole file: test
 made at module scope, read it after a fixture function returns, or pass it to a child process.
 The helper's cleanup runs before a file's own `after()` hooks, so those must not read one.
 
-The helper removes only what was made through it. A script under test that makes a temporary
-directory of its own, in a child process, has to remove it itself.
+[gates/test-temp-dirs.test.mjs](gates/test-temp-dirs.test.mjs) fails on a line of code under
+`tests/` that names `mkdtemp` anywhere else. It reads text, so it cannot see what the helper
+does not make: a script under test that makes a temporary directory of its own, in a child
+process, has to remove it itself.
 
 ## The can-fail-proof registry
 
