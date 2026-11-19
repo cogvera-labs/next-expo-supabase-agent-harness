@@ -28,19 +28,30 @@ cut at a word near 157 characters when it is longer than 160. Where that falls s
 description, a shorter `<title>` and a sidebar label; the page still shows its own heading.
 The build log names each page whose description was cut or missing.
 
-A page's `<title>` is its title followed by ` | Claude Code harness`, the `TITLE_SUFFIX` in
-[`src/harness-docs/head.mjs`](src/harness-docs/head.mjs). The site's own title is the package
-name, which would take more than half of the 60 characters a `<title>` is held to (about
-what a search result shows before it cuts the rest); it stays in the header and in
-`og:site_name`. A title in `page-meta.mjs` is limited to what the suffix leaves, and the build
-log names a page whose heading is longer than that and has no shorter title there. The home
-page states its whole `<title>` in its frontmatter.
-
 The sidebar opens with the groups in `LEAD_GROUPS` in
 [`src/harness-docs/site-index.mjs`](src/harness-docs/site-index.mjs) (Start here, Reference,
 Project), then one group per template docs folder. `llms.txt` lists every page in the same
 order, each with its `page-meta.mjs` description or, for a repository document, its opening
 paragraph.
+
+## Search metadata
+
+What a page tells a search engine, beyond its description:
+
+- **`<title>`.** A page's `<title>` is its title followed by ` | Claude Code harness`, the
+  `TITLE_SUFFIX` in [`src/harness-docs/head.mjs`](src/harness-docs/head.mjs). The site's own
+  title is the package name, which would take more than half of the 60 characters a
+  `<title>` is held to (about what a search result shows before it cuts the rest); it stays
+  in the header and in `og:site_name`. A title in `page-meta.mjs` is limited to what the
+  suffix leaves, and the build log names a page whose heading is longer than that and has no
+  shorter title there. The home page states its whole `<title>` in its frontmatter.
+- **Sitemap `<lastmod>`.** Each sitemap entry carries the commit date of the page's source
+  file. It comes from the same `git log` call as the page's "Last updated" line and its
+  JSON-LD `dateModified` ([`src/harness-docs/page-dates.mjs`](src/harness-docs/page-dates.mjs)),
+  so the three agree. In a shallow clone, or where git cannot answer, the only dates on
+  offer would be false, so the sitemap is written with no `<lastmod>` and the build log says
+  so. `astro.config.mjs` lists `@astrojs/sitemap` itself in order to set the dates;
+  Starlight's built-in sitemap has none.
 
 ## Links
 
@@ -113,8 +124,8 @@ pnpm --dir docs-site run dev      # a local server
 The site has its own lockfile and pnpm root. It needs Node 22.22 or newer (CI uses Node 24)
 and the pnpm version in `package.json` (`corepack enable` provides it). If `corepack` is not
 on your PATH (Node.js 25 and later no longer bundle it), run `npm install -g corepack` first.
-"Last updated" dates come from `git log`, so a shallow clone stamps every page with one date.
-CI also sets `ASTRO_TELEMETRY_DISABLED=1`.
+"Last updated" dates come from `git log`, so a shallow clone stamps every page with one date
+and leaves the sitemap without `<lastmod>`. CI also sets `ASTRO_TELEMETRY_DISABLED=1`.
 
 ## Checks that cover this folder
 
@@ -122,9 +133,10 @@ ESLint lints the `.mjs` files here with the repository's cognitive-complexity bu
 `scripts/hygiene.mjs` and REUSE cover every file.
 [`tests/gates/docs-site.test.mjs`](../tests/gates/docs-site.test.mjs) runs with the
 repository's test suites, without this folder's dependencies: it fails when a page's
-`<title>` would be longer than the limit. The modules it imports (`corpus.mjs`, `head.mjs`,
-`page-meta.mjs` and `site-index.mjs`) are type-checked by the root `tsc` through it. Two
-gaps:
+`<title>` would be longer than the limit, and it shows on throwaway repositories that a
+`<lastmod>` is a page's own commit date or absent. The modules it imports (`corpus.mjs`,
+`head.mjs`, `page-dates.mjs`, `page-meta.mjs` and `site-index.mjs`) are type-checked by the
+root `tsc` through it. Two gaps:
 
 - A pull request that changes only the repository documents under `docs/` does not build the
   site, because `pages.yml` does not list `docs/**` among its paths. A broken link there

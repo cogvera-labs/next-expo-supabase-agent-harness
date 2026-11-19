@@ -1,17 +1,23 @@
 // THE DOCUMENTATION SITE'S SEARCH METADATA (docs-site/src/harness-docs/).
 //
 // The site's build proves that every page renders and every internal link resolves. It
-// cannot tell a <title> that a search result shows whole from one it cuts, so that is held
-// here, on every pull request and not only on those that build the site.
+// cannot tell a <title> that a search result shows whole from one it cuts, or a sitemap date
+// that is a page's own from one that is not, so both are held here, on every pull request and
+// not only on those that build the site.
 //
 // The modules under test import Node built-ins and each other, never the site's
 // dependencies, so the installer-unit job, which installs nothing, runs this file on Linux,
 // Windows and macOS.
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
-import { test } from 'node:test'
-import { loadCorpus } from '../../docs-site/src/harness-docs/corpus.mjs'
+import { spawnSync } from 'node:child_process'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { after, test } from 'node:test'
+import { pathToFileURL } from 'node:url'
+import { loadCorpus, pageSourcePaths, sitePages } from '../../docs-site/src/harness-docs/corpus.mjs'
 import { PAGE_TITLE_MAX, TITLE_MAX, TITLE_SUFFIX, documentTitle, setDocumentTitle } from '../../docs-site/src/harness-docs/head.mjs'
+import { lastCommitDates, lastmodByUrl } from '../../docs-site/src/harness-docs/page-dates.mjs'
 import { firstH1 } from '../../docs-site/src/harness-docs/site-index.mjs'
 
 // ---- the <title> ---------------------------------------------------------------------
@@ -50,4 +56,104 @@ test("a page's own <title> stays, and Starlight's default takes the suffix", () 
   const untitled = [defaults()[0]]
   setDocumentTitle(untitled, [], 'Gates catalog')
   assert.deepEqual(untitled, [defaults()[0]])
+})
+
+// ---- the sitemap's <lastmod> -----------------------------------------------------------
+
+// A private directory per fixture, removed when the file is done.
+const made = []
+after(() => {
+  for (const dir of made) rmSync(dir, { recursive: true, force: true })
+})
+
+function scratch() {
+  const dir = mkdtempSync(join(tmpdir(), 'harness-docs-site-'))
+  made.push(dir)
+  return dir
+}
+
+// A fixture's git commands must reach the fixture alone, whatever repository the run was started from.
+const NO_GIT_ENV = Object.fromEntries(Object.entries(process.env).filter(([name]) => !name.startsWith('GIT_')))
+
+function git(cwd, args, env = {}) {
+  const res = spawnSync('git', args, { cwd, encoding: 'utf8', env: { ...NO_GIT_ENV, ...env } })
+  assert.equal(res.status, 0, `git ${args.join(' ')} failed: ${res.stderr}`)
+}
+
+const FIRST = new Date('2026-01-05T10:00:00Z')
+const SECOND = new Date('2026-03-09T16:30:00Z')
+
+/** Write files and commit them at a given time. */
+function commit(dir, files, when) {
+  for (const [path, text] of Object.entries(files)) writeFileSync(join(dir, path), text)
+  // Git's own date format: seconds since the epoch, then a zone offset.
+  const stamp = `${String(when.getTime() / 1000)} +0000`
+  git(dir, ['add', '-A'])
+  git(dir, ['commit', '-q', '-m', 'change'], { GIT_AUTHOR_DATE: stamp, GIT_COMMITTER_DATE: stamp })
+}
+
+/** A repository of two commits: the first writes docs/a.md and docs/b.md, the second changes docs/b.md alone. */
+function repository() {
+  const dir = scratch()
+  git(dir, ['init', '-q'])
+  for (const [key, value] of [
+    ['user.email', 'docs-site-test@example.invalid'],
+    ['user.name', 'docs-site-test'],
+    ['core.autocrlf', 'false'],
+    ['commit.gpgsign', 'false'],
+  ]) {
+    git(dir, ['config', key, value])
+  }
+  mkdirSync(join(dir, 'docs'))
+  commit(dir, { 'docs/a.md': '# A\n', 'docs/b.md': '# B\n' }, FIRST)
+  commit(dir, { 'docs/b.md': '# B\n\nChanged.\n' }, SECOND)
+  return dir
+}
+
+const SITE = 'https://example.invalid/site/'
+const PAGES = [
+  { route: 'index', repoPath: 'docs/a.md' },
+  { route: 'guide/b', repoPath: 'docs/b.md' },
+  { route: 'new', repoPath: 'docs/not-committed.md' },
+]
+
+test('with full history, a page takes the date of the last commit to its own file', () => {
+  const lookup = lastCommitDates(['docs'], repository())
+  assert.equal(lookup.failure, undefined)
+  assert.equal(lookup.shallow, false)
+  // The site's root has no path of its own, every other URL ends in a slash, and a page git
+  // has no commit for has no entry.
+  assert.deepEqual(
+    [...lastmodByUrl(PAGES, lookup, SITE)],
+    [
+      [SITE, FIRST.toISOString()],
+      [`${SITE}guide/b/`, SECOND.toISOString()],
+    ],
+  )
+})
+
+test('in a shallow clone the sitemap carries no date, where git would give every page the newest', () => {
+  const clone = join(scratch(), 'clone')
+  git(tmpdir(), ['clone', '-q', '--depth', '1', pathToFileURL(repository()).href, clone])
+  const lookup = lastCommitDates(['docs'], clone)
+  assert.equal(lookup.failure, undefined)
+  assert.equal(lookup.shallow, true)
+  // The date that would be false: docs/a.md was last changed by the first commit, and here
+  // git reports it as changed by the second, the only commit the clone holds.
+  assert.equal(lookup.dates.get('docs/a.md')?.getTime(), SECOND.getTime())
+  assert.equal(lastmodByUrl(PAGES, lookup, SITE).size, 0)
+})
+
+test('when git cannot answer, the sitemap carries no date', () => {
+  const lookup = lastCommitDates(['docs'], join(scratch(), 'no-such-folder'))
+  assert.ok(lookup.failure, 'a lookup in a folder that does not exist says why it failed')
+  assert.equal(lastmodByUrl(PAGES, lookup, SITE).size, 0)
+})
+
+test("every page's source file is under a path the date lookup reads", () => {
+  const paths = pageSourcePaths()
+  const unread = [...sitePages(), ...loadCorpus().pages]
+    .map((page) => page.repoPath)
+    .filter((repoPath) => !paths.some((path) => repoPath === path || repoPath.startsWith(`${path}/`)))
+  assert.deepEqual(unread, [], 'pageSourcePaths() in corpus.mjs must cover these files, or their pages get no "Last updated" date and no <lastmod>')
 })

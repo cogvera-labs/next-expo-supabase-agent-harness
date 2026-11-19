@@ -168,6 +168,13 @@ export function sitePages() {
 /** The folders the repository documents live in, for Starlight's Markdown processing. */
 export const repositoryDocDirs = () => [...new Set(REPOSITORY_DOCS.map(([repoPath]) => join(REPO_ROOT, posix.dirname(repoPath), '/')))]
 
+/**
+ * The repo-relative paths that hold every page's source file, for the one git call that dates
+ * the pages (page-dates.mjs): the template docs' trees, each repository document, and the
+ * site's own pages.
+ */
+export const pageSourcePaths = () => ['template/base/docs', 'template/modules', ...REPOSITORY_DOCS.map(([repoPath]) => repoPath), posix.join(SITE_DIR, 'src/content/docs')]
+
 /** Repo-relative POSIX path for an absolute path. */
 export function repoRelative(absPath) {
   return relative(REPO_ROOT, absPath).split(sep).join('/')

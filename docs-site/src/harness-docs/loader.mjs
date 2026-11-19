@@ -11,35 +11,23 @@
 //   3. Starlight reads git dates only for src/content/docs, so `lastUpdated` is set here.
 // Only documented LoaderContext APIs are used: renderMarkdown, parseData, store,
 // generateDigest, logger and watcher.
-import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { dirname, join, posix, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { DEFAULT_BRANCH, GITHUB_REPO, REPO_ROOT, REPOSITORY_DOCS, SITE_DIR, loadCorpus, repoRelative, sitePages } from './corpus.mjs'
+import { DEFAULT_BRANCH, GITHUB_REPO, REPO_ROOT, loadCorpus, pageSourcePaths, repoRelative, sitePages } from './corpus.mjs'
 import { PAGE_TITLE_MAX, TITLE_MAX, documentTitle } from './head.mjs'
+import { lastCommitDates } from './page-dates.mjs'
 import { fillSiteValues } from './site-values.mjs'
 
-const git = (args) =>
-  spawnSync('git', args, { cwd: REPO_ROOT, encoding: 'utf8', timeout: 60_000, maxBuffer: 64 * 1024 * 1024 })
-
-/** Newest commit time per repo-relative path, from ONE git call. */
-function lastCommitDates(paths, logger) {
-  const dates = new Map()
-  const res = git(['log', '--format=t:%ct', '--name-only', '--', ...paths])
-  if (res.status !== 0) {
-    logger.warn(`git log failed (${res.error?.message ?? res.stderr.trim()}); pages ship without "last updated"`)
-    return dates
-  }
-  // A shallow clone has no history to read, so every page would carry the newest commit's date.
-  if (git(['rev-parse', '--is-shallow-repository']).stdout.trim() === 'true') {
-    logger.warn('shallow clone: "last updated" shows the checkout commit for every page (pages.yml fetches full history)')
-  }
-  let current
-  for (const line of res.stdout.split('\n')) {
-    if (line.startsWith('t:')) current = new Date(Number(line.slice(2)) * 1000)
-    else if (line && current && !dates.has(line)) dates.set(line, current)
-  }
+/**
+ * Each page's "last updated" date, by repo-relative path. A shallow clone has no history to
+ * read, so there every page carries the newest commit's date, and the build log says so.
+ */
+function lastUpdatedDates(logger) {
+  const { dates, shallow, failure } = lastCommitDates(pageSourcePaths(), REPO_ROOT)
+  if (failure) logger.warn(`git log failed (${failure}); pages ship without "last updated"`)
+  else if (shallow) logger.warn('shallow clone: "last updated" shows the checkout commit for every page (pages.yml fetches full history)')
   return dates
 }
 
@@ -130,8 +118,7 @@ export function harnessDocsLoader() {
 
       async function sync() {
         const all = allPages()
-        const paths = ['template/base/docs', 'template/modules', ...REPOSITORY_DOCS.map(([repoPath]) => repoPath)]
-        const dates = lastCommitDates([...paths, posix.join(SITE_DIR, 'src/content/docs')], logger)
+        const dates = lastUpdatedDates(logger)
         const seen = new Set()
         for (const page of all) {
           if (seen.has(page.route)) throw new Error(`two pages claim the route "/${page.route}"`)
