@@ -1,8 +1,9 @@
-# next-expo-supabase-agent-harness
+# Next.js + Expo + Supabase starter with a Claude Code harness
 
 [![npm version](https://img.shields.io/npm/v/next-expo-supabase-agent-harness)](https://www.npmjs.com/package/next-expo-supabase-agent-harness)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/cogvera-labs/next-expo-supabase-agent-harness/badge)](https://scorecard.dev/viewer/?uri=github.com/cogvera-labs/next-expo-supabase-agent-harness)
 [![OpenSSF Baseline](https://www.bestpractices.dev/projects/14727/baseline)](https://www.bestpractices.dev/projects/14727)
+[![selftest on main](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/actions/workflows/selftest.yml/badge.svg?branch=main&event=push)](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/actions/workflows/selftest.yml?query=branch%3Amain+event%3Apush)
 
 **Quality is a deterministic gate, not a request.**
 
@@ -11,9 +12,18 @@ hooks that send the agent back to work while a quality gate fails. Guard hooks c
 commands and file writes before they run, CI re-runs the gates, and `update` brings later
 releases into an existing project.
 
+For teams shipping a web app and a mobile app on one Supabase backend with Claude Code. Not a
+fit today for a web-only app. The `.claude/` hooks run only under Claude Code; another agent
+meets the checks at the commit and in the pull request.
+
+- **Starting an app:** [What you get](#what-you-get) · [Quick start](#quick-start) ·
+  [Comparison](docs/comparison.md)
+- **Here for the hooks:** [What it stops](#what-it-stops) · [How it works](#how-it-works) ·
+  [the shipped hooks](template/base/.claude/hooks/)
+- **Checking the claims:** [Evidence](docs/evidence.md) · [Limitations](#limitations)
+
 [Documentation](https://cogvera-labs.github.io/next-expo-supabase-agent-harness/) ·
-[Get started](docs/getting-started.md) · [How it works](docs/how-it-works.md) ·
-[FAQ](docs/faq.md) · [Evidence](docs/evidence.md) · [Changelog](CHANGELOG.md)
+[FAQ](docs/faq.md) · [Changelog](CHANGELOG.md)
 
 ```sh
 npx --yes next-expo-supabase-agent-harness@latest init
