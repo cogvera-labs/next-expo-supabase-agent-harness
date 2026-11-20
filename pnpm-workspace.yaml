@@ -16,7 +16,7 @@
 # `minimatch-11-override` row in scripts/obligations.json says when this goes.
 overrides:
   typescript: 6.0.3
-  'minimatch@<11.0.1': 11.0.3
+  'minimatch@<11.0.1': 11.0.8
 
 # Same determinism pin as template/base/pnpm-workspace.yaml (see the full
 # rationale there): dependency aging is Renovate's job at the update-PR layer;
