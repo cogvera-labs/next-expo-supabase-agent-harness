@@ -1,12 +1,13 @@
-// Starlight route middleware: JSON-LD built from the same validated entry data Starlight
-// renders. Every page but the home page gets a TechArticle (title, description, lastUpdated);
-// the home page gets the software and its publisher, beside the WebSite block that
-// astro.config.mjs puts on every page.
+// Starlight route middleware: each page's <title>, and JSON-LD built from the same validated
+// entry data Starlight renders. Every page but the home page gets a TechArticle (title,
+// description, lastUpdated); the home page gets the software and its publisher, beside the
+// WebSite block that astro.config.mjs puts on every page.
 //
 // This file runs inside the built site, so it imports nothing that reads the repository at
 // run time; the version is a JSON import, which the build inlines.
 import { defineRouteMiddleware } from '@astrojs/starlight/route-data'
 import { version } from '../../package.json'
+import { setDocumentTitle } from './harness-docs/head.mjs'
 
 const REPOSITORY = 'https://github.com/cogvera-labs/next-expo-supabase-agent-harness'
 const NPM_PACKAGE = 'https://www.npmjs.com/package/next-expo-supabase-agent-harness'
@@ -45,6 +46,7 @@ function homeJsonLd(route, url) {
 export const onRequest = defineRouteMiddleware((context) => {
   const route = context.locals.starlightRoute
   const { data } = route.entry
+  setDocumentTitle(route.head, data.head, data.title)
   if (!context.site) return
   const url = new URL(context.url.pathname, context.site).href
   // Starlight gives the site root's entry (src/content/docs/index.md) the id ''.

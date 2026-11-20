@@ -1,12 +1,13 @@
-// Config-time views of the pages: the sidebar and the llms.txt page index. Both come from
-// the same listings the loader renders, and the index follows the sidebar, so a new page
-// appears everywhere at once.
+// Config-time views of the pages: the sidebar, the llms.txt page index and the sitemap's
+// dates. All come from the same listings the loader renders, and the index follows the
+// sidebar, so a new page appears everywhere at once.
 //
 // The sidebar is built from `slug` items rather than `autogenerate`: Starlight's autogenerate
 // groups pages by their file path under src/content/docs, which a file read in place never
 // has. A `slug` item takes its label from the item, else from the page title.
 import { readFileSync } from 'node:fs'
-import { REPOSITORY_DOCS, loadCorpus, sitePages } from './corpus.mjs'
+import { REPO_ROOT, REPOSITORY_DOCS, loadCorpus, pageSourcePaths, sitePages } from './corpus.mjs'
+import { lastCommitDates, lastmodByUrl } from './page-dates.mjs'
 
 /**
  * The groups that open the sidebar, before the template docs' groups. Each item is the route
@@ -128,8 +129,11 @@ export function harnessSidebar() {
   return [...leadGroups(), ...templateGroups()]
 }
 
-/** Plain-text title of the first `# ` heading outside code fences (for llms.txt labels only). */
-function firstH1(source) {
+/**
+ * Plain-text title of the first `# ` heading outside code fences: the label of a page's line
+ * in llms.txt, and what tests/gates/docs-site.test.mjs measures a page's <title> by.
+ */
+export function firstH1(source) {
   let fence = null
   for (const line of source.split('\n')) {
     const marker = /^\s{0,3}(`{3,}|~{3,})/.exec(line)?.[1][0]
@@ -206,7 +210,7 @@ export function llmsPageIndex(siteWithBase) {
   const line = ({ slug, label }) => {
     const page = pages.get(slug)
     // A site page's title is in its frontmatter, which is not read here; its sidebar label stands in.
-    const title = (page.local ? undefined : firstH1(readFileSync(page.absPath, 'utf8'))) ?? label ?? slug
+    const title = ('local' in page ? undefined : firstH1(readFileSync(page.absPath, 'utf8'))) ?? label ?? slug
     const description = descriptionOf(page)
     const about = description ? `${description} ` : ''
     return `- [${title}](${siteWithBase}${slug}/): ${about}Source: \`${page.repoPath}\`.`
@@ -214,4 +218,16 @@ export function llmsPageIndex(siteWithBase) {
   return harnessSidebar()
     .map((group) => `## ${group.label}\n\n${linksOf(group).map(line).join('\n')}`)
     .join('\n\n')
+}
+
+/**
+ * The sitemap's <lastmod> for a build, by page URL: each page's commit date, read as the
+ * loader reads the "Last updated" dates. Where git cannot give true dates there are none,
+ * and the build log says why.
+ */
+export function sitemapLastmod(siteWithBase, logger) {
+  const lookup = lastCommitDates(pageSourcePaths(), REPO_ROOT)
+  if (lookup.failure) logger.warn(`git log failed (${lookup.failure}): the sitemap is written without <lastmod>`)
+  else if (lookup.shallow) logger.warn('shallow clone: git cannot say here when each page last changed, so the sitemap is written without <lastmod> (pages.yml fetches full history)')
+  return lastmodByUrl([...sitePages(), ...loadCorpus().pages], lookup, siteWithBase)
 }

@@ -7,16 +7,24 @@
 import { copyFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { satteri } from '@astrojs/markdown-satteri'
+import sitemap from '@astrojs/sitemap'
 import starlight from '@astrojs/starlight'
 import { defineConfig } from 'astro/config'
 import starlightLinksValidator from 'starlight-links-validator'
 import starlightLlmsTxt from 'starlight-llms-txt'
 import { DEFAULT_BRANCH, GITHUB_REPO, REPO_ROOT, REPOSITORY_DOCS, SITE_DIR, SITE_TITLE, repositoryDocDirs } from './src/harness-docs/corpus.mjs'
+import { llmsTxtLink, verificationTags } from './src/harness-docs/head.mjs'
 import { harnessHastPlugins, harnessMdastPlugins } from './src/harness-docs/markdown-plugins.mjs'
-import { LEAD_GROUPS, harnessSidebar, llmsPageIndex } from './src/harness-docs/site-index.mjs'
+import { LEAD_GROUPS, harnessSidebar, llmsPageIndex, sitemapLastmod } from './src/harness-docs/site-index.mjs'
 
 const site = 'https://cogvera-labs.github.io'
 const base = '/next-expo-supabase-agent-harness'
+// The codes Google Search Console and Bing Webmaster Tools issue for their "HTML tag" method.
+// Paste each between its quotes: the value of the tag's `content` attribute, not the whole
+// tag. A code is public, and every page then carries it; while a code is empty, no tag is
+// written. They tie the site to the maintainer's accounts, so a copy of the site that
+// someone else publishes must empty both.
+const SITE_VERIFICATION = { google: '', bing: '' }
 const title = SITE_TITLE
 // The project's one-sentence description, the same as the landing page's tagline.
 const description =
@@ -48,6 +56,26 @@ function socialPreview() {
       },
     },
   }
+}
+
+/**
+ * The sitemap, with a <lastmod> on each page: the commit date of the page's source file,
+ * which is the date the page shows as "Last updated". Starlight adds a sitemap of its own,
+ * without dates, only when the config has none. The dates are read once, when a build
+ * starts (`astro dev` writes no sitemap), so that writing an entry is a lookup that cannot
+ * fail: the sitemap integration logs an error from `serialize` and then writes no sitemap.
+ */
+function sitemapWithLastmod() {
+  let lastmod = new Map()
+  const dates = {
+    name: 'harness-sitemap-lastmod',
+    hooks: {
+      'astro:build:start': ({ logger }) => {
+        lastmod = sitemapLastmod(`${site}${base}/`, logger)
+      },
+    },
+  }
+  return [dates, sitemap({ serialize: (item) => (lastmod.has(item.url) ? { ...item, lastmod: lastmod.get(item.url) } : item) })]
 }
 
 export default defineConfig({
@@ -93,6 +121,8 @@ export default defineConfig({
         { tag: 'meta', attrs: { name: 'twitter:image:alt', content: OG_IMAGE_ALT } },
         { tag: 'meta', attrs: { property: 'og:image:width', content: '1280' } },
         { tag: 'meta', attrs: { property: 'og:image:height', content: '640' } },
+        llmsTxtLink(base),
+        ...verificationTags(SITE_VERIFICATION),
         {
           tag: 'script',
           attrs: { type: 'application/ld+json' },
@@ -133,5 +163,6 @@ export default defineConfig({
         }),
       ],
     }),
+    ...sitemapWithLastmod(),
   ],
 })
