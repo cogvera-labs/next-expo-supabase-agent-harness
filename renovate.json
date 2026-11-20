@@ -250,6 +250,18 @@
       "allowedVersions": "!/^8\\.73\\.0$/"
     },
     {
+      "description": "react-native-reanimated 4.8.0 supports React Native 0.87 to 0.89, and the scaffold is on 0.86, so its Android build stops at reanimated's assertMinimalReactNativeVersionTask. No workspace package declares it: it arrives as a peer of react-native-css-interop, so the template holds 4.7.2 with an override, and this skips that one release. tests/gates/override-held-releases.test.mjs fails if either half goes.",
+      "matchFileNames": ["template/base/pnpm-workspace.yaml"],
+      "matchPackageNames": ["react-native-reanimated"],
+      "allowedVersions": "!/^4\\.8\\.0$/"
+    },
+    {
+      "description": "react-native-worklets 0.14.0 supports React Native 0.87 to 0.89 and is the release react-native-reanimated 4.8.0 needs; 4.7.2 needs 0.13.x. The template holds 0.13.1 with an override, and this skips that one release. tests/gates/override-held-releases.test.mjs fails if either half goes.",
+      "matchFileNames": ["template/base/pnpm-workspace.yaml"],
+      "matchPackageNames": ["react-native-worklets"],
+      "allowedVersions": "!/^0\\.14\\.0$/"
+    },
+    {
       "description": "next minors move the App Router contract. Patches, which carry the security floor, still flow.",
       "matchFileNames": ["template/base/pnpm-workspace.yaml"],
       "matchPackageNames": ["next"],
