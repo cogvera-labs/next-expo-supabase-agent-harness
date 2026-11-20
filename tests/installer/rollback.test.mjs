@@ -13,7 +13,6 @@ import fs, {
   chmodSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
   renameSync,
@@ -24,7 +23,6 @@ import fs, {
 } from 'node:fs'
 import { syncBuiltinESMExports } from 'node:module'
 import { createServer } from 'node:net'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { gzipSync } from 'node:zlib'
@@ -37,6 +35,7 @@ import {
 } from '../../installer/lib/rollback.mjs'
 import { readManifest, sha256 } from '../../installer/lib/manifest.mjs'
 import { writeInstallFile } from '../../installer/lib/write-file.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 import { liveOwned, tablesWith } from './helpers/provenance-fixture.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
@@ -49,7 +48,7 @@ const SETS = [
 ]
 
 function initFixture() {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   const res = spawnSync('node', [CLI, 'init', '--dir', dir, '--yes', ...SETS], { encoding: 'utf8' })
   assert.equal(res.status, 0, `init must succeed: ${res.stdout}${res.stderr}`)
   return dir
@@ -121,7 +120,7 @@ const AGED_TABLES = (() => {
 })()
 
 test('snapshot blob: N=1, round-trips, and records absent candidates as absent', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   writeInstallFile(join(dir, 'tools', 'a.mjs'), 'export const a = 1\n')
   writeInstallFile(join(dir, '.harness', 'manifest.json'), '{"files":{}}\n')
 
@@ -158,7 +157,7 @@ test('snapshot records every parked obligation file, present with its bytes and 
   ]
   const manifest = { files: {} }
 
-  const present = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const present = tempDir('tpah-rb-')
   writeInstallFile(join(present, '.harness', 'manifest.json'), '{"files":{}}\n')
   for (const rel of OBLIGATION_FILES) writeInstallFile(join(present, rel), `{"parked":"${rel}"}\n`)
   writeRollbackSnapshot({ targetDir: present, manifest, plan: [], from: '1.0.4', to: '1.1.0' })
@@ -168,7 +167,7 @@ test('snapshot records every parked obligation file, present with its bytes and 
     assert.equal(Buffer.from(kept[rel].b64, 'base64').toString(), `{"parked":"${rel}"}\n`)
   }
 
-  const absent = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const absent = tempDir('tpah-rb-')
   writeInstallFile(join(absent, '.harness', 'manifest.json'), '{"files":{}}\n')
   writeRollbackSnapshot({ targetDir: absent, manifest, plan: [], from: '1.0.4', to: '1.1.0' })
   const vacant = readRollbackSnapshot(absent).snapshot.files
@@ -178,7 +177,7 @@ test('snapshot records every parked obligation file, present with its bytes and 
 })
 
 test('rollback with no snapshot refuses loudly', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   writeInstallFile(join(dir, '.harness', 'manifest.json'), '{"files":{}}\n')
   assert.notEqual(rollbackUpdate({ dir }), 0, 'nothing to roll back is an error, not a green no-op')
 })
@@ -252,7 +251,7 @@ test('dry-run records no snapshot', async () => {
 })
 
 test('rollback restores the executable bit with the bytes', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   const hook = join(dir, '.claude', 'hooks', 'guard.mjs')
   writeInstallFile(hook, '#!/usr/bin/env node\nexport {}\n')
   writeInstallFile(join(dir, '.harness', 'manifest.json'), '{"files":{}}\n')
@@ -302,7 +301,7 @@ function trySymlink(target, path) {
 test('snapshot takes the mode and the bytes from ONE inode while the file is replaced underneath', {
   skip: !POSIX && 'mode bits are the observable here, and win32 has no 0o600/0o700 distinction',
 }, () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   mkdirSync(join(dir, 'tools'))
   const dest = join(dir, 'tools', 'churn.mjs')
   // Version n: bytes `v<n>`, mode 0o600 when n is even and 0o700 when odd, swapped in by
@@ -347,7 +346,7 @@ test('snapshot takes the mode and the bytes from ONE inode while the file is rep
 })
 
 test('snapshot records a directory and a path under a regular file as absent', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   writeInstallFile(join(dir, 'tools', 'a.mjs'), 'export const a = 1\n')
   mkdirSync(join(dir, 'tools', 'a-dir'))
   const files = snapshotOf(dir, ['tools/a-dir', 'tools/a.mjs/child', 'tools/a.mjs'])
@@ -359,7 +358,7 @@ test('snapshot records a directory and a path under a regular file as absent', (
 })
 
 test('snapshot follows a symlink as statSync did; a dangling link is absent', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   const target = join(dir, 'tools', 'real.mjs')
   writeInstallFile(target, 'export const real = 1\n')
   if (POSIX) chmodSync(target, 0o600)
@@ -379,7 +378,7 @@ test('snapshot follows a symlink as statSync did; a dangling link is absent', (t
 test('a FIFO candidate is recorded absent without blocking', {
   skip: !POSIX && 'win32 has no FIFOs',
 }, (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   mkdirSync(join(dir, 'tools'))
   if (spawnSync('mkfifo', [join(dir, 'tools', 'pipe')]).status !== 0) {
     t.skip('mkfifo is unavailable on this runner')
@@ -406,7 +405,7 @@ test('a FIFO candidate is recorded absent without blocking', {
 test('a UNIX socket candidate is recorded absent', {
   skip: !POSIX && 'a path-bound socket is POSIX-only',
 }, async (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   mkdirSync(join(dir, 'tools'))
   const server = createServer()
   const listenError = await new Promise((resolve) => {
@@ -434,7 +433,7 @@ test('a UNIX socket candidate is recorded absent', {
 test('an unreadable directory is absent; an unreadable FILE throws before any blob', {
   skip: !NONROOT && 'needs POSIX permissions and a non-root user',
 }, () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   const lockedDir = join(dir, 'tools', 'locked-dir')
   const lockedFile = join(dir, 'tools', 'locked.mjs')
   mkdirSync(lockedDir, { recursive: true })
@@ -491,7 +490,7 @@ const recorded = (text, mode = 0o644) => ({
 })
 
 test('rollback removes a directory the update created at a vacant path', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   writeRollbackSnapshot({
     targetDir: dir,
     manifest: { files: {} },
@@ -513,7 +512,7 @@ test('rollback removes a directory the update created at a vacant path', () => {
 })
 
 test('a file the update replaced with a directory is restored with its bytes', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   const gate = join(dir, 'tools', 'gate.mjs')
   const manifestPath = join(dir, '.harness', 'manifest.json')
   const gateBytes = '#!/usr/bin/env node\nexport const gate = 1\n'
@@ -547,7 +546,7 @@ test('a file the update replaced with a directory is restored with its bytes', (
 })
 
 test('a directory that was already at a candidate path survives, with a note', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   const mine = join(dir, 'tools', 'kept', 'mine.txt')
   const manifestPath = join(dir, '.harness', 'manifest.json')
   writeInstallFile(mine, 'mine\n')
@@ -576,7 +575,7 @@ test('a directory that was already at a candidate path survives, with a note', (
 })
 
 test('under a v1 blob a directory at an absent path is a conflict, not a delete', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   const manifestPath = join(dir, '.harness', 'manifest.json')
   const created = join(dir, 'tools', 'new-gate', 'nested', 'check.mjs')
   const gate = join(dir, 'tools', 'gate.mjs')
@@ -609,7 +608,7 @@ test('under a v1 blob a directory at an absent path is a conflict, not a delete'
 })
 
 test('the CLI exits 2 and names the directory a v1 blob cannot account for', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
+  const dir = tempDir('tpah-rb-')
   writeInstallFile(join(dir, '.harness', 'manifest.json'), '{"files":{}}\n')
   writeInstallFile(join(dir, 'tools', 'new-gate', 'check.mjs'), 'export {}\n')
   writeV1Blob(dir, {
@@ -623,8 +622,8 @@ test('the CLI exits 2 and names the directory a v1 blob cannot account for', () 
 })
 
 test('a symlink inside a removed directory is unlinked, never followed', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
-  const outside = mkdtempSync(join(tmpdir(), 'tpah-rb-outside-'))
+  const dir = tempDir('tpah-rb-')
+  const outside = tempDir('tpah-rb-outside-')
   writeFileSync(join(outside, 'keep.txt'), 'keep\n')
   writeRollbackSnapshot({
     targetDir: dir,
@@ -647,8 +646,8 @@ test('a symlink inside a removed directory is unlinked, never followed', (t) => 
 })
 
 test('a symlinked parent that leads outside the install: nothing outside is removed, exit 2', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-rb-'))
-  const outside = mkdtempSync(join(tmpdir(), 'tpah-rb-outside-'))
+  const dir = tempDir('tpah-rb-')
+  const outside = tempDir('tpah-rb-outside-')
   const manifestPath = join(dir, '.harness', 'manifest.json')
   writeFileSync(join(outside, 'gate.mjs'), 'export const gate = 1\n')
   mkdirSync(join(dir, 'tools'))

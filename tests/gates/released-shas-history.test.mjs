@@ -14,11 +14,11 @@
 import assert from 'node:assert/strict'
 import { execFileSync, spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const SCRIPT = join(ROOT, 'scripts/check-released-shas.mjs')
@@ -64,7 +64,7 @@ test('RED: a variant only an untagged main commit shipped, missing from its tabl
   const sha = createHash('sha256')
     .update(execFileSync('git', ['show', `${UNTAGGED}:template/base/${VICTIM}`], { cwd: ROOT }))
     .digest('hex')
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-shas-history-'))
+  const dir = tempDir('nsah-shas-history-')
   made.push(dir)
   cpSync(TABLES, dir, { recursive: true })
   const path = join(dir, '1.0.4.json')

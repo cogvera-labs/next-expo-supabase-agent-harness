@@ -6,8 +6,7 @@
 // HARNESS_TEST_REQUIRE_TYPESCRIPT=1 (lint.yml's machinery-evals step).
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
 import { after, test } from 'node:test'
@@ -16,6 +15,7 @@ import { B_DIR, runB, SAMPLE, stratified } from '../../scripts/eval-b.mjs'
 import { checkManifest, readJson, writeJson } from '../../scripts/lib/evals.mjs'
 import { walkFiles } from '../../template/base/tools/lib/fs-walk.mjs'
 import { treeTest, ts } from '../gates/helpers/single-home.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../scripts/eval-b.mjs', import.meta.url))
 const FIXTURE = join(B_DIR, 'fixture')
@@ -25,7 +25,7 @@ after(() => {
 })
 
 function scratchEval() {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-eval-b-dir-'))
+  const dir = tempDir('epah-eval-b-dir-')
   made.push(dir)
   cpSync(B_DIR, dir, { recursive: true })
   return dir

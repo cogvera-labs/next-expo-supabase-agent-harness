@@ -21,8 +21,7 @@
 
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -41,6 +40,7 @@ import { fileURLToPath } from 'node:url'
 import { boundKind, createRecorder, normalizeChain } from '../../template/base/tools/lib/query-recorder.mjs'
 import { indexServes, parseShapes, selectSql } from '../../template/base/tools/lib/query-shapes.mjs'
 import { parseFunctions, parseIndexes, splitStatements } from '../../template/base/tools/lib/sql-parse.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const GATE_SRC = join(ROOT, 'template/base/tools/check-query-shapes.mjs')
@@ -116,7 +116,7 @@ function getShape(over = {}) {
  * @param {{ shapes?: any[] | null, rawManifest?: string, migration?: string }} [opts]
  */
 function fixture({ shapes = [listShape(), getShape()], rawManifest, migration = MIGRATION_OK } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nesah-queryshapes-'))
+  const dir = tempDir('nesah-queryshapes-')
   mkdirSync(join(dir, 'tools/generated'), { recursive: true })
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   mkdirSync(join(dir, 'supabase/migrations'), { recursive: true })

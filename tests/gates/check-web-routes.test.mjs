@@ -18,16 +18,15 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(new URL('../../template/base/tools/check-web-routes.mjs', import.meta.url))
 const GEN = fileURLToPath(new URL('../../template/base/tools/gen-web-routes.mjs', import.meta.url))
@@ -49,7 +48,7 @@ const asText = (v) => (typeof v === 'string' ? v : JSON.stringify(v, null, 2))
  * @param {{ allowlist?: any, mutate?: (dir: string) => void, demo?: boolean }} [opts]
  */
 function fixture({ allowlist = SHIPPED_ALLOWLIST, mutate, demo = true } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-webroutes-'))
+  const dir = tempDir('epah-webroutes-')
   for (const root of demo ? [WEB, DEMO_WEB] : [WEB]) {
     for (const sub of ['app', 'lib', 'e2e']) {
       if (existsSync(join(root, sub))) cpSync(join(root, sub), join(dir, 'apps/web', sub), { recursive: true })
@@ -319,7 +318,7 @@ test('a Route Handler (route.ts) is plumbing, not a page', () => {
 })
 
 test('SKIP-LOUDLY locally / FAIL-CLOSED in CI when there is no web surface', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-webroutes-none-'))
+  const dir = tempDir('epah-webroutes-none-')
   const ci = runGate(dir)
   assert.equal(ci.code, 1, ci.out)
   assert.match(ci.out, /skips are not allowed in CI/)

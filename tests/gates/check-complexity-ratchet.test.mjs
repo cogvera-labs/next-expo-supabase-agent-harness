@@ -15,19 +15,18 @@ import {
   chmodSync,
   copyFileSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
   realpathSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { delimiter, join } from 'node:path'
 import process from 'node:process'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { compareComplexity, identify, keyScores, scoreOf } from '../../scripts/lib/complexity.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const record = { limit: 15, functions: { 'a.mjs::foo': 20, 'b.mjs::bar': 30 } }
 
@@ -146,7 +145,7 @@ after(() => {
 
 /** @param {string} prefix */
 function scratch(prefix) {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), prefix)))
+  const dir = realpathSync(tempDir(prefix))
   made.push(dir)
   return dir
 }

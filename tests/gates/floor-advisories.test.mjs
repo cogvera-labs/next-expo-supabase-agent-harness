@@ -28,8 +28,7 @@
 // SOURCE: scripts/check-floor-advisories.mjs · scripts/lib/floor-advisories.mjs
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
 import { after, test } from 'node:test'
@@ -43,6 +42,7 @@ import {
   rangeIncludes,
   UPSTREAM_REPOS,
 } from '../../scripts/lib/floor-advisories.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const SCRIPT = join(ROOT, 'scripts/check-floor-advisories.mjs')
@@ -118,7 +118,7 @@ const osvVuln = (id, extra = {}) => ({ id, aliases: [FRESH_CVE], published: '202
  * @param {{ floor?: unknown, workspace?: string, responses?: unknown, args?: string[] }} [fx]
  */
 function run(fx = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'floor-advisories-'))
+  const dir = tempDir('floor-advisories-')
   made.push(dir)
   const floor = join(dir, 'framework-floor.json')
   const workspace = join(dir, 'pnpm-workspace.yaml')
@@ -597,7 +597,7 @@ test('a malformed argument exits 2 rather than running on a default', () => {
 })
 
 test('an unreadable floor, workspace or responses file fails closed', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'floor-advisories-'))
+  const dir = tempDir('floor-advisories-')
   made.push(dir)
   writeFileSync(join(dir, 'bad.json'), '{')
   const missing = join(dir, 'absent.json')
@@ -630,7 +630,7 @@ test('on the REAL seeds, the probes are each minPatchByMajor version and the exa
 test('on the REAL seeds, the script asks for exactly those probes and the upstream listing', () => {
   // End to end over the default paths, with an EMPTY recording: every request the script
   // would send is named by its missing response, and nothing else is.
-  const dir = mkdtempSync(join(tmpdir(), 'floor-advisories-'))
+  const dir = tempDir('floor-advisories-')
   made.push(dir)
   writeFileSync(join(dir, 'none.json'), '{}')
   const r = spawnSync(process.execPath, [SCRIPT, `--responses=${join(dir, 'none.json')}`], { cwd: ROOT, encoding: 'utf8' })

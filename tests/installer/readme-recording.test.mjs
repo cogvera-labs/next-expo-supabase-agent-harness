@@ -8,10 +8,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, readFileSync, rmSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const TAPE = join(ROOT, 'docs/media/harness-demo.tape')
@@ -71,7 +71,7 @@ test('every command the tape types prints what the tape says it prints', { skip:
   const steps = parseTape(readFileSync(TAPE, 'utf8'))
   assert.ok(steps.some((s) => s.exit !== 0), 'the recording must show at least one gate going red')
   assert.ok(steps.some((s) => s.expects.length > 0), 'the tape checks no output at all')
-  const tmp = mkdtempSync(join(tmpdir(), 'epah-recording-'))
+  const tmp = tempDir('epah-recording-')
   try {
     // `clear` is screen plumbing for the recording; the commands run in one shell, as typed.
     const script = ['exec 2>&1', 'clear() { :; }']

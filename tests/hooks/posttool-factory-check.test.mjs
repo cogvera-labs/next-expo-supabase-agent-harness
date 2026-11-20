@@ -15,11 +15,11 @@
 // Windows leg of installer-unit too.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { after, before, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const REPO = fileURLToPath(new URL('../../', import.meta.url))
 const ADAPTER = '.claude/hooks/posttool-factory-check.mjs'
@@ -39,7 +39,7 @@ after(() => {
 
 /** A temp copy of the adapter and the shipped tree it resolves, in the repo's layout. */
 function mirror() {
-  const root = mkdtempSync(join(tmpdir(), 'epah-factory-check-'))
+  const root = tempDir('epah-factory-check-')
   made.push(root)
   mkdirSync(join(root, '.claude/hooks'), { recursive: true })
   cpSync(join(REPO, ADAPTER), join(root, ADAPTER))

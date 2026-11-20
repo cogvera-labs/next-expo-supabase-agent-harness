@@ -787,6 +787,9 @@
     "biome.jsonc": [
       {
         "sha256": "bb5cb287b58e497a292013444a08bb085ddb0094f31a388d2968195dbc52c786"
+      },
+      {
+        "sha256": "f6664d3ae92655aa63f91fde45c469e3876ef985ed7aa7b71ef5fcbac87b40f2"
       }
     ],
     "commitlint.config.mjs": [
@@ -2852,6 +2855,23 @@
       }
     ],
     "package.json": [
+      {
+        "sha256": "29b5b41754bd0fb8cec51b3cbc568bffd32646289586582dc1fdd731598d8f0c",
+        "sites": [
+          [
+            13,
+            "PROJECT_SLUG"
+          ],
+          [
+            124,
+            "GITHUB_OWNER"
+          ],
+          [
+            141,
+            "PROJECT_SLUG"
+          ]
+        ]
+      },
       {
         "sha256": "585cff8a7888136beaa7c92ad673cc84276243ae70cae03f769568a95acb07d1",
         "sites": [

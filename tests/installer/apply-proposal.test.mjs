@@ -15,18 +15,17 @@ import { spawnSync } from 'node:child_process'
 import {
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   rmSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { applyProposal } from '../../installer/commands/apply-proposal.mjs'
 import { doctor } from '../../installer/commands/doctor.mjs'
 import { PROPOSABLE, PROPOSALS_DIR } from '../../installer/lib/proposals.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 import { captured, freshInstall as install } from './helpers/provenance-fixture.mjs'
 
 // Every directory this file makes is removed when it ends (a fresh install is ~14 MB).
@@ -35,12 +34,6 @@ const made = []
 after(() => {
   for (const dir of made) rmSync(dir, { recursive: true, force: true })
 })
-/** @param {string} prefix */
-const tempDir = (prefix) => {
-  const dir = mkdtempSync(join(tmpdir(), prefix))
-  made.push(dir)
-  return dir
-}
 
 /** @param {string} cwd @param {string[]} args */
 const git = (cwd, args) => {

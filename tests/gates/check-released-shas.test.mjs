@@ -12,8 +12,7 @@
 // The tag half of the gate (--verify-tags) is proved where tags exist — lint.yml.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -34,6 +33,7 @@ import {
   unionInto,
 } from '../../scripts/lib/released-shas.mjs'
 import { ESCAPE_LISTS } from '../../template/base/tools/lib/enforcement-surface.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/check-released-shas.mjs', import.meta.url))
 const TABLES = fileURLToPath(new URL('../../template/shas/', import.meta.url))
@@ -56,7 +56,7 @@ after(() => {
 /** A writable copy of the shipped tables, doctored by `mutate(dir)`. */
 /** @param {(dir: string) => void} mutate */
 function doctored(mutate) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-shas-'))
+  const dir = tempDir('nsah-shas-')
   made.push(dir)
   cpSync(TABLES, dir, { recursive: true })
   mutate(dir)
@@ -83,7 +83,7 @@ const shippedTables = () =>
 /** A writable copy of the shipped tools/lib/planted-shas.json, doctored by `edit`. */
 /** @param {(evidence: any) => any} edit */
 function doctoredPlanted(edit) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-planted-'))
+  const dir = tempDir('nsah-planted-')
   made.push(dir)
   const path = join(dir, 'planted-shas.json')
   writeFileSync(path, `${JSON.stringify(edit(JSON.parse(readFileSync(PLANTED, 'utf8'))), null, 2)}\n`)

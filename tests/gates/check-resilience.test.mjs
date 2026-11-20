@@ -12,11 +12,11 @@
 // exists to refuse.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-resilience.mjs', import.meta.url),
@@ -48,7 +48,7 @@ const TIMED_FETCH_ROW = {
  * @param {{ register?: any, edit?: (r: any) => void, files?: Record<string, string>, manifest?: { harnessVersion: string, baseVersion: string }, includeStack?: boolean }} [opts]
  */
 function fixture({ register, edit, files = {}, manifest, includeStack = false } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-resilience-'))
+  const dir = tempDir('epah-resilience-')
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   cpSync(join(TOOLS, 'lib'), join(dir, 'tools/lib'), { recursive: true })
   if (includeStack) {

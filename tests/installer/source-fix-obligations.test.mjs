@@ -11,8 +11,7 @@
 // the consumer moved the surface, and the gate stays the authority.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -21,6 +20,7 @@ import {
   applySeededSourceFixObligations,
   unappliedSeededSourceFixes,
 } from '../../installer/lib/migrations.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLIENT = 'apps/web/lib/supabase/client.ts'
 const BARREL = 'packages/platform/supabase/src/client.ts'
@@ -65,7 +65,7 @@ const treeOf = (map) => (rel) => (Object.hasOwn(map, rel) ? map[rel] : null)
 // `init` a leftover that already holds a harness (a reused pid), or a directory another
 // local user pre-created in a shared temp dir; mkdtemp can do neither.
 function scratch() {
-  return mkdtempSync(join(tmpdir(), 'harness-srcfix-'))
+  return tempDir('harness-srcfix-')
 }
 
 /** @param {string} dir @param {Record<string, string>} files */

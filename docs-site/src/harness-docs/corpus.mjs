@@ -16,7 +16,7 @@ import { checkPageMeta, pageMetaFor } from './page-meta.mjs'
 
 export const GITHUB_REPO = 'https://github.com/cogvera-labs/next-expo-supabase-agent-harness'
 export const DEFAULT_BRANCH = 'main'
-/** The site title: the header, og:site_name, and the end of every <title>. */
+/** The site title: the header and og:site_name. A <title> ends with the shorter suffix in head.mjs. */
 export const SITE_TITLE = 'next-expo-supabase-agent-harness'
 
 /** The repository root: docs-site/src/harness-docs/ is three levels below it. */
@@ -167,6 +167,13 @@ export function sitePages() {
 
 /** The folders the repository documents live in, for Starlight's Markdown processing. */
 export const repositoryDocDirs = () => [...new Set(REPOSITORY_DOCS.map(([repoPath]) => join(REPO_ROOT, posix.dirname(repoPath), '/')))]
+
+/**
+ * The repo-relative paths that hold every page's source file, for the one git call that dates
+ * the pages (page-dates.mjs): the template docs' trees, each repository document, and the
+ * site's own pages.
+ */
+export const pageSourcePaths = () => ['template/base/docs', 'template/modules', ...REPOSITORY_DOCS.map(([repoPath]) => repoPath), posix.join(SITE_DIR, 'src/content/docs')]
 
 /** Repo-relative POSIX path for an absolute path. */
 export function repoRelative(absPath) {

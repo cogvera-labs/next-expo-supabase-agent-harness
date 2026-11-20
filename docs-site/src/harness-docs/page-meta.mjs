@@ -5,14 +5,17 @@
 // paragraph, which on most of them is cut mid-sentence. Each entry here can give a page:
 //
 //   description  the meta description: complete sentences, at most 155 characters
-//   title        the <title> and og:title, where the H1 is long; the page still shows its H1
+//   title        the page's part of the <title>, and the og:title, where the H1 is long; the
+//                page still shows its H1
 //   label        the sidebar label, where the H1 is long
 //
 // Write what the page is for, not what it says today, so an entry does not go stale on the
 // next edit to the page. No live counts: a number here is checked by nothing. An entry for a
 // file the site does not render fails the build, and so does an entry that breaks a limit.
+import { PAGE_TITLE_MAX } from './head.mjs'
 
-const LIMITS = { description: 155, title: 40, label: 32 }
+// A title's limit is what the <title> has left beside the site's suffix (head.mjs).
+const LIMITS = { description: 155, title: PAGE_TITLE_MAX, label: 32 }
 
 export const PAGE_META = {
   'template/base/docs/harness/README.md': {

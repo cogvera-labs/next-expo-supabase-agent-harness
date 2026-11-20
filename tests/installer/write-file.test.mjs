@@ -12,16 +12,15 @@ import {
   chmodSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   statSync,
   readFileSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { renameWithRetry, writeInstallFile } from '../../installer/lib/write-file.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 // POSIX file modes do not exist on Windows — content assertions run there,
 // mode assertions are guarded. Pin the umask so exact-mode assertions are
@@ -33,7 +32,7 @@ if (POSIX) process.umask(0o022)
 const mode = (p) => statSync(p).mode & 0o777
 
 test('shebang string gets the executable bit (0o755)', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-wf-'))
+  const dir = tempDir('tpah-wf-')
   const dest = join(dir, 'hook.mjs')
   const content = '#!/usr/bin/env node\nconsole.log("hook")\n'
   writeInstallFile(dest, content)
@@ -42,7 +41,7 @@ test('shebang string gets the executable bit (0o755)', () => {
 })
 
 test('plain string gets 0o644 — including a "#!" that is not at byte 0', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-wf-'))
+  const dir = tempDir('tpah-wf-')
 
   const plain = join(dir, 'AGENTS.md')
   writeInstallFile(plain, '# Project memory\n')
@@ -62,7 +61,7 @@ test('plain string gets 0o644 — including a "#!" that is not at byte 0', () =>
 })
 
 test('Buffer content is never executable, even when it starts with #! bytes', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-wf-'))
+  const dir = tempDir('tpah-wf-')
 
   // Binary asset whose leading bytes spell '#!' — the Buffer branch must win.
   const shebangBytes = Buffer.concat([
@@ -83,7 +82,7 @@ test('Buffer content is never executable, even when it starts with #! bytes', ()
 })
 
 test('parent directories are created recursively', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-wf-'))
+  const dir = tempDir('tpah-wf-')
   const dest = join(dir, 'apps', 'server', 'src', 'routes', 'health.ts')
   assert.ok(!existsSync(join(dir, 'apps')), 'fixture precondition: no parent dirs yet')
   writeInstallFile(dest, 'export const ok = true\n')
@@ -102,7 +101,7 @@ test('parent directories are created recursively', () => {
 const NONROOT = POSIX && typeof process.getuid === 'function' && process.getuid() !== 0
 
 test('a failed staging write leaves the old bytes and mode untouched', { skip: !NONROOT }, () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-wf-'))
+  const dir = tempDir('tpah-wf-')
   const dest = join(dir, 'hookio.mjs')
   const old = '#!/usr/bin/env node\nexport const ok = true\n'
   writeInstallFile(dest, old)
@@ -125,7 +124,7 @@ test('a failed staging write leaves the old bytes and mode untouched', { skip: !
 })
 
 test('a failed rename leaves no tmp residue and throws', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-wf-'))
+  const dir = tempDir('tpah-wf-')
   // The destination is a DIRECTORY: staging succeeds, the rename itself fails.
   const dest = join(dir, 'taken')
   mkdirSync(dest)
@@ -139,7 +138,7 @@ test('a failed rename leaves no tmp residue and throws', () => {
 })
 
 test('success leaves no tmp residue beside the destination', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-wf-'))
+  const dir = tempDir('tpah-wf-')
   writeInstallFile(join(dir, 'a.json'), '{"a":1}\n')
   writeInstallFile(join(dir, 'a.json'), '{"a":2}\n')
   writeInstallFile(join(dir, 'b.bin'), Buffer.from([0x00, 0x01]))
@@ -231,7 +230,7 @@ test('writeFileSync appears nowhere in installer/ outside the primitive', () => 
 })
 
 test('overwrite re-asserts the mode — shebang-ness flips the executable bit in place', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-wf-'))
+  const dir = tempDir('tpah-wf-')
 
   // writeFileSync's mode option only applies at creation, so the primitive
   // chmods explicitly: a file whose shebang-ness changes across harness

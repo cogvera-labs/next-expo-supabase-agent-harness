@@ -21,7 +21,6 @@ import {
   copyFileSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   rmSync,
   symlinkSync,
@@ -40,6 +39,7 @@ import {
   probeCommand,
   toolchainReport,
 } from '../../installer/lib/toolchain.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 import { captured, freshInstall as install } from './helpers/provenance-fixture.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
@@ -52,12 +52,6 @@ const made = []
 after(() => {
   for (const dir of made) rmSync(dir, { recursive: true, force: true })
 })
-/** @param {string} prefix */
-const tempDir = (prefix) => {
-  const dir = mkdtempSync(join(tmpdir(), prefix))
-  made.push(dir)
-  return dir
-}
 /** @param {string} prefix */
 const freshInstall = async (prefix) => {
   const dir = await install(prefix)

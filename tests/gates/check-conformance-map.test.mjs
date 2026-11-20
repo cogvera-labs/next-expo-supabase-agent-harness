@@ -14,8 +14,7 @@
 // empty register reading as a clean bill of health.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { appendFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { appendFileSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -35,6 +34,7 @@ import { liveControls } from '../../template/base/tools/lib/live-controls.mjs'
 // A namespace import: a named import of an entry the register lacks would fail this whole
 // file at link time instead of failing the stamp cases that need it.
 import * as stampRegister from '../../template/base/tools/lib/stamp-inputs.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const BASE = join(ROOT, 'template/base')
@@ -627,7 +627,7 @@ test('the shipped GATE fails CLOSED on an empty register — an empty map is a m
   // The template stores workflows dotless (github/), so the gate's green path is exercised
   // in the rendered scaffold (selftest); what a fixture can prove without a render is the
   // anti-vacuity path: an empty requirements[] is a hard red naming the file.
-  const dir = mkdtempSync(join(tmpdir(), 'epah-conformance-'))
+  const dir = tempDir('epah-conformance-')
   try {
     mkdirSync(join(dir, 'tools', 'lib'), { recursive: true })
     for (const f of ['check-conformance-map.mjs', 'harness.config.mjs', 'modules.json']) {
@@ -689,7 +689,7 @@ function put(dir, rel, text) {
 }
 
 function stampFixture() {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-cmapstamp-'))
+  const dir = tempDir('epah-cmapstamp-')
   made.push(dir)
   mkdirSync(join(dir, 'tools'), { recursive: true })
   for (const f of ['check-conformance-map.mjs', 'harness.config.mjs', 'modules.json']) {

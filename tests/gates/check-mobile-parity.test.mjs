@@ -5,12 +5,12 @@
 // gate that cannot go red is decoration.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-mobile-parity.mjs', import.meta.url),
@@ -35,7 +35,7 @@ function run(dir, extraEnv = {}) {
  * @param {{ actions?: any, parity?: string, files?: string[], manifest?: any }} [opts]
  */
 function scaffold({ actions, parity, files = [], manifest } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'parity-'))
+  const dir = tempDir('parity-')
   if (actions !== undefined) {
     mkdirSync(join(dir, 'tools/generated'), { recursive: true })
     writeFileSync(

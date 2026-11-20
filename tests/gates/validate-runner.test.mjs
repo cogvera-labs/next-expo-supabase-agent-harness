@@ -9,15 +9,14 @@ import {
   copyFileSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { loadStopChain } from '../../template/base/tools/lib/stop-chain.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const VALIDATE = fileURLToPath(new URL('../../template/base/tools/validate.mjs', import.meta.url))
 const STOP_LIB = fileURLToPath(
@@ -44,7 +43,7 @@ export const STOP_HOOK_STEPS = []
 `
 
 function run(args) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-validate-'))
+  const dir = tempDir('epah-validate-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   copyFileSync(VALIDATE, join(dir, 'tools/validate.mjs'))
   writeFileSync(join(dir, 'tools/harness.config.mjs'), STUB_CONFIG)
@@ -95,7 +94,7 @@ function poolConfig(steps) {
 // steps: [name, exitCode][]. provenance/version-sync/licenses/docs-sync are
 // PARALLEL_SAFE (pooled); 'custom-step' stands in for a consumer step (exclusive).
 function runPool(steps, args = ['--report-all']) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-validate-pool-'))
+  const dir = tempDir('epah-validate-pool-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   copyFileSync(VALIDATE, join(dir, 'tools/validate.mjs'))
   writeFileSync(join(dir, 'tools/step.mjs'), STEP_RUNNER)
@@ -181,7 +180,7 @@ test('--report-all: a non-PARALLEL_SAFE step runs EXCLUSIVE — serialized betwe
  * @param {{ config: string[], floor: string[] | null, corruptFloor?: string }} spec
  */
 function stopChainFixture({ config, floor, corruptFloor }) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-validate-stop-'))
+  const dir = tempDir('epah-validate-stop-')
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   copyFileSync(VALIDATE, join(dir, 'tools/validate.mjs'))
   copyFileSync(STOP_LIB, join(dir, 'tools/lib/stop-chain.mjs'))
@@ -355,7 +354,7 @@ function parityConfig(steps) {
 
 /** @param {[string, string][]} steps [name, command] */
 function parityFixture(steps) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-validate-parity-'))
+  const dir = tempDir('epah-validate-parity-')
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   copyFileSync(VALIDATE, join(dir, 'tools/validate.mjs'))
   copyFileSync(GATE_LIB_FILE, join(dir, 'tools/lib/gate.mjs'))
@@ -559,7 +558,7 @@ test('--ci-parity: the report root lives in the temp dir and is removed when the
     ['db-lane', 'node tools/skip.mjs fake-db'],
     ['need', 'node tools/need.mjs'],
   ])
-  const tmp = mkdtempSync(join(tmpdir(), 'epah-parity-tmp-'))
+  const tmp = tempDir('epah-parity-tmp-')
   for (const args of [['--ci-parity'], ['--ci-parity', '--report-all']]) {
     const r = runParity(dir, args, tmpVars(tmp))
     assert.equal(r.code, 1, r.out)

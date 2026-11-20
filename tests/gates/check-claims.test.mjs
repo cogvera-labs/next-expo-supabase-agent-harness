@@ -14,12 +14,12 @@
 // The conformance class (0.9.9) is the only one judged for ABSENCE as well as drift, and
 // the reason is in its own section at the bottom of this file.
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/check-claims.mjs', import.meta.url))
 const SCRIPT_BYTES = readFileSync(SCRIPT, 'utf8')
@@ -162,7 +162,7 @@ function runFixture({
   // 1.0.0 status-word cases hand a version in so the word/major agreement can be judged.
   pkg = null,
 }) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-claims-'))
+  const dir = tempDir('epah-claims-')
   const files = {
     'scripts/check-claims.mjs': SCRIPT_BYTES,
     // The real judge, byte-identical — the fixture must not get a stand-in that could
@@ -487,7 +487,7 @@ test('RED (0.6.0): a measurement taken against a DIFFERENT chain stops licensing
   // and left in place while two steps landed is not old, it is WRONG — and nothing about a
   // committed integer expires on its own, so it would go on unlocking the published figure
   // forever. The fixture chain is 3 steps; a measurement claiming 2 no longer describes it.
-  const dir = mkdtempSync(join(tmpdir(), 'epah-claims-stale-'))
+  const dir = tempDir('epah-claims-stale-')
   const files = {
     'scripts/check-claims.mjs': SCRIPT_BYTES,
     'scripts/lib/chain-budget.mjs': BUDGET_LIB_BYTES,

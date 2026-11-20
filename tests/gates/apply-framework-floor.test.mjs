@@ -14,11 +14,11 @@
 // SOURCE: scripts/ci/apply-framework-floor.mjs · template/base/tools/framework-floor.json
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/ci/apply-framework-floor.mjs', import.meta.url))
 
@@ -30,7 +30,7 @@ const FLOOR = {
 
 /** A scaffold carrying a catalog and (optionally) a floor. */
 function scaffold({ pin, floor = FLOOR, withFloor = true }) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-floor-'))
+  const dir = tempDir('epah-floor-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   if (withFloor) writeFileSync(join(dir, 'tools/framework-floor.json'), JSON.stringify(floor))
   writeFileSync(

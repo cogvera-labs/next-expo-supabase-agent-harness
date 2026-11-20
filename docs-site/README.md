@@ -34,6 +34,40 @@ Project), then one group per template docs folder. `llms.txt` lists every page i
 order, each with its `page-meta.mjs` description or, for a repository document, its opening
 paragraph.
 
+## Search metadata
+
+What a page tells a search engine, or a client that reads `llms.txt`, beyond its description:
+
+- **`<title>`.** A page's `<title>` is its title followed by ` | Claude Code harness`, the
+  `TITLE_SUFFIX` in [`src/harness-docs/head.mjs`](src/harness-docs/head.mjs). The site's own
+  title is the package name, which would take more than half of the 60 characters a
+  `<title>` is held to (about what a search result shows before it cuts the rest); it stays
+  in the header and in `og:site_name`. A title in `page-meta.mjs` is limited to what the
+  suffix leaves, and the home page states its whole `<title>` in its frontmatter. The build
+  log names any page whose `<title>` comes out longer: a heading with no shorter title in
+  `page-meta.mjs`, or the title of one of the site's own pages.
+- **Sitemap `<lastmod>`.** Each sitemap entry carries the commit date of the page's source
+  file. It comes from the same `git log` call as the page's "Last updated" line and its
+  JSON-LD `dateModified` ([`src/harness-docs/page-dates.mjs`](src/harness-docs/page-dates.mjs)),
+  so the three agree. The date follows the file alone: a change that reaches a page from
+  elsewhere, such as a new `TITLE_SUFFIX` or a count the landing page computes, does not
+  move it. In a shallow clone, or where git cannot answer, the only dates on offer would be
+  false, so the sitemap is written with no `<lastmod>` and the build log says so.
+  `astro.config.mjs` lists `@astrojs/sitemap` itself in order to set the dates; Starlight's
+  built-in sitemap has none.
+- **`llms.txt`.** Every page's `<head>` links the site's `llms.txt` with
+  `<link rel="describedby">`, the relation the [llms.txt proposal](https://llmstxt.org/)
+  recommends for pointing a page at the file that covers it. The link validator does not
+  read a `<head>`, so nothing checks this link at build time: it resolves for as long as
+  `starlight-llms-txt` stays in `astro.config.mjs`.
+- **Ownership tags.** To verify the site in Google Search Console or Bing Webmaster Tools,
+  choose the service's "HTML tag" method and paste its code into `SITE_VERIFICATION` at the
+  top of [`astro.config.mjs`](astro.config.mjs): the value of the tag's `content` attribute,
+  not the whole tag. Every page then carries `<meta name="google-site-verification">` or
+  `<meta name="msvalidate.01">`. While a code is empty, no tag is written. The codes are
+  public, and they tie the site to the maintainer's accounts, so a copy of the site that
+  someone else publishes must empty both.
+
 ## Links
 
 - **In a page read in place**, write relative links, as for GitHub. A link to a page the site
@@ -86,7 +120,8 @@ site page cannot show literal double braces. Write no other number that can go s
 - Two pages claiming one route, or a page claiming the site root.
 - A stale exclusion in `corpus.mjs`, or an empty template docs tree.
 - A `page-meta.mjs` entry for a page the site does not render, an unknown field, or a field
-  over its limit (description 155 characters, title 40, label 32).
+  over its limit (description 155 characters, title 38, label 32).
+- A `SITE_VERIFICATION` code that is more than the code, such as a whole `<meta>` tag.
 - A route in `LEAD_GROUPS` that names no page, or a repository document in no group.
 - An unknown build-time value in a site page.
 - A relative link that leaves the repository or names nothing; an internal link, `#anchor`
@@ -105,13 +140,19 @@ pnpm --dir docs-site run dev      # a local server
 The site has its own lockfile and pnpm root. It needs Node 22.22 or newer (CI uses Node 24)
 and the pnpm version in `package.json` (`corepack enable` provides it). If `corepack` is not
 on your PATH (Node.js 25 and later no longer bundle it), run `npm install -g corepack` first.
-"Last updated" dates come from `git log`, so a shallow clone stamps every page with one date.
-CI also sets `ASTRO_TELEMETRY_DISABLED=1`.
+"Last updated" dates come from `git log`, so a shallow clone stamps every page with one date
+and leaves the sitemap without `<lastmod>`. CI also sets `ASTRO_TELEMETRY_DISABLED=1`.
 
 ## Checks that cover this folder
 
 ESLint lints the `.mjs` files here with the repository's cognitive-complexity budget, and
-`scripts/hygiene.mjs` and REUSE cover every file. Two gaps:
+`scripts/hygiene.mjs` and REUSE cover every file.
+[`tests/gates/docs-site.test.mjs`](../tests/gates/docs-site.test.mjs) runs with the
+repository's test suites, without this folder's dependencies: it fails when a page's
+`<title>` would be longer than the limit, and it shows on throwaway repositories that a
+`<lastmod>` is a page's own commit date or absent. The modules it imports (`corpus.mjs`,
+`head.mjs`, `page-dates.mjs`, `page-meta.mjs` and `site-index.mjs`) are type-checked by the
+root `tsc` through it. Two gaps:
 
 - A pull request that changes only the repository documents under `docs/` does not build the
   site, because `pages.yml` does not list `docs/**` among its paths. A broken link there

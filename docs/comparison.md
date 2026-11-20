@@ -1,4 +1,4 @@
-# Comparison
+# Next.js and Expo starters compared
 
 How this harness compares with other Next.js and Expo starters and with Claude Code workflow
 and guard tools, as of November 2026, and when to choose each.

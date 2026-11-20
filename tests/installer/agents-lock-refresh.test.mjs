@@ -14,13 +14,13 @@
 // and keeps redding — because that edit is exactly what the lock exists to surface.
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { refreshAgentsLockEntries } from '../../installer/lib/agents-lock.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GENERATOR = fileURLToPath(new URL('../../template/base/tools/gen-agents-lock.mjs', import.meta.url))
 
@@ -34,7 +34,7 @@ const sha = (s) => createHash('sha256').update(s).digest('hex')
  * @returns {string} the install directory
  */
 function fixture({ files = {}, models = {}, lock } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-lockrefresh-'))
+  const dir = tempDir('epah-lockrefresh-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   for (const [rel, body] of Object.entries(files)) {
     mkdirSync(join(dir, rel, '..'), { recursive: true })
@@ -130,10 +130,10 @@ test('a dry run writes nothing; a missing or corrupt lock is left to the `prompt
   assert.equal(refreshAgentsLockEntries(dry, [rel], { notes: [] }, { dryRun: true }), 0)
   assert.equal(readLock(dry).files[rel], sha('old\n'))
 
-  const noLock = mkdtempSync(join(tmpdir(), 'epah-lockrefresh-'))
+  const noLock = tempDir('epah-lockrefresh-')
   assert.equal(refreshAgentsLockEntries(noLock, [rel], { notes: [] }), 0)
 
-  const corrupt = mkdtempSync(join(tmpdir(), 'epah-lockrefresh-'))
+  const corrupt = tempDir('epah-lockrefresh-')
   mkdirSync(join(corrupt, 'tools'), { recursive: true })
   writeFileSync(join(corrupt, 'tools/agents.lock.json'), '{ not json')
   assert.equal(refreshAgentsLockEntries(corrupt, [rel], { notes: [] }), 0)

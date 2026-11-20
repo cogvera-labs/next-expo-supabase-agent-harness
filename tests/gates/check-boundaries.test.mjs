@@ -4,11 +4,11 @@
 // workspace, run the real gate with cwd inside it, assert the exact red/green.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const EXPORTS_WALLS = fileURLToPath(
   new URL('../../template/base/tools/check-exports-walls.mjs', import.meta.url),
@@ -84,7 +84,7 @@ function fixture({
   files = [],
   modules = { modules: ['e2ee'], retired: [] },
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nesah-bounds-'))
+  const dir = tempDir('nesah-bounds-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   mkdirSync(join(dir, '.harness'), { recursive: true })
   writeFileSync(join(dir, 'tools/exports-walls.json'), JSON.stringify(census, null, 2))

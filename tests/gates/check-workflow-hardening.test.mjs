@@ -22,8 +22,7 @@
 //   - the job in actions-lint.yml that runs it, and the comments that name it.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -34,6 +33,7 @@ import {
   PLATFORM_LIMITS,
   workflowFindings,
 } from '../../template/base/tools/lib/workflow-hardening.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 import { CHECKOUT, CLEAN, CLEAN_JOB, HARDEN, HEAD, ISSUE_FIXTURE, LOOP_MISSES } from './helpers/workflow-hardening-cases.mjs'
 
 const REPO = fileURLToPath(new URL('../../', import.meta.url))
@@ -48,7 +48,7 @@ after(() => {
 
 /** @param {Record<string, string>} files @param {{ baseVersion: string, harnessVersion: string }} [manifest] */
 function install(files, manifest) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-wfh-'))
+  const dir = tempDir('nsah-wfh-')
   made.push(dir)
   for (const [rel, text] of Object.entries(files)) {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })

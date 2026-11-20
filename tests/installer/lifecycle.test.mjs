@@ -15,16 +15,15 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   readdirSync,
   rmSync,
   statSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 const TEMPLATE = fileURLToPath(new URL('../../template/', import.meta.url))
@@ -66,7 +65,7 @@ function shippedModules() {
 }
 
 test('bootstrap init renders the monorepo layout with manifest modes', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-boot-'))
+  const dir = tempDir('epah-boot-')
   const r = run(['init', '--dir', dir, '--yes', ...SETS])
   assert.equal(r.code, 0, r.out)
   assert.match(
@@ -165,7 +164,7 @@ test('bootstrap init renders the monorepo layout with manifest modes', () => {
 })
 
 test('init in an existing Git repository omits the git init step', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-git-'))
+  const dir = tempDir('epah-git-')
   execFileSync('git', ['init', '-q', dir])
   const r = run(['init', '--dir', dir, '--yes', ...SETS])
   assert.equal(r.code, 0, r.out)
@@ -179,7 +178,7 @@ test('init in an existing Git repository omits the git init step', () => {
 // The first run ends at a green Claude Code turn, and that turn's Stop hook runs the RLS suites
 // against the local stack: `pnpm validate` alone does not, so the stack comes up before it.
 test('init JSON report carries next steps as an array, through the first Claude Code turn', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-json-'))
+  const dir = tempDir('epah-json-')
   const r = run(['init', '--dir', dir, '--yes', '--report', 'json', ...SETS])
   assert.equal(r.code, 0, r.out)
   const report = JSON.parse(r.out)
@@ -201,7 +200,7 @@ test('init JSON report carries next steps as an array, through the first Claude 
 // `git init` is printed only where the target is no repository.
 /** @param {string} prefix */
 function retrofitTarget(prefix) {
-  const dir = mkdtempSync(join(tmpdir(), prefix))
+  const dir = tempDir(prefix)
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'existing', dependencies: { next: '16.0.0' } }))
   writeFileSync(join(dir, 'pnpm-workspace.yaml'), "packages:\n  - 'apps/*'\n")
   return dir
@@ -235,7 +234,7 @@ test('init in an existing project with its own supabase/config.toml keeps the pn
 // A dry run writes no file, so `will have` cannot be read off the disk alone.
 test('a dry run of a new project prints the steps the real run prints', () => {
   const steps = (extra) => {
-    const dir = mkdtempSync(join(tmpdir(), 'epah-dry-steps-'))
+    const dir = tempDir('epah-dry-steps-')
     const r = run(['init', '--dir', dir, '--yes', '--report', 'json', ...extra, ...SETS])
     assert.equal(r.code, 0, r.out)
     return JSON.parse(r.out).steps
@@ -244,7 +243,7 @@ test('a dry run of a new project prints the steps the real run prints', () => {
 })
 
 test('dry-run writes nothing', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-dry-'))
+  const dir = tempDir('epah-dry-')
   const r = run(['init', '--dir', dir, '--yes', '--dry-run', ...SETS])
   assert.equal(r.code, 0, r.out)
   assert.ok(!existsSync(join(dir, 'package.json')))
@@ -252,7 +251,7 @@ test('dry-run writes nothing', () => {
 })
 
 test('retrofit: non-clobber configs, merged workspace yaml, no stack app code', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-retro-'))
+  const dir = tempDir('epah-retro-')
   writeFileSync(
     join(dir, 'package.json'),
     JSON.stringify({ name: 'existing', dependencies: { next: '16.0.0' }, scripts: { validate: 'my-own-gate' } }),
@@ -309,7 +308,7 @@ test('retrofit: non-clobber configs, merged workspace yaml, no stack app code', 
 })
 
 test('retrofit non-clobber is universal: project memory, ignore rules, settings, compose, workflows', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-retro2-'))
+  const dir = tempDir('epah-retro2-')
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'existing', dependencies: { next: '16.0.0' } }))
   writeFileSync(join(dir, 'pnpm-workspace.yaml'), "packages:\n  - 'apps/*'\n")
   mkdirSync(join(dir, 'apps/web'), { recursive: true })
@@ -362,7 +361,7 @@ test('retrofit non-clobber is universal: project memory, ignore rules, settings,
 })
 
 test('re-running init on an installed project is refused; --force re-renders with carried answers', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-reinit-'))
+  const dir = tempDir('epah-reinit-')
   assert.equal(run(['init', '--dir', dir, '--yes', ...SETS]).code, 0)
 
   // Tune an owned file, then attempt re-init: must refuse before touching anything.
@@ -391,7 +390,7 @@ test('re-running init on an installed project is refused; --force re-renders wit
 })
 
 test('init rejects invalid placeholder values, unknown --set keys, unknown tiers', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-val-'))
+  const dir = tempDir('epah-val-')
 
   // Store identity must satisfy the iOS/Android intersection — hyphens are
   // Android-illegal, so this must fail loud before anything is written.
@@ -426,8 +425,8 @@ test('init rejects invalid placeholder values, unknown --set keys, unknown tiers
 // manifest.answers, never an `enable`-flippable unit. ──
 
 test('design-token preset: default is the plain stack render; metal plants the vendored variant set', () => {
-  const defDir = mkdtempSync(join(tmpdir(), 'epah-preset-def-'))
-  const metalDir = mkdtempSync(join(tmpdir(), 'epah-preset-metal-'))
+  const defDir = tempDir('epah-preset-def-')
+  const metalDir = tempDir('epah-preset-metal-')
   assert.equal(run(['init', '--dir', defDir, '--yes', '--tier', 'core', ...SETS]).code, 0)
   assert.equal(
     run(['init', '--dir', metalDir, '--yes', '--tier', 'core', ...SETS, '--set', 'DESIGN_TOKENS=metal']).code,
@@ -488,7 +487,7 @@ test('design-token preset: default is the plain stack render; metal plants the v
 })
 
 test('design-token preset: --force carries the choice; update touches no preset file; pre-0.2.1 manifests backfill default', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-preset-lc-'))
+  const dir = tempDir('epah-preset-lc-')
   assert.equal(
     run(['init', '--dir', dir, '--yes', '--tier', 'core', ...SETS, '--set', 'DESIGN_TOKENS=metal']).code,
     0,
@@ -528,7 +527,7 @@ test('design-token preset: --force carries the choice; update touches no preset 
   // A pre-0.2.1 manifest (no DESIGN_TOKENS answer) IS a default install:
   // update backfills 'default' so walkStack resolves and the provenance line
   // can never render as residue.
-  const defDir = mkdtempSync(join(tmpdir(), 'epah-preset-old-'))
+  const defDir = tempDir('epah-preset-old-')
   assert.equal(run(['init', '--dir', defDir, '--yes', '--tier', 'core', ...SETS]).code, 0)
   const oldManifestPath = join(defDir, '.harness/manifest.json')
   const oldManifest = JSON.parse(readFileSync(oldManifestPath, 'utf8'))
@@ -547,7 +546,7 @@ test('design-token preset: --force carries the choice; update touches no preset 
 })
 
 test('design-token preset: retrofit records the choice but plants no preset files; a preset is not a module', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-preset-retro-'))
+  const dir = tempDir('epah-preset-retro-')
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'existing', dependencies: { next: '16.0.0' } }))
   writeFileSync(join(dir, 'pnpm-workspace.yaml'), "packages:\n  - 'apps/*'\n")
   mkdirSync(join(dir, 'apps/web/src'), { recursive: true })
@@ -561,7 +560,7 @@ test('design-token preset: retrofit records the choice but plants no preset file
   assert.ok(!existsSync(join(dir, 'packages/design-tokens/src')), 'retrofit must not plant stack token source')
 
   // And the preset is not reachable through the module lifecycle.
-  const installed = mkdtempSync(join(tmpdir(), 'epah-preset-mod-'))
+  const installed = tempDir('epah-preset-mod-')
   assert.equal(run(['init', '--dir', installed, '--yes', '--tier', 'core', ...SETS]).code, 0)
   const en = run(['enable', 'tokens-metal', '--dir', installed])
   assert.equal(en.code, 1, en.out)
@@ -569,7 +568,7 @@ test('design-token preset: retrofit records the choice but plants no preset file
 })
 
 test('enable rejects unknown modules with the known-module list', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-unkmod-'))
+  const dir = tempDir('epah-unkmod-')
   assert.equal(run(['init', '--dir', dir, '--yes', '--tier', 'core', ...SETS]).code, 0)
   const res = run(['enable', 'no-such-module', '--dir', dir])
   assert.equal(res.code, 1, res.out)
@@ -587,7 +586,7 @@ test('enable rejects unknown modules with the known-module list', () => {
 // anything — proving the guard, not just the happy path.
 test('init fails loud when a tier module resolves to zero files; healthy tiers attribute real files', () => {
   // Healthy: the real template tree.
-  const dir = mkdtempSync(join(tmpdir(), 'epah-tiermod-'))
+  const dir = tempDir('epah-tiermod-')
   assert.equal(run(['init', '--dir', dir, '--yes', '--tier', 'standard', ...SETS]).code, 0)
   const manifest = JSON.parse(readFileSync(join(dir, '.harness/manifest.json'), 'utf8'))
   assert.deepEqual(
@@ -604,13 +603,13 @@ test('init fails loud when a tier module resolves to zero files; healthy tiers a
   // Red: a doctored copy of installer+template with an emptied module tree.
   // (The guard is unreachable through the real tree now that every module
   // ships files — the copy is how the red path stays exercised.)
-  const copyRoot = mkdtempSync(join(tmpdir(), 'epah-zeromod-'))
+  const copyRoot = tempDir('epah-zeromod-')
   for (const p of ['installer', 'template', 'package.json']) {
     cpSync(fileURLToPath(new URL(`../../${p}`, import.meta.url)), join(copyRoot, p), { recursive: true })
   }
   rmSync(join(copyRoot, 'template/modules/ci-provenance'), { recursive: true })
   mkdirSync(join(copyRoot, 'template/modules/ci-provenance'))
-  const target = mkdtempSync(join(tmpdir(), 'epah-zeromod-t-'))
+  const target = tempDir('epah-zeromod-t-')
   const res = spawnSync(
     'node',
     [join(copyRoot, 'installer/cli.mjs'), 'init', '--dir', target, '--yes', '--tier', 'standard', ...SETS],
@@ -632,7 +631,7 @@ test('enable/disable flips a module: dry-run writes nothing, drift is parked, di
   }
   const moduleName = available.includes('gate-a11y-deep') ? 'gate-a11y-deep' : available[0]
 
-  const dir = mkdtempSync(join(tmpdir(), 'epah-mod-'))
+  const dir = tempDir('epah-mod-')
   assert.equal(run(['init', '--dir', dir, '--yes', '--tier', 'core', ...SETS]).code, 0)
 
   // dry-run: reports but writes nothing, manifest unchanged.
@@ -718,7 +717,7 @@ test('enable/disable round-trips representative W7 module shapes with correct in
       ],
     },
   ]
-  const dir = mkdtempSync(join(tmpdir(), 'epah-mods3-'))
+  const dir = tempDir('epah-mods3-')
   assert.equal(run(['init', '--dir', dir, '--yes', '--tier', 'core', ...SETS]).code, 0)
 
   for (const c of cases) {
@@ -771,26 +770,26 @@ test('enable/disable round-trips representative W7 module shapes with correct in
 })
 
 test('retrofit rejects hono-only, Tauri, foreign lockfiles, and non-workspace layouts with clear messages', () => {
-  const honoDir = mkdtempSync(join(tmpdir(), 'nesah-hono-'))
+  const honoDir = tempDir('nesah-hono-')
   writeFileSync(join(honoDir, 'package.json'), JSON.stringify({ dependencies: { hono: '^4.0.0' } }))
   const honoRes = run(['init', '--dir', honoDir, '--yes', ...SETS])
   assert.equal(honoRes.code, 1, honoRes.out)
   assert.ok(honoRes.out.includes('Move the backend to Supabase first'), honoRes.out)
 
-  const tauriDir = mkdtempSync(join(tmpdir(), 'nesah-tauri-'))
+  const tauriDir = tempDir('nesah-tauri-')
   writeFileSync(join(tauriDir, 'package.json'), JSON.stringify({ dependencies: { '@tauri-apps/api': '^2.0.0' } }))
   const tauriRes = run(['init', '--dir', tauriDir, '--yes', ...SETS])
   assert.equal(tauriRes.code, 1, tauriRes.out)
   assert.ok(tauriRes.out.includes('Tauri'), tauriRes.out)
 
-  const npmDir = mkdtempSync(join(tmpdir(), 'nesah-npmlock-'))
+  const npmDir = tempDir('nesah-npmlock-')
   writeFileSync(join(npmDir, 'package.json'), JSON.stringify({ dependencies: { next: '16.0.0' } }))
   writeFileSync(join(npmDir, 'package-lock.json'), '{}\n')
   const npmRes = run(['init', '--dir', npmDir, '--yes', ...SETS])
   assert.equal(npmRes.code, 1, npmRes.out)
   assert.ok(npmRes.out.includes('pnpm'), npmRes.out)
 
-  const bareDir = mkdtempSync(join(tmpdir(), 'nesah-bare-'))
+  const bareDir = tempDir('nesah-bare-')
   writeFileSync(join(bareDir, 'package.json'), JSON.stringify({ dependencies: { next: '16.0.0' } }))
   const bareRes = run(['init', '--dir', bareDir, '--yes', ...SETS])
   assert.equal(bareRes.code, 1, bareRes.out)
@@ -826,7 +825,7 @@ function ageToReleased101(dir) {
 }
 
 test('update refreshes unmodified owned files, preserves drift, never touches seeded', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-upd-'))
+  const dir = tempDir('epah-upd-')
   assert.equal(run(['init', '--dir', dir, '--yes', ...SETS]).code, 0)
 
   // 1. REFRESH: a file an older release installed — its content differs from the incoming
@@ -881,7 +880,7 @@ function dropManifestRecord(dir, rel) {
 test('update plants docs/reviews/README.md where it is absent, with the template bytes and a seeded record (#64)', () => {
   const source = join(TEMPLATE, 'base', REVIEWS_README)
   assert.ok(existsSync(source), `the template must ship ${REVIEWS_README}`)
-  const dir = mkdtempSync(join(tmpdir(), 'epah-reviews-plant-'))
+  const dir = tempDir('epah-reviews-plant-')
   assert.equal(run(['init', '--dir', dir, '--yes', ...SETS]).code, 0)
   rmSync(join(dir, REVIEWS_README))
   dropManifestRecord(dir, REVIEWS_README)
@@ -898,7 +897,7 @@ test('update plants docs/reviews/README.md where it is absent, with the template
 })
 
 test('update leaves a docs/reviews/README.md it has no record of byte-identical, and parks nothing (#64)', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-reviews-keep-'))
+  const dir = tempDir('epah-reviews-keep-')
   assert.equal(run(['init', '--dir', dir, '--yes', ...SETS]).code, 0)
   const ours = '# Our review log\n\nRounds live in the tracker, not here.\n'
   writeFileSync(join(dir, REVIEWS_README), ours)
@@ -915,7 +914,7 @@ test('update leaves a docs/reviews/README.md it has no record of byte-identical,
 })
 
 test('update NEVER overwrites a re-recorded fork — through the real CLI and the shipped tables (1.0.2)', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-fork-'))
+  const dir = tempDir('epah-fork-')
   assert.equal(run(['init', '--dir', dir, '--yes', ...SETS]).code, 0)
 
   // What keeping `gate-integrity` green on a deliberate fork requires: edit the owned file,
@@ -952,7 +951,7 @@ test('update NEVER overwrites a re-recorded fork — through the real CLI and th
 })
 
 test('backslash manifest keys: doctor trips, update heals', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-bslash-'))
+  const dir = tempDir('epah-bslash-')
   assert.equal(run(['init', '--dir', dir, '--yes', ...SETS]).code, 0)
 
   // Simulate a manifest written by a backslash-keying Windows install (the
@@ -987,7 +986,7 @@ test('backslash manifest keys: doctor trips, update heals', () => {
 })
 
 test('doctor exit codes: clean=0, drift=2, broken=1; CLAUDE.md purity enforced', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-doc-'))
+  const dir = tempDir('epah-doc-')
   assert.equal(run(['init', '--dir', dir, '--yes', ...SETS]).code, 0)
 
   // clean → 0
@@ -1021,7 +1020,7 @@ test('doctor exit codes: clean=0, drift=2, broken=1; CLAUDE.md purity enforced',
 })
 
 test('refresh-seeded: overwrite when untouched, park on drift, error on unknown path', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-refresh-'))
+  const dir = tempDir('epah-refresh-')
   assert.equal(run(['init', '--dir', dir, '--yes', '--tier', 'core', ...SETS]).code, 0)
   const ip = 'apps/mobile/src/routes.ts'
   const abs = join(dir, ip)
@@ -1074,7 +1073,7 @@ test('seedOnInitOnly: plain update withholds a new exemplar; refresh-seeded pull
     return
   }
 
-  const dir = mkdtempSync(join(tmpdir(), 'epah-seedpull-'))
+  const dir = tempDir('epah-seedpull-')
   assert.equal(run(['init', '--dir', dir, '--yes', '--tier', 'core', ...SETS]).code, 0)
   const manifestPath = join(dir, '.harness/manifest.json')
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
@@ -1116,7 +1115,7 @@ test('seedOnInitOnly: plain update withholds a new exemplar; refresh-seeded pull
 })
 
 test('update: baseVersion carries the seeded-content vintage — pre-baseVersion manifests inherit harnessVersion, stamped values persist', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-basev-'))
+  const dir = tempDir('epah-basev-')
   assert.equal(run(['init', '--dir', dir, '--yes', '--tier', 'core', ...SETS]).code, 0)
   const manifestPath = join(dir, '.harness/manifest.json')
   const installerVersion = JSON.parse(
@@ -1153,7 +1152,7 @@ test('update: baseVersion carries the seeded-content vintage — pre-baseVersion
 })
 
 test('doctor: seeded divergence from the current template is an info advisory, never an error', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-seedadv-'))
+  const dir = tempDir('epah-seedadv-')
   assert.equal(run(['init', '--dir', dir, '--yes', '--tier', 'core', ...SETS]).code, 0)
   writeFileSync(join(dir, 'apps/mobile/src/routes.ts'), '// project rewrote its routes\n')
   const r = run(['doctor', '--dir', dir])
@@ -1169,7 +1168,7 @@ test('a module that plants a workspace package is referenced by the root solutio
   // The reference cannot live in the template: a core install has no packages/eval and
   // `tsc -b` fails outright on a reference to a project that does not exist — which is
   // why both directions are asserted here.
-  const strict = mkdtempSync(join(tmpdir(), 'epah-tsref-strict-'))
+  const strict = tempDir('epah-tsref-strict-')
   assert.equal(run(['init', '--dir', strict, '--yes', '--tier', 'strict', ...SETS]).code, 0)
   const strictText = readFileSync(join(strict, 'tsconfig.json'), 'utf8')
   assert.ok(
@@ -1184,7 +1183,7 @@ test('a module that plants a workspace package is referenced by the root solutio
   // of apps/web + apps/mobile. A JSON round-trip would have deleted it silently.
   assert.ok(strictText.includes('DELIBERATELY absent'), 'the JSONC commentary must survive injection')
 
-  const core = mkdtempSync(join(tmpdir(), 'epah-tsref-core-'))
+  const core = tempDir('epah-tsref-core-')
   assert.equal(run(['init', '--dir', core, '--yes', '--tier', 'core', ...SETS]).code, 0)
   const coreText = readFileSync(join(core, 'tsconfig.json'), 'utf8')
   assert.ok(
@@ -1197,7 +1196,7 @@ test('update does not strip a module package reference from the owned solution f
   // tsconfig.json is OWNED, so update rewrites it from the template every run. Without
   // the same injection on that path the reference would be planted at init and removed
   // by the first update, redding `contracts` on a tree nobody touched.
-  const dir = mkdtempSync(join(tmpdir(), 'epah-tsref-update-'))
+  const dir = tempDir('epah-tsref-update-')
   assert.equal(run(['init', '--dir', dir, '--yes', '--tier', 'strict', ...SETS]).code, 0)
   const r = run(['update', '--dir', dir])
   assert.notEqual(r.code, 1, r.out)
@@ -1279,7 +1278,7 @@ test('npm pack ships every template path (dotless storage survives packing)', ()
 // reporting, park-on-drift idempotence, and dry-run plan parity. ──
 
 test('update --force overwrites a drifted OWNED file, notes it, and re-records the sha', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-force-'))
+  const dir = tempDir('epah-force-')
   assert.equal(run(['init', '--dir', dir, '--yes', ...SETS]).code, 0)
 
   // A locally-modified owned hook: without --force this parks (exit 2); with
@@ -1307,7 +1306,7 @@ test('update --force overwrites a drifted OWNED file, notes it, and re-records t
 })
 
 test('refresh-seeded unknown path: non-zero via return (not a throw), near-candidate suggestions', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-refunk-'))
+  const dir = tempDir('epah-refunk-')
   assert.equal(run(['init', '--dir', dir, '--yes', ...SETS]).code, 0)
 
   // Near miss: wrong directory, right basename → the note names the real path.
@@ -1349,7 +1348,7 @@ test('refresh-seeded unknown path: non-zero via return (not a throw), near-candi
 })
 
 test('refresh-seeded park-on-drift is idempotent: re-running never clobbers and never flip-flops', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-refidem-'))
+  const dir = tempDir('epah-refidem-')
   assert.equal(run(['init', '--dir', dir, '--yes', ...SETS]).code, 0)
 
   const ip = 'apps/mobile/src/routes.ts'
@@ -1386,7 +1385,7 @@ test('refresh-seeded park-on-drift is idempotent: re-running never clobbers and 
 })
 
 test('update --dry-run touches nothing yet reports byte-for-byte the plan the real run applies', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-dryplan-'))
+  const dir = tempDir('epah-dryplan-')
   assert.equal(run(['init', '--dir', dir, '--yes', ...SETS]).code, 0)
 
   // Stage a REFRESH: an owned file v1.0.1 installed (content differs from the template,

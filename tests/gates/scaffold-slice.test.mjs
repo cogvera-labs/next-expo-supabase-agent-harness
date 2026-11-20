@@ -26,17 +26,16 @@ import {
   existsSync,
   lstatSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   rmSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
 import process from 'node:process'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCAFFOLD_SLICE = fileURLToPath(
   new URL(
@@ -61,7 +60,7 @@ after(() => {
 
 /** An empty root, removed after the file. */
 function emptyRoot() {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-scaffold-slice-'))
+  const dir = tempDir('epah-scaffold-slice-')
   made.push(dir)
   return dir
 }

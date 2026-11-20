@@ -18,15 +18,15 @@
 // reads, so each case runs inside its own fixture through `inDir`, and restores the cwd.
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:net'
-import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { walkFiles } from '../../template/base/tools/lib/fs-walk.mjs'
 import { collectBrief, renderBrief } from '../../template/base/tools/lib/harness-brief.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TEMPLATE = fileURLToPath(new URL('../../template/base/', import.meta.url))
 const CAP = 1200
@@ -46,7 +46,7 @@ after(() => {
 
 /** A throwaway tree. @param {string} tag */
 function fixture(tag) {
-  const dir = mkdtempSync(join(tmpdir(), `epah-brief-${tag}-`))
+  const dir = tempDir(`epah-brief-${tag}-`)
   made.push(dir)
   return dir
 }

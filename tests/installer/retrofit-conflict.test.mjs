@@ -12,11 +12,11 @@
 // was not.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 
@@ -25,7 +25,7 @@ const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 // with exit 2 by design, so that is the expected status.
 const SIDECAR = 'eslint.config.harness.mjs'
 function retrofitTarget() {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-retrofit-'))
+  const dir = tempDir('epah-retrofit-')
   writeFileSync(
     join(dir, 'package.json'),
     `${JSON.stringify({ name: 'their-app', version: '1.0.0', private: true }, null, 2)}\n`,

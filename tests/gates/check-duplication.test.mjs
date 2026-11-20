@@ -4,13 +4,13 @@
 // and a baseVersion predating the check downgrades a clone to a ramp NOTE (in this
 // lineage the check ships in 0.1.0, so every real install is live).
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import assert from 'node:assert/strict'
 import process from 'node:process'
 import { test } from 'node:test'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 // The gate imports its `./lib/*` relative to its own file, so spawning it with cwd = a
 // temp tree keeps the real lib while only the scanned apps/packages roots vary.
@@ -29,7 +29,7 @@ const BLOCK = (name) => `export function ${name}(rows: readonly { id: string; ti
 `
 
 function runReal(treeFiles, extra = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-dup-'))
+  const dir = tempDir('epah-dup-')
   for (const [rel, content] of Object.entries(treeFiles)) {
     const abs = join(dir, rel)
     mkdirSync(join(abs, '..'), { recursive: true })
@@ -228,7 +228,7 @@ for (const [label, flags] of [
   ['an init --with-demo', ['--with-demo']],
 ]) {
   test(`duplication: ${label} is clean under the shipped allowlist`, () => {
-    const root = mkdtempSync(join(tmpdir(), 'epah-dup-init-'))
+    const root = tempDir('epah-dup-init-')
     const dir = join(root, 'app')
     try {
       const init = spawnSync('node', [CLI, 'init', '--dir', dir, '--tier', 'core', '--yes', ...flags], {
@@ -263,7 +263,7 @@ function recorded(dir) {
 const TERMINATOR = { v: 1, producer: 'duplication', leg: 'l0', complete: true }
 
 /** @param {string} tag */
-const reportDir = (tag) => join(mkdtempSync(join(tmpdir(), `epah-dup-advisory-${tag}-`)), 'report')
+const reportDir = (tag) => join(tempDir(`epah-dup-advisory-${tag}-`), 'report')
 
 test('duplication: a green tree writes exactly one L0 terminator', () => {
   const dir = reportDir('green')

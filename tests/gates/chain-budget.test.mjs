@@ -5,8 +5,7 @@
 // from job ids in the shipped consumer workflows, and a key matching neither reds it.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -20,6 +19,7 @@ import {
   recordMeasurement,
   recordStopMeasurement,
 } from '../../scripts/lib/chain-budget.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const budget = JSON.parse(
   readFileSync(fileURLToPath(new URL('../../scripts/chain-budget.json', import.meta.url)), 'utf8'),
@@ -538,7 +538,7 @@ test('recordStopMeasurement stamps the stop rows + stopWall with provenance, pur
 test('--record --stop-chain refuses to stamp outside Actions without --runner (CLI re-pin for the new mode)', () => {
   // A synthetic GREEN stop log, so the CLI's judge passes and the refusal is the only
   // thing standing between the run and a stamped file.
-  const dir = mkdtempSync(join(tmpdir(), 'chain-budget-stop-'))
+  const dir = tempDir('chain-budget-stop-')
   const logPath = join(dir, 'stop-chain.log')
   writeFileSync(logPath, `noise\nVALIDATE_TIMINGS ${JSON.stringify(stopTimingsFor())}\n`)
   const shippedPath = fileURLToPath(new URL('../../scripts/chain-budget.json', import.meta.url))
@@ -649,7 +649,7 @@ test('recordColdMeasurement REFUSES a partial run and an unattributed one — a 
 })
 
 test('--cold judges COVERAGE only (no ceiling), and --record --cold refuses outside Actions without --runner', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'chain-budget-cold-'))
+  const dir = tempDir('chain-budget-cold-')
   const script = fileURLToPath(new URL('../../scripts/check-chain-budget.mjs', import.meta.url))
   const env = { ...process.env }
   delete env.GITHUB_ACTIONS

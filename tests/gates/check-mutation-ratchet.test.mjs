@@ -12,11 +12,11 @@
 //     "killed" — and `--write` would then have silently ERASED them).
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(
   new URL('../../template/base/tools/check-mutation-ratchet.mjs', import.meta.url),
@@ -56,7 +56,7 @@ const reportFor = (source = ERRORS_TS) => ({
 
 /** @param {{ report?: any, baseline?: any }} [opts] */
 function fixture({ report = reportFor(), baseline } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-ratchet-'))
+  const dir = tempDir('epah-ratchet-')
   mkdirSync(join(dir, 'reports/mutation'), { recursive: true })
   mkdirSync(join(dir, 'tools'), { recursive: true })
   mkdirSync(join(dir, 'apps/server/src'), { recursive: true })

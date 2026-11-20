@@ -7,17 +7,17 @@
 // CODEOWNERS rule covers, and `defaultMode: "bypassPermissions"`.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { before, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 let scaffold
 
 before(() => {
-  scaffold = mkdtempSync(join(tmpdir(), 'epah-wiring-'))
+  scaffold = tempDir('epah-wiring-')
   const res = spawnSync(
     'node',
     [CLI, 'init', '--dir', scaffold, '--yes', '--set', 'PROJECT_NAME=Wired App', '--set', 'GITHUB_OWNER=o', '--set', 'SECURITY_OWNERS=@o/sec'],

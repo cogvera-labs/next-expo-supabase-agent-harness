@@ -12,9 +12,8 @@
 // that exists and is wrong.
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -27,6 +26,7 @@ import {
   parseVersion,
   publishProblems,
 } from '../../scripts/ci/npm-publish.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/ci/npm-publish.mjs', import.meta.url))
 const run = promisify(execFile)
@@ -119,7 +119,7 @@ test('a version published with a token instead of the trusted publisher is named
  * @param {string[]} args
  */
 async function cli(routes, args) {
-  const dir = mkdtempSync(join(tmpdir(), 'npm-publish-'))
+  const dir = tempDir('npm-publish-')
   const pkg = join(dir, 'package.json')
   writeFileSync(pkg, JSON.stringify({ name: 'fixture-pkg', version: '1.2.3' }))
   const tarball = join(dir, 'fixture-pkg-1.2.3.tgz')

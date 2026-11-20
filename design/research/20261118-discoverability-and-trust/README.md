@@ -125,10 +125,10 @@ The integrator fills in Status.
 
 | # | Maintainer action, in order | Status |
 |---|---|---|
-| 1 | Nightly lanes: save the maestro-smoke artifact before 2026-11-20 12:21 UTC and pin the culprit; merge #300, then #283; re-run corpus-fidelity; cut 2.0.9, as published scaffolds still crash `lint`; legs A and E wait on upstream or the protected lane; calendar reds 2026-12-01 and 12-09 | in part. Done: typescript-eslint is pinned at 8.72.2 in the seeded catalog (#302); the artifact is saved, and the culprit, expo-sqlite 57.0.5 (its prebuilt Android library carries arm64-v8a only), is pinned off at 57.0.4, with `maestro-smoke` green on that branch (#303); `corpus-fidelity` passed on a re-run; the upgrade lane pins both held releases into each baseline's own catalog, so legs A and E are green without waiting for upstream (#307). Pending: #300 and #283, 2.0.9, the calendar reds |
+| 1 | Nightly lanes: save the maestro-smoke artifact before 2026-11-20 12:21 UTC and pin the culprit; merge #300, then #283; re-run corpus-fidelity; cut 2.0.9, as published scaffolds still crash `lint`; legs A and E wait on upstream or the protected lane; calendar reds 2026-12-01 and 12-09 | in part. Done: typescript-eslint is pinned at 8.72.2 in the seeded catalog (#302); the artifact is saved, and the culprit, expo-sqlite 57.0.5 (its prebuilt Android library carries arm64-v8a only), is pinned off at 57.0.4, with `maestro-smoke` green on that branch (#303); `corpus-fidelity` passed on a re-run; the upgrade lane pins both held releases into each baseline's own catalog, so legs A and E are green without waiting for upstream (#307); #300 and #283 are merged; the scheduled `selftest` run of 2026-11-19 passed, `maestro-smoke` included; 2.0.9 is tagged and on npm (2026-11-19), and a project scaffolded from the published package passes its own `lint` gate. Pending: the calendar reds, which are four: 2026-12-01 and 12-02 in `scripts/obligations.json`, 12-08 for `tools/framework-floor.json` and 12-09 for `tools/eol.json` |
 | 2 | About set to the shared description; the 20 topics; the repository pinned on the org profile | pending |
-| 3 | npm: a release after this branch (new README on npm, changelog entries); deprecate below 2.0.8, `0.0.0-stage` included; a second maintainer with 2FA | pending |
-| 4 | Verify the docs site in Search Console and Bing, with the sitemap; consider an org root site or custom domain | pending |
+| 3 | npm: a release after this branch (new README on npm, changelog entries); deprecate below 2.0.8, `0.0.0-stage` included; a second maintainer with 2FA | in part. Done: 2.0.9 is on npm with the new README and its changelog entries. Pending: the deprecations below 2.0.8 and a second maintainer with 2FA |
+| 4 | Verify the docs site in Search Console and Bing, with the sitemap; consider an org root site or custom domain | pending. The site is ready for it: `SITE_VERIFICATION` in `docs-site/astro.config.mjs` takes the two codes, and each sitemap entry carries its page's `lastmod` |
 | 5 | After the example: awesome-claude-code by its web form; harness-engineering lists, affiliation disclosed; the plugin directory; Context7; a claudepluginhub re-index | pending |
 | 6 | Example project (#164): deployed web app, screenshots of both apps, its CI, a public `update` pull request | pending |
 | 7 | Real review, then required approval with last-push approval; a second admin; Best Practices "passing"; immutable releases; REUSE; a Zenodo DOI; an outside reading of the assurance case | pending |
@@ -154,9 +154,11 @@ The integrator fills in Status.
 | 15 | `init --dry-run` prints "written: N file(s)" although it writes nothing | pending |
 | 16 | `template/base/tools/eslint-rules/index.mjs` names the three sanctioned transport throws; `check-migrations.mjs` and the stack's warrant regex use `YYYYMMDD-slug.md` ADR names | pending |
 
-Outside the protected paths, and left for a later change: the other test files that leave
-`mkdtemp` directories behind (#276) can clean up the way
-`tests/gates/check-plugin-manifest.test.mjs` now does, which left the largest trees.
+Outside the protected paths: tests make their temporary directories through
+`tests/helpers/temp-dir.mjs`, which removes them when the test file ends, and
+`tests/gates/test-temp-dirs.test.mjs` fails on a direct `mkdtemp` call under `tests/` (#276).
+Left for a protected-path change: `scripts/check-syntax.mjs` never removes the directory it
+makes, so each run of it still leaves one in the OS temp folder.
 
 Earlier records: [20261002-distribution](../20261002-distribution/README.md) and
 [20260813-harness-landscape.md](../20260813-harness-landscape.md).

@@ -12,11 +12,11 @@
 // this idiom diff a release against its own tree.
 import assert from 'node:assert/strict'
 import { execFileSync, spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/check-eol-target.mjs', import.meta.url))
 
@@ -66,7 +66,7 @@ const UNPROBED = { '0.2.0': { seededSourceFixes: [{ probes: [{ path: 'apps/web/e
  * @returns {string} the fixture root
  */
 function makeRepo({ before = register([]), after = register([]), migrations = PROBED, tagged = true } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-eoltarget-'))
+  const dir = tempDir('nsah-eoltarget-')
   const write = (rel, content) => {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })
     writeFileSync(join(dir, rel), content)

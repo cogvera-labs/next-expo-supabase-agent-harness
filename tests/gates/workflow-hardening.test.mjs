@@ -29,13 +29,13 @@
 // every shape the position rule reds and show it passing each one.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { renderEntry, walkTemplate } from '../../installer/lib/copy.mjs'
 import { jobsOf, workflowFindings } from '../../template/base/tools/lib/workflow-hardening.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 import { HARDEN, ISSUE_FIXTURE, LOOP_MISSES } from './helpers/workflow-hardening-cases.mjs'
 
 const REPO = fileURLToPath(new URL('../../', import.meta.url))
@@ -164,7 +164,7 @@ function stepOf(text, stepName) {
 
 /** @param {string} script @param {string[]} argv @param {{ cwd: string, env?: Record<string, string> }} opts */
 function runAsGitHub(script, argv, { cwd, env = {} }) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-step-'))
+  const dir = tempDir('nsah-step-')
   const file = join(dir, 'step.sh')
   writeFileSync(file, script)
   const res = spawnSync('bash', [...argv, file], { cwd, encoding: 'utf8', env: { ...process.env, ...env } })
@@ -176,7 +176,7 @@ const qualityGate = () => shippedWorkflows().find((w) => w.file.endsWith('qualit
 test('CANARY: gate-summary goes RED when its summarizer does — and passed under the un-shelled default', (t) => {
   if (!HAS_BASH) return t.skip(SKIP)
   const { script, argv } = stepOf(qualityGate(), 'Summarize every lane (a skip is recorded, never a pass)')
-  const summary = join(mkdtempSync(join(tmpdir(), 'nsah-summary-')), 'summary.md')
+  const summary = join(tempDir('nsah-summary-'), 'summary.md')
   const env = { NEEDS_JSON: JSON.stringify({ static: { result: 'failure', outputs: {} } }), GITHUB_STEP_SUMMARY: summary }
 
   const selected = runAsGitHub(script, argv, { cwd: TEMPLATE_BASE, env })
@@ -193,7 +193,7 @@ test('CANARY: gate-summary goes RED when its summarizer does — and passed unde
 test('CANARY: the mutation scoper\'s fail-closed exit reaches the step — a command substitution inside `echo` discarded it', (t) => {
   if (!HAS_BASH) return t.skip(SKIP)
   const { script, argv } = stepOf(qualityGate(), 'Which critical files does this change touch?')
-  const cwd = mkdtempSync(join(tmpdir(), 'nsah-scope-'))
+  const cwd = tempDir('nsah-scope-')
   mkdirSync(join(cwd, 'tools'), { recursive: true })
   writeFileSync(join(cwd, 'tools', 'mutation-scope.mjs'), "console.error('mutation-scope: FAIL — a root matched zero files')\nprocess.exit(1)\n")
   const res = runAsGitHub(script, argv, { cwd, env: { GITHUB_OUTPUT: join(cwd, 'out.txt') } })
@@ -203,7 +203,7 @@ test('CANARY: the mutation scoper\'s fail-closed exit reaches the step — a com
 test('CANARY: the targetSdk floor step still SAYS why it failed when no targetSdkVersion is found', (t) => {
   if (!HAS_BASH) return t.skip(SKIP)
   const { script, argv } = stepOf(qualityGate(), 'targetSdk floor (the generated project vs tools/store-policy.json)')
-  const cwd = mkdtempSync(join(tmpdir(), 'nsah-sdk-'))
+  const cwd = tempDir('nsah-sdk-')
   mkdirSync(join(cwd, 'tools'), { recursive: true })
   mkdirSync(join(cwd, 'apps', 'mobile', 'android'), { recursive: true })
   writeFileSync(join(cwd, 'tools', 'store-policy.json'), JSON.stringify({ androidTargetSdk: { floor: 35 } }))
@@ -231,7 +231,7 @@ after(() => {
 
 /** A scratch checkout holding `files`. @param {Record<string, string>} files */
 function checkoutOf(files) {
-  const cwd = mkdtempSync(join(tmpdir(), 'nsah-wfloop-'))
+  const cwd = tempDir('nsah-wfloop-')
   made.push(cwd)
   for (const [rel, text] of Object.entries(files)) {
     mkdirSync(join(cwd, rel, '..'), { recursive: true })

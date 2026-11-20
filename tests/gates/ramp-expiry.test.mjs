@@ -10,8 +10,7 @@
 // SOURCE: docs/runbooks/harness-upgrade.md (ramps expire)
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { pathToFileURL } from 'node:url'
@@ -20,6 +19,7 @@ import { pathToFileURL } from 'node:url'
 // upgrade lane, which derives the NOTEs a given baseline should produce. A second copy here
 // would be a clone of the thing that computes the release's headline number.
 import { shippedRampSites, TOOLS_DIR } from '../../scripts/lib/ramp-sites.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE_LIB = pathToFileURL(join(TOOLS_DIR, 'lib/gate.mjs')).href
 
@@ -68,7 +68,7 @@ ok('fake', 'clean')
  * @param {{ harnessVersion?: string, baseVersion?: string } | null} manifest
  */
 function runFixture(untilArg, manifest) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-rampclock-'))
+  const dir = tempDir('epah-rampclock-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   if (manifest !== null) {
     mkdirSync(join(dir, '.harness'), { recursive: true })

@@ -24,13 +24,11 @@ import {
   appendFileSync,
   copyFileSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   rmSync,
   unlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { after, test } from 'node:test'
@@ -43,6 +41,7 @@ import {
   reviewProblems,
   SURFACES,
 } from '../../template/base/tools/lib/surface-deferral.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const TOOLS = join(ROOT, 'template', 'base', 'tools')
@@ -99,7 +98,7 @@ function manifestFor(/** @type {Record<string, string>} */ files) {
  * @param {{ files?: Record<string, string>, surfaces?: object | string | null, manifest?: object | string | null }} spec
  */
 function repo({ files = APP, surfaces = null, manifest = manifestFor(files) } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-surface-'))
+  const dir = tempDir('nsah-surface-')
   made.push(dir)
   const put = (/** @type {string} */ rel, /** @type {string} */ body) => {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })
@@ -554,7 +553,7 @@ test('CLI: a missing or unknown --mode and a malformed --today are usage errors,
 
 test('CLI: a listing that fails (no git repository) voids a row instead of deferring blind', (t) => {
   if (!HAS_GIT) return t.skip(NO_GIT)
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-surface-nogit-'))
+  const dir = tempDir('nsah-surface-nogit-')
   made.push(dir)
   mkdirSync(join(dir, 'tools'), { recursive: true })
   mkdirSync(join(dir, '.harness'), { recursive: true })
@@ -573,7 +572,7 @@ test('CLI: a listing that fails (no git repository) voids a row instead of defer
 
 test('A ZERO-EDIT SCAFFOLD: every tracked apps/mobile/ file matches its record, so a future-dated row is LIVE', (t) => {
   if (!HAS_GIT) return t.skip(NO_GIT)
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-surface-init-'))
+  const dir = tempDir('nsah-surface-init-')
   made.push(dir)
   const init = spawnSync(process.execPath, [INSTALLER, 'init', '--dir', dir, '--tier', 'core', '--yes'], {
     encoding: 'utf8',

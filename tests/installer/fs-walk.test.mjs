@@ -5,15 +5,15 @@
 // and [] for a missing/unreadable root.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { walkFiles } from '../../installer/lib/fs-walk.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 // Build a fixture tree from POSIX-relative file specs, in the given order —
 // creation order is the variable under test for determinism.
 function makeTree(prefix, relFiles) {
-  const root = mkdtempSync(join(tmpdir(), prefix))
+  const root = tempDir(prefix)
   for (const rel of relFiles) {
     const abs = join(root, ...rel.split('/'))
     mkdirSync(dirname(abs), { recursive: true })
@@ -127,7 +127,7 @@ test('filter sees the POSIX relative path of every file and gates output', () =>
 })
 
 test('missing root returns [] (surface-absence policy belongs to the caller)', () => {
-  const root = mkdtempSync(join(tmpdir(), 'tpah-walk-missing-'))
+  const root = tempDir('tpah-walk-missing-')
   assert.deepEqual(walkFiles(join(root, 'does-not-exist')), [])
 })
 

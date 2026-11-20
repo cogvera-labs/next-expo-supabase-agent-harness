@@ -13,11 +13,11 @@
 // proven BEFORE any spawn, install-free.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-perf-budget.mjs', import.meta.url),
@@ -97,7 +97,7 @@ const asText = (v) => (typeof v === 'string' ? v : JSON.stringify(v, null, 2))
 
 /** @param {{ budget?: any, mobile?: boolean, stubs?: boolean, files?: Record<string, string> }} [opts] */
 function fixture({ budget, mobile = true, stubs = false, files = {} } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-perfgate-'))
+  const dir = tempDir('epah-perfgate-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   if (mobile) {
     mkdirSync(join(dir, 'apps/mobile'), { recursive: true })

@@ -13,8 +13,7 @@
 // health.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { appendFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { appendFileSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -33,6 +32,7 @@ import { liveControls } from '../../template/base/tools/lib/live-controls.mjs'
 // A namespace import: a named import of an entry the register lacks would fail this whole
 // file at link time instead of failing the stamp cases that need it.
 import * as stampRegister from '../../template/base/tools/lib/stamp-inputs.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SHIPPED = JSON.parse(
@@ -438,7 +438,7 @@ after(() => {
 
 /** @param {{ register?: object }} [opts] */
 function stampFixture({ register = { requirements: [] } } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-e8stamp-'))
+  const dir = tempDir('epah-e8stamp-')
   made.push(dir)
   mkdirSync(join(dir, 'tools'), { recursive: true })
   for (const f of ['check-essential-eight.mjs', 'harness.config.mjs', 'modules.json']) {

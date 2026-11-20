@@ -14,11 +14,11 @@
 
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const GATE_SRC = join(ROOT, 'template/base/tools/check-rate-limits.mjs')
@@ -148,7 +148,7 @@ function fixture({
   actions = ACTIONS_OK,
   budgetSrc = BUDGET_SRC,
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nesah-ratelimits-'))
+  const dir = tempDir('nesah-ratelimits-')
   mkdirSync(join(dir, 'tools/generated'), { recursive: true })
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   mkdirSync(join(dir, 'apps/web/lib'), { recursive: true })

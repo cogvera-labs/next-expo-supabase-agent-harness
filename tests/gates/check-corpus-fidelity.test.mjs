@@ -17,11 +17,11 @@
 // fixture corpus, which is what makes the offline halves falsifiable without network.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/check-corpus-fidelity.mjs', import.meta.url))
 
@@ -37,7 +37,7 @@ function cleanEnv() {
 
 /** @param {Record<string, string>} files @returns {string} the fixture root */
 function writeTree(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-corpus-'))
+  const dir = tempDir('nsah-corpus-')
   for (const [rel, content] of Object.entries(files)) {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })
     writeFileSync(join(dir, rel), content)

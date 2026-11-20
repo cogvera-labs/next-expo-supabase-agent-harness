@@ -13,14 +13,14 @@
 // the plan (the skip happens later, in update's write loop), so plan membership is the
 // wrong question and "will this exist when the run finishes" is the right one.
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import {
   injectModuleProjectReferences,
   pruneMissingProjectReferences,
 } from '../../installer/lib/tsconfig-references.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 // A root tsconfig shaped like the real one: JSONC, with comments that carry the layering
 // law. Every assertion below also proves those comments survive, because the module works
@@ -48,7 +48,7 @@ const refs = (content) =>
 
 /** A target dir containing exactly the given install paths (as empty files). */
 function targetWith(paths) {
-  const dir = mkdtempSync(join(tmpdir(), 'tsref-'))
+  const dir = tempDir('tsref-')
   for (const p of paths) {
     const full = join(dir, p)
     mkdirSync(join(full, '..'), { recursive: true })

@@ -22,13 +22,13 @@
 // loudly by name, and under HARNESS_TEST_REQUIRE_TYPESCRIPT=1 (lint.yml's machinery-lint, which
 // installs the root) a compiler that cannot load FAILS. The #76 convention (i18n-tree.test.mjs).
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { probeMatchesBroken } from '../../installer/lib/migrations.mjs'
 import { edgeSuiteDirs } from '../../template/base/tools/lib/mutation-critical.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 /** The root's `typescript`, or null where nothing is installed. */
 const ts = await import('typescript').then(
@@ -126,7 +126,7 @@ async function loadConfig(dir) {
 }
 
 function tree(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-vitest-edge-'))
+  const dir = tempDir('nsah-vitest-edge-')
   made.push(dir)
   for (const [rel, text] of Object.entries(files)) {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })

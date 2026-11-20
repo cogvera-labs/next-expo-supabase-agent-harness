@@ -10,13 +10,13 @@
 // published fails here rather than at tag time.
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import { RELEASE_BODY_LIMIT, boundNotes, sectionOf, shortenEntries } from '../../scripts/ci/release-notes.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const SCRIPT = join(ROOT, 'scripts/ci/release-notes.mjs')
@@ -139,7 +139,7 @@ test('size is UTF-8 bytes, never less than the character count GitHub enforces',
 })
 
 test('CLI: writes the notes to stdout, shortens over --limit, and fails on a missing section or a bad repository', async () => {
-  const dir = mkdtempSync(join(tmpdir(), 'release-notes-'))
+  const dir = tempDir('release-notes-')
   const file = join(dir, 'CHANGELOG.md')
   writeFileSync(file, CHANGELOG)
   const whole = await run('node', [SCRIPT, '1.1.0', '--repository', REPO, '--changelog', file])

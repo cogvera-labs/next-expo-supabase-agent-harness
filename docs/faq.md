@@ -1,4 +1,4 @@
-# FAQ
+# FAQ: hooks, Supabase RLS and upgrades
 
 Short answers to the questions people ask about the harness, from agents that claim to be done
 too early to Cursor, Windows, upgrades and audits.
