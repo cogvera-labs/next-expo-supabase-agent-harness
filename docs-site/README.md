@@ -49,10 +49,12 @@ What a page tells a search engine, or a client that reads `llms.txt`, beyond its
 - **Sitemap `<lastmod>`.** Each sitemap entry carries the commit date of the page's source
   file. It comes from the same `git log` call as the page's "Last updated" line and its
   JSON-LD `dateModified` ([`src/harness-docs/page-dates.mjs`](src/harness-docs/page-dates.mjs)),
-  so the three agree. In a shallow clone, or where git cannot answer, the only dates on
-  offer would be false, so the sitemap is written with no `<lastmod>` and the build log says
-  so. `astro.config.mjs` lists `@astrojs/sitemap` itself in order to set the dates;
-  Starlight's built-in sitemap has none.
+  so the three agree. The date follows the file alone: a change that reaches a page from
+  elsewhere, such as a new `TITLE_SUFFIX` or a count the landing page computes, does not
+  move it. In a shallow clone, or where git cannot answer, the only dates on offer would be
+  false, so the sitemap is written with no `<lastmod>` and the build log says so.
+  `astro.config.mjs` lists `@astrojs/sitemap` itself in order to set the dates; Starlight's
+  built-in sitemap has none.
 - **`llms.txt`.** Every page's `<head>` links the site's `llms.txt` with
   `<link rel="describedby">`, the relation the [llms.txt proposal](https://llmstxt.org/)
   recommends for pointing a page at the file that covers it. The link validator does not
