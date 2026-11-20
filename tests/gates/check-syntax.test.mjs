@@ -12,7 +12,7 @@
 // target that does not exist, which must fail loudly rather than pass empty.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -84,4 +84,41 @@ test('RED: a missing scan target fails loudly — a gate that scans nothing is a
   const { code, out } = run(join(tempDir('nsah-syntax-gone-'), 'does-not-exist'))
   assert.equal(code, 1, out)
   assert.match(out, /SYNTAX: FAIL — directory not found/)
+})
+
+/**
+ * Run the script with an OS temp folder of its own, and return what the run left there under
+ * the script's own prefix.
+ * @param {string} target
+ */
+function leftBehind(target) {
+  const own = tempDir('nsah-syntax-own-tmp-')
+  const env = cleanEnv()
+  // os.tmpdir() reads TMPDIR on POSIX, and TEMP then TMP on Windows, where names match in any case.
+  for (const k of Object.keys(env)) {
+    if (['TMPDIR', 'TEMP', 'TMP'].includes(k.toUpperCase())) delete env[k]
+  }
+  Object.assign(env, { TMPDIR: own, TEMP: own, TMP: own })
+  const r = spawnSync(process.execPath, [SCRIPT, target], { encoding: 'utf8', env })
+  return {
+    code: r.status,
+    out: `${r.stdout ?? ''}${r.stderr ?? ''}`,
+    left: readdirSync(own).filter((entry) => entry.startsWith('nsah-syntax-')),
+  }
+}
+
+test('the directory made for the .tmpl copies is removed again, on every way out of the script', () => {
+  // A .tmpl file is checked through a copy in a directory the script makes under the OS temp
+  // folder. Nothing clears that folder between runs, and this script runs in the Stop gate at
+  // every turn end, so a directory left behind per run adds up without limit.
+  const ways = [
+    { name: 'a clean tree', exit: 0, target: writeTree({ 'fine.mjs.tmpl': 'export const rendered = true\n' }) },
+    { name: 'a broken template', exit: 1, target: writeTree({ 'broken.mjs.tmpl': 'export function {\n' }) },
+    { name: 'a missing scan target', exit: 1, target: join(tempDir('nsah-syntax-gone-'), 'does-not-exist') },
+  ]
+  for (const { name, exit, target } of ways) {
+    const { code, out, left } = leftBehind(target)
+    assert.equal(code, exit, `${name}:\n${out}`)
+    assert.deepEqual(left, [], `${name}: the run left ${left.join(', ')} in the temp folder`)
+  }
 })
