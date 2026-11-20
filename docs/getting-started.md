@@ -54,6 +54,28 @@ claude            # Claude Code: ask for one small change
 > [upgrade runbook](../template/base/docs/runbooks/harness-upgrade.md) has the steps under
 > 2.0.9.
 
+> **A project made with 2.0.9 or earlier, and its Android build.** No package in the project
+> declares react-native-reanimated: it arrives as a peer of react-native-css-interop, which
+> NativeWind brings, so an install takes the newest release. 4.8.0 supports React Native 0.87
+> to 0.89, and the project is on 0.86, so the Android build stops with
+> `Your installed version of React Native (0.86.2) is not compatible with installed version of
+> Reanimated (4.8.0)`. The gates do not build the native app, so `pnpm validate` stays green.
+> Check what your lockfile holds:
+>
+> ```sh
+> grep -nE 'react-native-reanimated@4\.8\.|react-native-worklets@0\.14\.' pnpm-lock.yaml
+> ```
+>
+> No output means it holds an earlier pair, and nothing changes until the lockfile is
+> resolved again. Either way, add this to `pnpm-workspace.yaml` above `catalog:`, run
+> `pnpm install` and commit the new `pnpm-lock.yaml`; `update` does not change that file.
+>
+> ```yaml
+> overrides:
+>   react-native-reanimated: 4.7.2
+>   react-native-worklets: 0.13.1
+> ```
+
 **Use `npx` or a global install, never a local `npm i`.** A local
 `npm i next-expo-supabase-agent-harness` in the project folder writes a `package-lock.json`,
 and `init` refuses to run in a folder that has one, because the harness requires pnpm. To
