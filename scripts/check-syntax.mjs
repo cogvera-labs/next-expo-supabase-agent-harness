@@ -5,7 +5,7 @@
 // the module render lane points it at a fully-rendered scaffold.
 //   usage: node scripts/check-syntax.mjs [rendered-dir]
 import { execFileSync } from 'node:child_process'
-import { copyFileSync, existsSync, mkdtempSync, readFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -16,6 +16,15 @@ const ARG_DIR = process.argv[2] ? resolve(process.argv[2]) : null
 const ROOT = ARG_DIR ?? fileURLToPath(new URL('..', import.meta.url))
 const failures = []
 const tmp = mkdtempSync(join(tmpdir(), 'nsah-syntax-'))
+// Where the .tmpl copies go. Removed when the process ends, whichever way it ends: nothing
+// clears the OS temp folder between runs, and this script runs at every turn end.
+process.on('exit', () => {
+  try {
+    rmSync(tmp, { recursive: true, force: true })
+  } catch {
+    // It is in the OS temp folder, never the tree under check; the verdict is already decided.
+  }
+})
 let jsCount = 0
 let jsonCount = 0
 

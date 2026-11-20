@@ -157,8 +157,8 @@ The integrator fills in Status.
 Outside the protected paths: tests make their temporary directories through
 `tests/helpers/temp-dir.mjs`, which removes them when the test file ends, and
 `tests/gates/test-temp-dirs.test.mjs` fails on a direct `mkdtemp` call under `tests/` (#276).
-Left for a protected-path change: `scripts/check-syntax.mjs` never removes the directory it
-makes, so each run of it still leaves one in the OS temp folder.
+On a protected path, `scripts/check-syntax.mjs` removes the directory it makes when it exits,
+and `tests/gates/check-syntax.test.mjs` holds that on each way out of the script.
 
 Earlier records: [20261002-distribution](../20261002-distribution/README.md) and
 [20260813-harness-landscape.md](../20260813-harness-landscape.md).
