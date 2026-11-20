@@ -1636,6 +1636,9 @@
     ],
     "tools/framework-floor.json": [
       {
+        "sha256": "01793aca98c33d7e839e0926c198fb9da81596c89c15e4591ddf60c87a88998b"
+      },
+      {
         "sha256": "10a6de70217975bb12ac30dc5ade122dbceb413ab6ae3de3b19becbf6f7fb70d"
       }
     ],
@@ -1872,6 +1875,9 @@
     "tools/lib/planted-shas.json": [
       {
         "sha256": "1ef63c05e11ed7b8f2eccb123772c53534bcffdde4efd7ffd434f82de61d9a59"
+      },
+      {
+        "sha256": "a5da6cd0fbc5ad6fd3e7885ca1824f57c80bee0e10265c615d4633074ba3c16f"
       }
     ],
     "tools/lib/png.mjs": [
@@ -2177,6 +2183,9 @@
     "tools/eol.json": [
       {
         "sha256": "143cd815089177586f220497143d75bd9022a8abab441147c061343508ad5938"
+      },
+      {
+        "sha256": "969ca2eb595f5684fccce0a6dd5f153861475e6208f98b67df1309b3196928f3"
       }
     ],
     "tools/expo-permissions.json": [
