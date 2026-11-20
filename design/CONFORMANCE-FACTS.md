@@ -86,6 +86,57 @@ next re-check, which corrects it to what has landed by then. The maintainer deci
 2026-11-01 to re-date the row rather than delete it, because the change it watches has not
 arrived: its next re-check is **2026-12-01**.
 
+**Supabase grants row re-verified 2026-11-20**, eleven days before the 2026-12-01 re-check the
+`conformance-supabase-grants-arrival` row owed. These were read on 2026-11-20:
+
+- The announcement, [discussion 45329](https://github.com/orgs/supabase/discussions/45329),
+  and its copy on supabase.com, where `/changelog/45329` redirects. GitHub gives the
+  discussion's last edit as 2026-11-18, by the changelog bot, and its comments were read too.
+- [supabase/cli#6337](https://github.com/supabase/cli/pull/6337) again, and
+  [supabase/cli#7286](https://github.com/supabase/cli/issues/7286), opened on 2026-10-22 and
+  closed on 2026-10-27, which the 2026-11-01 re-check did not cite.
+- The Supabase CLI's config schema, `packages/config/src/api.ts`, at v3.2.0, the newest
+  release, published on 2026-11-16.
+- Supabase's guide [Securing your API](https://supabase.com/docs/guides/api/securing-your-api).
+
+**No hosted project was read this time.** The 2026-11-01 probe needs a login to a project,
+and this re-read used public sources only. So what follows about the platform is Supabase's
+own account of it, not an observation, and the probe is still worth repeating: its query is
+in the 2026-11-01 list above.
+
+What they say:
+
+- **The announcement still gives both dates.** New projects by default from 2026-05-30, in a
+  rollout over a few weeks, and all existing projects from 2026-10-30. It carries no note that
+  either date moved, and the newest comment that GitHub marks as a Supabase member's is from
+  2026-08-08.
+- **Supabase says the cloud default has not changed.** #7286 asked the CLI to treat an unset
+  `[api].auto_expose_new_tables` as `false` again, citing the announcement's 2026-05-30 date.
+  A Supabase maintainer closed it as not planned on 2026-10-27, with: "The cloud default
+  hasn’t changed yet, as the rollout caused issues for some users. We’re working on a revised
+  timeline and will share an update on when the default will change once we have more
+  information". On 2026-11-20 the announcement carried no revised timeline, and no changelog
+  entry published since 2026-10-01 is about this change.
+- **The CLI still treats auto-exposing as the cloud default.** At v3.2.0 the schema says of
+  the flag: "When unset, new entities are auto-exposed, matching the cloud default." The
+  scaffold still pins the CLI at 2.118.0 and does not set the flag.
+- **The guide describes the change as under way and gives no date.** "Supabase is changing
+  the platform default to revoke these automatic grants so that exposure becomes opt-in",
+  and "Default privileges differ between projects, depending on when the project was created
+  and its Data API settings".
+
+**Verdict: no source read on 2026-11-20 says that either announced date has landed, and
+Supabase's last word, on 2026-10-27, is that the default has not changed and that a revised
+timeline will follow.** The shipped closure is right either way, for the reason given on
+2026-11-01. The shipped prose that dates the change to projects created on or after
+2026-10-30 is **not** corrected by this re-read, though the paragraph above said the next
+re-check would do it. Nothing has landed to correct it to, and the sentence is repeated in
+gate messages, the tests that read them and the scaffold's migrations, so changing it changes
+the product and not this record. It was reported to the maintainer as its own item. The row
+is re-dated again, not deleted, pending the maintainer's acceptance as in §2: its next
+re-check is **2026-12-20**, one month on, as on 2026-11-01, because the change it watches has
+still not arrived and Supabase has said a revised timeline will follow.
+
 ---
 
 ## 2. Google Play target API level — **CUT (already satisfied, and not derivable)**
