@@ -33,6 +33,21 @@ allowBuilds:
 # SOURCE: design/CONFORMANCE-FACTS.md §8 (all three facts empirically checked)
 minimumReleaseAge: 0
 
+# Two native packages that no workspace package declares. react-native-css-interop, which
+# NativeWind brings, names react-native-reanimated as a peer, and pnpm installs the newest
+# release of an undeclared peer on every fresh install. No code here imports either one (the
+# app's motion is core `Animated`), but Expo links both into the native build.
+# exact: react-native-reanimated 4.8.0 supports React Native 0.87 to 0.89 and needs
+# react-native-worklets 0.14, which supports the same three. On this scaffold's 0.86 the
+# Android build stops at reanimated's assertMinimalReactNativeVersionTask. 4.7.2 and 0.13.1
+# are the last releases of each that support 0.86.
+# An override and not a catalog entry: it holds the whole dependency graph, so the packages
+# that depend on react-native-css-interop cannot resolve two copies of its peer, and no
+# package has to declare a dependency it does not use.
+overrides:
+  react-native-reanimated: 4.7.2
+  react-native-worklets: 0.13.1
+
 catalog:
   # ---- toolchain --------------------------------------------------------------
   typescript: ~6.0.3 # typescript-eslint 8.63.x supports >=4.8.4 <6.1.0
