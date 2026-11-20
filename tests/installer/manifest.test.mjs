@@ -4,8 +4,7 @@
 // Regression armor: these pin CURRENT behavior after the v0.1.3 refactor.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -17,6 +16,7 @@ import {
   writeManifest,
 } from '../../installer/lib/manifest.mjs'
 import { CONFIG_FILES, SEEDED_FILES, SEEDED_PREFIXES } from '../../installer/lib/layout.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const PKG = fileURLToPath(new URL('../../package.json', import.meta.url))
 
@@ -116,7 +116,7 @@ test('manifestPath points at .harness/manifest.json under the target dir', () =>
 })
 
 test('readManifest: genuinely absent manifest returns null (init advice is correct)', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dir = tempDir('tpah-man-')
   assert.equal(readManifest(dir), null)
   // .harness exists but manifest.json does not — still absent
   mkdirSync(join(dir, '.harness'), { recursive: true })
@@ -125,13 +125,13 @@ test('readManifest: genuinely absent manifest returns null (init advice is corre
 
 test('readManifest: unreadable path (directory at manifest.json) also reads as absent', () => {
   // Pins that ANY read failure — not just ENOENT — is treated as "no manifest".
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dir = tempDir('tpah-man-')
   mkdirSync(join(dir, '.harness', 'manifest.json'), { recursive: true })
   assert.equal(readManifest(dir), null)
 })
 
 test('readManifest: corrupt JSON throws the restore-from-git error, never null', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dir = tempDir('tpah-man-')
   mkdirSync(join(dir, '.harness'), { recursive: true })
   for (const corrupt of ['{ not json', '', '{"files": }']) {
     writeFileSync(join(dir, '.harness', 'manifest.json'), corrupt)
@@ -149,14 +149,14 @@ test('readManifest: corrupt JSON throws the restore-from-git error, never null',
 })
 
 test('readManifest: valid JSON parses through untouched', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dir = tempDir('tpah-man-')
   mkdirSync(join(dir, '.harness'), { recursive: true })
   writeFileSync(join(dir, '.harness', 'manifest.json'), '{"harnessVersion":"9.9.9","extra":true}\n')
   assert.deepEqual(readManifest(dir), { harnessVersion: '9.9.9', extra: true })
 })
 
 test('writeManifest: creates .harness, pins key order, sorts modules and files, trailing newline', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dir = tempDir('tpah-man-')
   writeManifest(dir, sampleManifest())
 
   const raw = readFileSync(join(dir, '.harness', 'manifest.json'), 'utf8')
@@ -183,8 +183,8 @@ test('writeManifest: output is stable across insertion order (byte-identical)', 
   b.modules = ['ci-provenance', 'ci-windows-release'] // reversed relative to a
   b.files = Object.fromEntries(Object.entries(a.files).reverse())
 
-  const dirA = mkdtempSync(join(tmpdir(), 'tpah-man-'))
-  const dirB = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dirA = tempDir('tpah-man-')
+  const dirB = tempDir('tpah-man-')
   writeManifest(dirA, a)
   writeManifest(dirB, b)
   assert.equal(
@@ -195,7 +195,7 @@ test('writeManifest: output is stable across insertion order (byte-identical)', 
 })
 
 test('writeManifest: round-trips through readManifest and accepts a Set of modules', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dir = tempDir('tpah-man-')
   const manifest = sampleManifest()
   writeManifest(dir, manifest)
   assert.deepEqual(readManifest(dir), {
@@ -210,13 +210,13 @@ test('writeManifest: round-trips through readManifest and accepts a Set of modul
   })
 
   // enable/update pass module collections that may be Sets — the spread supports both
-  const dirSet = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dirSet = tempDir('tpah-man-')
   writeManifest(dirSet, { ...manifest, modules: new Set(['b-mod', 'a-mod']) })
   assert.deepEqual(readManifest(dirSet).modules, ['a-mod', 'b-mod'])
 })
 
 test('writeManifest: does not mutate the caller manifest and drops unknown top-level keys', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dir = tempDir('tpah-man-')
   const manifest = sampleManifest()
   manifest.modules = ['z-mod', 'a-mod']
   manifest.junkKey = 'should not persist'
@@ -232,12 +232,12 @@ test('writeManifest: baseVersion persists right after harnessVersion when presen
   // Absent (pre-0.1.5 manifests round-tripping through enable/update spreads):
   // the key must NOT appear — rampNote's harnessVersion fallback depends on
   // being able to tell "never stamped" apart from a stamped value.
-  const dirOld = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dirOld = tempDir('tpah-man-')
   writeManifest(dirOld, sampleManifest())
   assert.ok(!('baseVersion' in readManifest(dirOld)), 'absent baseVersion must not be serialized')
 
   // Present: pinned position (second key) and value round-trips.
-  const dirNew = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dirNew = tempDir('tpah-man-')
   writeManifest(dirNew, { ...sampleManifest(), baseVersion: '0.1.4' })
   const raw = JSON.parse(readFileSync(manifestPath(dirNew), 'utf8'))
   assert.equal(raw.baseVersion, '0.1.4')
@@ -259,7 +259,7 @@ test('writeManifest never leaves a partial manifest — a failed replacement thr
   // renames, so the failure mode is a THROW with the old state intact, never a
   // half-written file. Forced here by pre-creating manifest.json as a DIRECTORY
   // (staging succeeds, the rename cannot land).
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-man-'))
+  const dir = tempDir('tpah-man-')
   mkdirSync(manifestPath(dir), { recursive: true })
   assert.throws(() => writeManifest(dir, sampleManifest()))
   const harnessDir = join(dir, '.harness')

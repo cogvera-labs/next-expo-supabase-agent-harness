@@ -8,17 +8,17 @@
 // output that failed it reads as noise instead of evidence.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { commandFailureOutput, runCmd } from '../../template/base/tools/lib/gate.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 // A real failing child under runCmd's capture contract (utf8, piped): writes the
 // diagnostic to STDOUT ONLY, nothing to stderr, exits non-zero — the exact shape
 // `expo export` produces. Script goes through a temp file, not `-e`, so the
 // invocation is quoting-safe on both POSIX and Windows runners.
 function realFailure({ stdout = '', stderr = '', code = 3 }) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-failout-'))
+  const dir = tempDir('epah-failout-')
   const script = join(dir, 'child.mjs')
   writeFileSync(
     script,

@@ -27,15 +27,14 @@ import {
   copyFileSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { walkFiles } from '../../template/base/tools/lib/fs-walk.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 const MODULES_ROOT = fileURLToPath(new URL('../../template/modules/', import.meta.url))
@@ -232,7 +231,7 @@ test('at least one module ships a feature slice (anti-vacuity)', () => {
 for (const name of SLICE_MODULES) {
   for (const variant of VARIANTS) {
     test(`the ${name} slice, applied per its APPLY.md to a ${variant.label} scaffold, passes boundaries and duplication`, () => {
-      const dir = mkdtempSync(join(tmpdir(), `epah-slice-${name}-`))
+      const dir = tempDir(`epah-slice-${name}-`)
       made.push(dir)
       const init = run(dir, process.execPath, [CLI, 'init', '--dir', dir, '--tier', 'core', '--yes', ...variant.flags, ...SETS])
       assert.equal(init.code, 0, init.out)

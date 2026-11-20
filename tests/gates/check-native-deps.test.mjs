@@ -9,11 +9,11 @@
 // config-plugin test closure, and the skip-local/fail-closed-CI asymmetry.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-native-deps.mjs', import.meta.url),
@@ -46,7 +46,7 @@ function fixture({
   gitignore = 'node_modules/\napps/mobile/android/\napps/mobile/ios/\n',
   files = {},
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-nativedeps-'))
+  const dir = tempDir('epah-nativedeps-')
   mkdirSync(join(dir, 'apps/mobile'), { recursive: true })
   mkdirSync(join(dir, 'tools'), { recursive: true })
   // Every dep is `catalog:` in the real scaffold — the gate reads the NAMES here and

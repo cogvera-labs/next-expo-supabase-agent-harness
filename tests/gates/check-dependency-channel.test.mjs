@@ -14,11 +14,11 @@
 // tripwire instead of the closure.
 import assert from 'node:assert/strict'
 import { execFileSync, spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/check-dependency-channel.mjs', import.meta.url))
 
@@ -90,7 +90,7 @@ const MIGRATIONS = {
  * @returns {string} the fixture root
  */
 function makeRepo({ catalogGain = [], referenceGain = '', tagged = true, migrations = MIGRATIONS, pins = {} } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-depchan-'))
+  const dir = tempDir('nsah-depchan-')
   const write = (rel, content) => {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })
     writeFileSync(join(dir, rel), content)

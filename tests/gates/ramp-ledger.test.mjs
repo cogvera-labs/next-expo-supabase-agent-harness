@@ -21,8 +21,7 @@
 // SOURCE: scripts/lib/ramp-sites.mjs
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import {
@@ -39,6 +38,7 @@ import {
   shippedRampSites,
   VINTAGES,
 } from '../../scripts/lib/ramp-sites.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 test('rampNoteCalls reads a multi-line call and skips a commented mention', () => {
   const src = `
@@ -92,7 +92,7 @@ test('an unconsumed rampNote() is detected — the expiry that rings into a gree
   // site that discards the result takes the identical path on both sides of the deadline,
   // and check-rate-limits.mjs's ended in ok(): the alarm printed to stderr and the gate
   // exited 0. It shipped that way for three releases and the release notes counted it.
-  const dir = mkdtempSync(join(tmpdir(), 'ramp-consumed-'))
+  const dir = tempDir('ramp-consumed-')
   writeFileSync(
     join(dir, 'check-discarded.mjs'),
     `const RAMP = '0.2.0'\nif (!existsSync(BUDGET)) {\n  rampNote(GATE, RAMP, 'missing', { until: '0.4.0' })\n  ok(GATE, 'nothing to judge')\n}\n`,

@@ -11,8 +11,7 @@
 // SOURCE: template/base/tools/lib/sbom.mjs
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -21,6 +20,7 @@ import {
   purlForLockKey,
   sbomProblems,
 } from '../../template/base/tools/lib/sbom.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const SCRIPT = join(ROOT, 'template/base/tools/check-sbom.mjs')
@@ -209,7 +209,7 @@ test('RED: a component with no purl is invisible to the closure, so it is its ow
 // ── the lane red-proof ────────────────────────────────────────────────────────────
 
 test('CANARY — the shipped sbom-inventory script EXITS 1 on an under-reporting inventory', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'harness-sbom-'))
+  const dir = tempDir('harness-sbom-')
   const lock = join(dir, 'pnpm-lock.yaml')
   const sbom = join(dir, 'sbom.cdx.json')
   writeFileSync(lock, LOCK)
@@ -234,7 +234,7 @@ test('CANARY — the shipped sbom-inventory script EXITS 1 on an under-reporting
 })
 
 test('CANARY — an absent lockfile SKIPS locally and FAILS CLOSED in CI', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'harness-sbom-nolock-'))
+  const dir = tempDir('harness-sbom-nolock-')
   const args = [SCRIPT, `--lock=${join(dir, 'pnpm-lock.yaml')}`]
 
   const local = spawnSync(process.execPath, args, {

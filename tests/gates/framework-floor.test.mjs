@@ -13,8 +13,7 @@
 // SOURCE: template/base/tools/lib/framework-floor.mjs
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
@@ -26,6 +25,7 @@ import {
   reviewWindowProblems,
   staleReviews,
 } from '../../template/base/tools/lib/framework-floor.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const SHIPPED_FLOOR = join(ROOT, 'template/base/tools/framework-floor.json')
@@ -339,7 +339,7 @@ test('MAX_REVIEW_WINDOW_DAYS is one calendar month, matching the upstream cadenc
 // ── the lane red-proof ────────────────────────────────────────────────────────────
 
 test('CANARY — the shipped floor-review script EXITS 1 on a backdated review', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'harness-floor-'))
+  const dir = tempDir('harness-floor-')
   const path = join(dir, 'framework-floor.json')
   const floor = floorJson()
   for (const entry of Object.values(floor.packages)) entry.reviewedUntil = '2020-01-01'
@@ -381,7 +381,7 @@ test('CANARY — a MISSING floor file reds rather than passing as "nothing to ch
 })
 
 test('CANARY — the vendor-support register rides the lane: a lapsed review reds naming the subject', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'harness-support-'))
+  const dir = tempDir('harness-support-')
   const script = join(ROOT, 'template/base/tools/check-framework-floor.mjs')
   const path = join(dir, 'support-register.json')
   const shipped = JSON.parse(
@@ -414,7 +414,7 @@ test('CANARY — the vendor-support register rides the lane: a lapsed review red
 })
 
 test('CANARY — the security.txt bound rides the lane: expired and too-distant red, live passes, absent NOTEs', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'harness-stxt-'))
+  const dir = tempDir('harness-stxt-')
   const script = join(ROOT, 'template/base/tools/check-framework-floor.mjs')
   const stxt = (name, expires) => {
     const p = join(dir, `${name}.txt`)

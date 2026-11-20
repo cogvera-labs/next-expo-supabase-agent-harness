@@ -20,12 +20,12 @@
 // No bash and no git: the installer-unit job's Windows leg can run this file.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { renderIndex } from '../../scripts/lib/demo-index.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const SCRIPT = join(ROOT, 'scripts/check-demo-index.mjs')
@@ -67,7 +67,7 @@ const GOOD_ROWS = [
  * @param {{ files?: Record<string, string | null>, index?: any }} [o]
  */
 function fixture({ files = {}, index = { rows: GOOD_ROWS } } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-demo-index-'))
+  const dir = tempDir('epah-demo-index-')
   made.push(dir)
   const all = {
     'base/PARITY.md': BASE_PARITY,

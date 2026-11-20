@@ -6,8 +6,7 @@
 // output (appId, one step block per route, the container-testID selector doctrine),
 // and the budget reader's fail-closed rejection of malformed budget files.
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import {
@@ -25,6 +24,7 @@ import {
   parseRoutes,
   readAppIdentity,
 } from '../../template/base/tools/lib/mobile-app-meta.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const IDENTITY = { appId: 'com.example.canary', scheme: 'canaryapp' }
 const ROUTES = [
@@ -34,7 +34,7 @@ const ROUTES = [
 ]
 
 function tempFile(name, content) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-maestro-'))
+  const dir = tempDir('epah-maestro-')
   const file = join(dir, name)
   mkdirSync(join(dir), { recursive: true })
   writeFileSync(file, content)
@@ -305,7 +305,7 @@ test('gen-maestro-flows --flow scaffolds a missing flow and REFUSES to overwrite
   const cli = fileURLToPath(
     new URL('../../template/base/tools/gen-maestro-flows.mjs', import.meta.url),
   )
-  const dir = mkdtempSync(join(tmpdir(), 'epah-genflows-'))
+  const dir = tempDir('epah-genflows-')
   mkdirSync(join(dir, 'apps/mobile/src'), { recursive: true })
   mkdirSync(join(dir, 'tools'), { recursive: true })
   writeFileSync(

@@ -12,11 +12,11 @@
 // target that does not exist, which must fail loudly rather than pass empty.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/check-syntax.mjs', import.meta.url))
 
@@ -32,7 +32,7 @@ function cleanEnv() {
 
 /** @param {Record<string, string>} files @returns {string} the fixture root */
 function writeTree(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-syntax-fixture-'))
+  const dir = tempDir('nsah-syntax-fixture-')
   for (const [rel, content] of Object.entries(files)) {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })
     writeFileSync(join(dir, rel), content)
@@ -81,7 +81,7 @@ test('GREEN: a clean tree, with the counts proving the scan read every class', (
 })
 
 test('RED: a missing scan target fails loudly — a gate that scans nothing is a false green', () => {
-  const { code, out } = run(join(mkdtempSync(join(tmpdir(), 'nsah-syntax-gone-')), 'does-not-exist'))
+  const { code, out } = run(join(tempDir('nsah-syntax-gone-'), 'does-not-exist'))
   assert.equal(code, 1, out)
   assert.match(out, /SYNTAX: FAIL — directory not found/)
 })

@@ -34,16 +34,15 @@ import {
   copyFileSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { delimiter, dirname, join, posix } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TEMPLATE = fileURLToPath(new URL('../../template/base/', import.meta.url))
 const RUNNER = 'tests/rls/run-rls.mjs'
@@ -137,7 +136,7 @@ function importClosure(rel, seen = new Set()) {
  *   PATH, working (the default) or failing every command.
  */
 function fixture({ workspace = false, pathCli = 'path' } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nesah-rls-'))
+  const dir = tempDir('nesah-rls-')
   made.push(dir)
   for (const rel of importClosure(RUNNER)) {
     mkdirSync(join(dir, dirname(rel)), { recursive: true })

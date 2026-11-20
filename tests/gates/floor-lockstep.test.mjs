@@ -10,14 +10,14 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 // Static, deliberately (0.8.0): the computed file:// dynamic import this replaced
 // was opaque to `knip --strict` and needed a Windows workaround (check-query-shapes
 // precedent).
 import { VALIDATE_STEPS } from '../../template/base/tools/harness.config.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TEMPLATE = fileURLToPath(new URL('../../template/base/', import.meta.url))
 const VALIDATE = join(TEMPLATE, 'tools/validate.mjs')
@@ -37,7 +37,7 @@ function cleanEnv(extra = {}) {
 // The floor snapshot is planted (or withheld) per-case.
 /** @param {{ floor?: any, config?: any }} parts */
 function fixture({ floor, config }) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-floor-'))
+  const dir = tempDir('epah-floor-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   copyFileSync(VALIDATE, join(dir, 'tools/validate.mjs'))
   writeFileSync(
@@ -80,7 +80,7 @@ const MIRROR_CONFIG =
 
 /** @param {{ validateFloor?: string }} planted */
 function mirror({ validateFloor } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-floor-'))
+  const dir = tempDir('epah-floor-')
   const tools = join(dir, 'template/base/tools')
   mkdirSync(join(dir, 'scripts'), { recursive: true })
   mkdirSync(tools, { recursive: true })

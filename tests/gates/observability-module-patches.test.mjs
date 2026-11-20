@@ -19,12 +19,12 @@
 //     is judged by the gate rather than slipping past on a parse failure.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { extractImports, vendorFor } from '../../template/base/tools/lib/observability.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-observability.mjs', import.meta.url),
@@ -105,7 +105,7 @@ function registerInstruction(md, ctx, planted) {
  * files, and the shipped policy EXTENDED (append-only) by the instructed additions.
  */
 function stageFixture({ planted, copies = {}, register }) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-observability-patch-'))
+  const dir = tempDir('epah-observability-patch-')
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   cpSync(join(TOOLS, 'lib'), join(dir, 'tools/lib'), { recursive: true })
   for (const { path, src } of planted) {

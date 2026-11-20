@@ -4,11 +4,11 @@
 
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { chmodSync, mkdirSync, writeFileSync } from 'node:fs'
 import { delimiter, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-types-drift.mjs', import.meta.url),
@@ -51,7 +51,7 @@ process.exit(0)
  * @returns {{ code: number | null, out: string }}
  */
 function run({ committed, genOutput = GEN_OUTPUT, workspace = false, ...flags } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nesah-typesdrift-'))
+  const dir = tempDir('nesah-typesdrift-')
   const bin = join(dir, 'bin')
   mkdirSync(bin, { recursive: true })
   writeFileSync(join(bin, 'impl.mjs'), IMPL)

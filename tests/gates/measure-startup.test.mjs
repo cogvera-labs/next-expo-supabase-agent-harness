@@ -7,8 +7,7 @@
 // measurement while both sides stayed individually green.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { delimiter, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -16,6 +15,7 @@ import {
   parseFullyDrawnMs,
   parseTotalTimeMs,
 } from '../../template/base/tools/measure-startup.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(
   new URL('../../template/base/tools/measure-startup.mjs', import.meta.url),
@@ -80,7 +80,7 @@ process.exit(0)
 
 /** @param {Record<string, any>} behavior */
 function fixture(behavior) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-measure-'))
+  const dir = tempDir('epah-measure-')
   mkdirSync(join(dir, 'apps/mobile/src'), { recursive: true })
   mkdirSync(join(dir, 'tools'), { recursive: true })
   writeFileSync(

@@ -17,15 +17,14 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { delimiter, join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(new URL('../../template/base/tools/check-web-build.mjs', import.meta.url))
 const QUALITY_GATE = fileURLToPath(
@@ -71,7 +70,7 @@ const PLACEHOLDERS = webBuildJobEnv()
  * @param {{ web?: boolean, nodeModules?: boolean, manifest?: { baseVersion: string, harnessVersion: string } }} [knobs]
  */
 function fixture({ web = true, nodeModules = true, manifest } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-webcompile-'))
+  const dir = tempDir('epah-webcompile-')
   made.push(dir)
   if (web) {
     mkdirSync(join(dir, 'apps/web/app'), { recursive: true })

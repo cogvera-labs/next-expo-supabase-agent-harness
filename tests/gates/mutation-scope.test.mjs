@@ -14,12 +14,12 @@
 // the ratchet's own ramp (tests/gates/check-mutation-ratchet.test.mjs).
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { edgeSuiteDirs } from '../../template/base/tools/lib/mutation-critical.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TOOLS = fileURLToPath(new URL('../../template/base/tools', import.meta.url))
 const DETAIL = 'the Edge Function surface'
@@ -40,7 +40,7 @@ const DENO_SUITE = "import { assertEquals } from 'jsr:@std/assert'\nDeno.test('x
  * @param {string[] | null} manifest [baseVersion, harnessVersion], or null for no install record
  */
 function install(committed, changes, manifest) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-mscope-'))
+  const dir = tempDir('nsah-mscope-')
   made.push(dir)
   const write = (files) => {
     for (const [rel, text] of Object.entries(files)) {

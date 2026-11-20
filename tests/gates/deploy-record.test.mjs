@@ -8,8 +8,7 @@
 // they feed are what this file proves red.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -19,6 +18,7 @@ import {
   judgeRestoreBinding,
   windowFor,
 } from '../../template/base/tools/lib/deploy-record.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const sha64 = 'a'.repeat(64)
@@ -129,7 +129,7 @@ test('the EMITTER judges before it writes: a scaffold-shaped tree emits; a hollo
   const tool = join(ROOT, 'template/base/tools/emit-deploy-record.mjs')
   const lib = join(ROOT, 'template/base/tools/lib')
   const stage = (withMigrations) => {
-    const dir = mkdtempSync(join(tmpdir(), 'nesah-deploy-'))
+    const dir = tempDir('nesah-deploy-')
     mkdirSync(join(dir, 'tools'), { recursive: true })
     spawnSync('cp', ['-R', lib, join(dir, 'tools/lib')])
     spawnSync('cp', [tool, join(dir, 'tools/emit-deploy-record.mjs')])
@@ -179,7 +179,7 @@ const NO_NET =
   '{console.log("FETCH:"+String(u));return new Response("{}",{status:401})}'
 
 function runRestore(ref, { ci = false } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nesah-restore-'))
+  const dir = tempDir('nesah-restore-')
   const manifest = join(dir, 'deploy-manifest.json')
   writeFileSync(manifest, JSON.stringify(MANIFEST))
   const env = { ...process.env }

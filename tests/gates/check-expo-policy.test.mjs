@@ -10,12 +10,12 @@
 // generated tokens module) are the SHIPPED templates, mutated per case.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { delimiter, dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { deflateSync } from 'node:zlib'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-expo-policy.mjs', import.meta.url),
@@ -199,7 +199,7 @@ function fixture({
   sources = {},
   gitignore = 'node_modules/\napps/mobile/android/\napps/mobile/ios/\n',
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-expopolicy-'))
+  const dir = tempDir('epah-expopolicy-')
   mkdirSync(join(dir, 'apps/mobile/src/theme'), { recursive: true })
   mkdirSync(join(dir, 'tools'), { recursive: true })
   writeFileSync(

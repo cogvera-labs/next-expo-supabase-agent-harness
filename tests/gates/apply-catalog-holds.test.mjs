@@ -14,13 +14,13 @@
 // SOURCE: scripts/ci/apply-catalog-holds.mjs · scripts/ci/catalog-holds.json
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { catalogEntry } from '../../installer/lib/migrations.mjs'
 import { admits, applyHolds, registerProblems } from '../../scripts/ci/apply-catalog-holds.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const SCRIPT = join(ROOT, 'scripts/ci/apply-catalog-holds.mjs')
@@ -43,7 +43,7 @@ after(() => {
 
 /** @param {string | null} yaml the scaffold's pnpm-workspace.yaml, or null for none */
 function scaffold(yaml) {
-  const dir = mkdtempSync(join(tmpdir(), 'harness-holds-'))
+  const dir = tempDir('harness-holds-')
   made.push(dir)
   if (yaml !== null) writeFileSync(join(dir, 'pnpm-workspace.yaml'), yaml)
   return dir

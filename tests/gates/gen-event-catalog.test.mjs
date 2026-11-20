@@ -25,18 +25,17 @@ import {
   copyFileSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
   rmSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const BASE = fileURLToPath(new URL('../../template/base/', import.meta.url))
 const DEMO = fileURLToPath(new URL('../../template/demo/', import.meta.url))
@@ -85,7 +84,7 @@ function write(dir, files) {
  *   committed: the catalog the tree has committed (the demo's, unless a test says).
  */
 function install({ notes = 'declared', rootLists = false, extra = {}, committed = DEMO_COMMITTED } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-gen-events-'))
+  const dir = tempDir('epah-gen-events-')
   made.push(dir)
   for (const rel of TOOL_FILES) {
     if (!existsSync(join(BASE, rel))) continue

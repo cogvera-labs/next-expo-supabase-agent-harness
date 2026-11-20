@@ -9,8 +9,7 @@
 // the demo dropped or changed comes back only where it is absent, in the default's position;
 // and a row that cannot be judged is KEPT and reported, never guessed at.
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { after, test } from 'node:test'
 import {
@@ -22,6 +21,7 @@ import {
   tokensToPointer,
   trimDemoRows,
 } from '../../installer/lib/demo-rows.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const made = []
 after(() => {
@@ -198,7 +198,7 @@ test('markdown: a restored row whose neighbour is gone lands at the end of the t
 // ---- the index file --------------------------------------------------------------------
 
 test('readDemoIndex fails loud on an absent, unparsable or row-less index', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-demo-rows-'))
+  const dir = tempDir('epah-demo-rows-')
   made.push(dir)
   assert.throws(() => readDemoIndex(join(dir, 'absent.json')), /missing or not valid JSON/)
   writeFileSync(join(dir, 'bad.json'), '{ nope')

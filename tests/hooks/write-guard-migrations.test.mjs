@@ -19,11 +19,11 @@
 // CLAUDE_PROJECT_DIR, the way subagent-verdict-pathstate.test.mjs runs its hook.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { appendFileSync, linkSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { appendFileSync, linkSync, mkdirSync, symlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { after, test } from 'node:test'
+import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const HOOK = fileURLToPath(
   new URL('../../template/base/.claude/hooks/pretool-write-guard.mjs', import.meta.url),
@@ -50,18 +50,6 @@ function cleanEnv() {
 
 const HAS_GIT = spawnSync('git', ['--version'], { env: cleanEnv() }).status === 0
 const NO_GIT = HAS_GIT ? false : 'git is not on PATH on this machine: every case here needs a real repository'
-
-/** @type {string[]} */
-const made = []
-after(() => {
-  for (const dir of made) rmSync(dir, { recursive: true, force: true })
-})
-/** @param {string} prefix */
-function tempDir(prefix) {
-  const dir = mkdtempSync(join(tmpdir(), prefix))
-  made.push(dir)
-  return dir
-}
 
 /** @param {string} cwd @param {string[]} args */
 function git(cwd, args) {

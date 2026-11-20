@@ -11,12 +11,12 @@
 // the exact red/green.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-styleguide-manifest.mjs', import.meta.url),
@@ -88,7 +88,7 @@ export default function Home() {
 `
 
 function scaffold({ manifest = MANIFEST, native = NATIVE, sources = {} } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'styleguide-'))
+  const dir = tempDir('styleguide-')
   const put = (rel, content) => {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })
     writeFileSync(join(dir, rel), content)
@@ -118,7 +118,7 @@ test('RED — in CI the install-less regen-diff fails CLOSED, and under the CI p
 
   // `validate --ci-parity` sets HARNESS_REQUIRE_TOOLCHAINS=1 (not CI) and a per-step
   // report directory; the leg must fail the same way and record why.
-  const reportDir = join(mkdtempSync(join(tmpdir(), 'styleguide-parity-')), '0')
+  const reportDir = join(tempDir('styleguide-parity-'), '0')
   const parity = run(scaffold(), {
     HARNESS_REQUIRE_TOOLCHAINS: '1',
     HARNESS_PARITY_REPORT_DIR: reportDir,
@@ -154,7 +154,7 @@ test('a forked tools/lib/gate.mjs without noteMissingPrerequisite still loads th
   )
   assert.ok(!forked.includes('export function noteMissingPrerequisite'), 'precondition: export removed')
   writeFileSync(join(dir, 'tools/lib/gate.mjs'), forked)
-  const reportDir = join(mkdtempSync(join(tmpdir(), 'styleguide-fork-')), '0')
+  const reportDir = join(tempDir('styleguide-fork-'), '0')
   const r = spawnSync(process.execPath, [gate], {
     cwd: dir,
     encoding: 'utf8',

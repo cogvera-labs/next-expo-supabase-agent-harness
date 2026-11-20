@@ -13,8 +13,7 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { test } from 'node:test'
@@ -25,6 +24,7 @@ import {
   corpusById,
   loadCorpus,
 } from '../../template/base/tools/lib/corpus.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TEMPLATE = fileURLToPath(new URL('../../template/base/', import.meta.url))
 const HELPER = fileURLToPath(new URL('../../template/base/tools/lib/corpus.mjs', import.meta.url))
@@ -73,7 +73,7 @@ function entry(overrides = {}) {
  * @param {Record<string, unknown>} files
  */
 function root(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-corpus-'))
+  const dir = tempDir('epah-corpus-')
   for (const [rel, content] of Object.entries(files)) {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })
     writeFileSync(join(dir, rel), typeof content === 'string' ? content : JSON.stringify(content))

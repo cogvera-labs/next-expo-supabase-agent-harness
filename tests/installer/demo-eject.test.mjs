@@ -6,11 +6,11 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { walkTemplate } from '../../installer/lib/copy.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 const INDEX = fileURLToPath(new URL('../../template/demo-index.json', import.meta.url))
@@ -32,7 +32,7 @@ const SETS = [
 const made = []
 /** @param {string} tag */
 function tmp(tag) {
-  const dir = mkdtempSync(join(tmpdir(), `epah-demo-${tag}-`))
+  const dir = tempDir(`epah-demo-${tag}-`)
   made.push(dir)
   return dir
 }

@@ -13,14 +13,14 @@
 // install's own harnessVersion, whichever CLI runs it.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { graduate } from '../../installer/commands/graduate.mjs'
 import { MODULES } from '../../installer/lib/layout.mjs'
 import { installerVersion } from '../../installer/lib/manifest.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 const SETS = [
@@ -35,7 +35,7 @@ const cli = (args) => spawnSync('node', [CLI, ...args], { encoding: 'utf8' })
 
 /** A real core-tier scaffold whose manifest claims a release newer than this CLI. */
 function newerInstall() {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-mismatch-'))
+  const dir = tempDir('tpah-mismatch-')
   const res = cli(['init', '--dir', dir, '--tier', 'core', '--yes', ...SETS])
   assert.equal(res.status, 0, `init must succeed: ${res.stdout}${res.stderr}`)
   const path = join(dir, '.harness/manifest.json')
@@ -79,7 +79,7 @@ test('update, enable, disable and eject refuse a CLI older than the install, and
 })
 
 test('update at the SAME version still runs — the guard refuses only an older CLI', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'tpah-mismatch-same-'))
+  const dir = tempDir('tpah-mismatch-same-')
   assert.equal(cli(['init', '--dir', dir, '--tier', 'core', '--yes', ...SETS]).status, 0)
   const res = cli(['update', '--dir', dir, '--dry-run'])
   assert.equal(res.status, 0, `${res.stdout}${res.stderr}`)
@@ -89,7 +89,7 @@ test('update at the SAME version still runs — the guard refuses only an older 
 
 /** A manifest plus a validate that exits 0 with no ramp NOTE: graduate's clean path. */
 function graduateFixture(manifest) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-graduate-target-'))
+  const dir = tempDir('epah-graduate-target-')
   mkdirSync(join(dir, '.harness'), { recursive: true })
   mkdirSync(join(dir, 'tools'), { recursive: true })
   writeFileSync(join(dir, '.harness/manifest.json'), JSON.stringify({ modules: [], files: {}, ...manifest }, null, 2))

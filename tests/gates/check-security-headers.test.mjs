@@ -8,11 +8,11 @@
 
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const GATE_SRC = join(ROOT, 'template/base/tools/check-security-headers.mjs')
@@ -28,7 +28,7 @@ const MODULE_SRC = join(ROOT, 'template/stack/apps/web/lib/security-headers.ts')
  * @param {{ mutate?: (src: string) => string, policy?: (base: any) => any, securityTxt?: string }} [opts]
  */
 function fixture({ mutate, policy, securityTxt } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nesah-sechdr-'))
+  const dir = tempDir('nesah-sechdr-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   mkdirSync(join(dir, 'apps/web/lib'), { recursive: true })
   cpSync(GATE_SRC, join(dir, 'tools/check-security-headers.mjs'))
@@ -188,7 +188,7 @@ test('a missing module SKIPS locally and FAILS in CI', () => {
   const ci = runGate(dir)
   assert.equal(ci.code, 1, ci.out)
 
-  const dir2 = mkdtempSync(join(tmpdir(), 'nesah-sechdr-none-'))
+  const dir2 = tempDir('nesah-sechdr-none-')
   mkdirSync(join(dir2, 'tools'), { recursive: true })
   cpSync(GATE_SRC, join(dir2, 'tools/check-security-headers.mjs'))
   cpSync(LIB_SRC, join(dir2, 'tools/lib'), { recursive: true })
@@ -212,7 +212,9 @@ test('a missing module SKIPS locally and FAILS in CI', () => {
 // would encode.
 test('a project path holding shell syntax reaches node as it is, and nothing in it runs', () => {
   const plain = fixture()
-  const dir = `${plain}-$(touch$IFS'PWNED')`
+  // Renamed into a second temporary directory. The helper removes a directory under the path
+  // it returned, so a fixture renamed in place would stay in the temp folder.
+  const dir = join(tempDir('nesah-sechdr-shell-'), `app-$(touch$IFS'PWNED')`)
   renameSync(plain, dir)
   const r = runGate(dir)
   assert.equal(r.code, 0, r.out)

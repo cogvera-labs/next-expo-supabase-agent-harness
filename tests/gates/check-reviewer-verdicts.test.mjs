@@ -78,7 +78,6 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -101,6 +100,7 @@ import { REVIEWER_AGENTS } from '../../template/base/tools/lib/agent-roster.mjs'
 import * as rosterLib from '../../template/base/tools/lib/agent-roster.mjs'
 import * as gitDiff from '../../template/base/tools/lib/git-diff.mjs'
 import * as ledgerLib from '../../template/base/tools/lib/reviewer-verdicts.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const STEP = fileURLToPath(new URL('../../template/base/tools/check-reviewer-verdicts.mjs', import.meta.url))
 const HOOK = fileURLToPath(new URL('../../template/base/.claude/hooks/subagent-verdict.mjs', import.meta.url))
@@ -118,7 +118,7 @@ const CHANGED = 'supabase/migrations/29990101_x.sql'
  * @param {{ changed?: string, ledger?: Array<object>|string|null, triggers?: any }} [opts]
  */
 function fixture({ changed = CHANGED, ledger = null, triggers } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-verdicts-'))
+  const dir = tempDir('epah-verdicts-')
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   cpSync(join(TOOLS, 'lib'), join(dir, 'tools/lib'), { recursive: true })
   writeFileSync(
@@ -210,7 +210,7 @@ function runStep(dir, { session = SESSION, prompt = PROMPT, step = STEP, ci = tr
 
 /** The hook, against a real project tree carrying the shipped agent roster. */
 function runHook(payload) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-verdicthook-'))
+  const dir = tempDir('epah-verdicthook-')
   mkdirSync(join(dir, '.claude/hooks/lib'), { recursive: true })
   cpSync(join(AGENTS, '..', 'agents'), join(dir, '.claude/agents'), { recursive: true })
   cpSync(join(HOOKS, 'lib'), join(dir, '.claude/hooks/lib'), { recursive: true })
@@ -920,7 +920,7 @@ function commitAll(dir, message) {
  * @param {{ base?: Record<string, string> }} [opts]
  */
 function branchFixture({ base = {} } = {}) {
-  const origin = mkdtempSync(join(tmpdir(), 'epah-verdicts-origin-'))
+  const origin = tempDir('epah-verdicts-origin-')
   gitIn(origin, 'init', '-q')
   gitIn(origin, 'symbolic-ref', 'HEAD', 'refs/heads/main')
   gitIn(origin, 'config', 'user.email', 't@example.com')
@@ -930,7 +930,7 @@ function branchFixture({ base = {} } = {}) {
   put(origin, 'seed.txt', 'seed\n')
   for (const [path, body] of Object.entries(base)) put(origin, path, body)
   commitAll(origin, 'base')
-  const dir = join(mkdtempSync(join(tmpdir(), 'epah-verdicts-v2-')), 'repo')
+  const dir = join(tempDir('epah-verdicts-v2-'), 'repo')
   gitIn(origin, 'clone', '-q', origin, dir)
   gitIn(dir, 'config', 'user.email', 't@example.com')
   gitIn(dir, 'config', 'user.name', 'T')
@@ -1426,7 +1426,7 @@ function transcriptOf(models, tail = [], { told = models[0] ?? 'none' } = {}) {
 
 /** Write a transcript to a file of its own and return its absolute path. @param {string} body */
 function transcriptFile(body) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-transcript-'))
+  const dir = tempDir('epah-transcript-')
   const path = join(dir, 'agent-a9.jsonl')
   writeFileSync(path, body)
   return path
