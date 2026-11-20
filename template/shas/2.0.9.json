@@ -1614,6 +1614,9 @@
     ],
     "tools/framework-floor.json": [
       {
+        "sha256": "01793aca98c33d7e839e0926c198fb9da81596c89c15e4591ddf60c87a88998b"
+      },
+      {
         "sha256": "10a6de70217975bb12ac30dc5ade122dbceb413ab6ae3de3b19becbf6f7fb70d"
       }
     ],
