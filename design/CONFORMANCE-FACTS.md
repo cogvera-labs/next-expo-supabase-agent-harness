@@ -448,6 +448,68 @@ revised.
 **Disposition: recorded, nothing to build.** A harness that over-claims here manufactures work
 for every consumer.
 
+**AI Act Article 50 row re-verified 2026-11-20**, twelve days before the 2026-12-02 date the
+`conformance-ai-act-transitional` row carried, and so before the transitional period it
+watches has ended. These were read on 2026-11-20:
+
+- The Regulation as amended, on the Commission's AI Act Service Desk:
+  [Article 50](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50),
+  [Article 111](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-111) and
+  [Article 113](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-113). The site
+  says the AI Act "has been amended by Regulation (EU) 2026/1744 (Digital Omnibus on AI)" and
+  that its text is the EUR-Lex consolidated version as at 27 July 2026.
+- The Commission's
+  [guidelines on Article 50](https://digital-strategy.ec.europa.eu/en/library/guidelines-transparency-obligations-providers-and-deployers-ai-systems).
+  The library page gives their publication as 20 July 2026 and its own last update as
+  5 November 2026, and the English text it serves is dated 5 November 2026 and numbered
+  C(2026) 7702 final.
+- The Commission's
+  [questions and answers on Article 50](https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act)
+  (last update 24 July 2026), and its page on the
+  [Code of Practice on Transparency of AI-generated Content](https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content)
+  (last update 19 October 2026).
+
+EUR-Lex was read only in part. A direct request for the consolidated version got the empty
+HTTP 202 that §4 describes. A second client did load
+[that version](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727),
+and the portions holding Articles 50, 111 and 113 agree with the Service Desk. The page that
+lists the Regulation's versions came back empty, so whether a consolidated version later than
+27 July 2026 exists was not read there.
+
+What they say:
+
+- **Dates: CONFIRMED, with one word to correct.** Article 50 *applies* from 2 August 2026,
+  under Art. 113. The Regulation itself entered into force on 1 August 2024, so "in force
+  since 2026-08-02" in the table above should read "applies from". The transitional date is
+  Art. 111(4), which the 2026 amendment added: providers of AI systems that generate synthetic
+  audio, image, video or text content, placed on the market before 2 August 2026, "shall take
+  the necessary steps in order to comply with Article 50(2) by 2 December 2026". It covers
+  the marking and detection duty of Art. 50(2) and nothing else in Article 50.
+- **The role split: CONFIRMED, in the Regulation's own words.** Art. 50(2) binds "Providers
+  of AI systems, including general-purpose AI systems, generating synthetic audio, image,
+  video or text content". Paragraphs 3 and 4 bind deployers: for emotion recognition and
+  biometric categorisation, for deep fakes, and for text "published with the purpose of
+  informing the public on matters of public interest". The amendment changed paragraph 7 of
+  Article 50 and none of paragraphs 1 to 6. The guidelines allocate the duties the same way
+  (points 10 to 13), and so does the Code of Practice, with one section for providers and one
+  for deployers.
+- **The source-code carve-out is still point 68**, in the text dated 5 November 2026. Source
+  code falls outside Art. 50(2), with the comments that are part of it, and so do SQL, YAML,
+  JSON, configuration schemas and scripts. The guidelines can still change: the Commission
+  "will review these Guidelines as soon as necessary" and may withdraw or amend them
+  (point 155), and no date is given.
+
+**Verdict: the negative holds, on the wording of Art. 50(2) itself, and the disposition
+stands: recorded, nothing to build.** Two limits. This re-read came before the transitional
+period ends, so it does not show what is published when it does. And it covers what this
+section records, authorship and the Art. 50(2) marking duty: a consumer whose own product is
+or contains a generative AI system has to read Article 50 for that product, which this
+section has never done. No shipped file states the negative, so nothing an install receives
+changes. The row is re-dated, not deleted, pending the maintainer's acceptance as in §2: its
+next re-read is **2026-12-31**, twenty-nine days after the period ends, in one sitting with
+the `conformance-cra-hens-citation` row, which is read from the same two sites, the
+Commission's and EUR-Lex.
+
 ---
 
 ## 6. European Accessibility Act — **CUT as a regime; the a11y limits recorded**

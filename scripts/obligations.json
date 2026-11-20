@@ -217,15 +217,19 @@
     {
       "id": "conformance-ai-act-transitional",
       "kind": "calendar",
-      "target": "2026-12-02",
+      "target": "2026-12-31",
       "sites": [
         {
           "file": "design/CONFORMANCE-FACTS.md",
-          "mustContain": "2026-12-02"
+          "mustContain": "AI Act Article 50 row re-verified 2026-11-20"
+        },
+        {
+          "file": "design/CONFORMANCE-FACTS.md",
+          "mustContain": "2026-12-31"
         }
       ],
-      "reason": "EU AI Act Article 50 transparency: in force since 2026-08-02 with a 2026-12-02 transitional. The recorded disposition is a CONFIRMED NEGATIVE on the role split (Art. 50(2) binds the provider of the generative system, not the author of software written with one); this row is the dated re-verification of that negative when the transitional window closes, since the robust rationale must survive whatever guidance accretes by then.",
-      "reviewedOn": "2026-08-10"
+      "reason": "EU AI Act Article 50 transparency: in force since 2026-08-02 with a 2026-12-02 transitional. The recorded disposition is a CONFIRMED NEGATIVE on the role split (Art. 50(2) binds the provider of the generative system, not the author of software written with one); this row is the dated re-verification of that negative when the transitional window closes, since the robust rationale must survive whatever guidance accretes by then. RE-VERIFIED 2026-11-20, twelve days BEFORE the 2026-12-02 date the row carried until then, so before the window has closed. THE NEGATIVE HOLDS, on the Regulation's own wording, read on the Commission's AI Act Service Desk, whose text is the consolidated version as at 2026-07-27, after the amendment by Regulation (EU) 2026/1744: Art. 50(2) binds 'Providers of AI systems, including general-purpose AI systems, generating synthetic audio, image, video or text content', paragraphs 3 and 4 bind deployers, and the amendment changed paragraph 7 of Article 50 and none of paragraphs 1 to 6. The dates are CONFIRMED with one word to correct: Article 50 APPLIES from 2026-08-02 (Art. 113; the Regulation entered into force on 2024-08-01), and the transitional date is the new Art. 111(4), under which providers of generative AI systems placed on the market before 2026-08-02 comply with Art. 50(2) by 2026-12-02. The guidance that has accreted agrees. The Commission's guidelines on Article 50 (published 2026-07-20; the English text served on 2026-11-20 is dated 2026-11-05, C(2026) 7702 final) give providers Art. 50(1) and (2) and deployers Art. 50(3) and (4) (points 10 to 13), still put source code outside Art. 50(2) at point 68, and say the Commission will review them 'as soon as necessary', with no date (point 155); its Code of Practice has one section for providers and one for deployers. EUR-Lex was read only in part: a direct request got an empty HTTP 202, a second client loaded the consolidated version, and the page listing its versions came back empty. No shipped file states the negative, so nothing an install receives changes. RE-DATED to 2026-12-31 rather than deleted, pending the maintainer's acceptance: the window this row was written to watch closes twelve days after this re-read, so one more re-read is owed after it closes, and 2026-12-31 puts it in one sitting with conformance-cra-hens-citation, which is read from the same two sites. The first sites[] anchor pins the re-verification date, so the next re-read has to move this row in the same diff; design/CONFORMANCE-FACTS.md §5 carries the full record and its sources.",
+      "reviewedOn": "2026-11-20"
     },
     {
       "id": "version-sync-eol-arrival-ramp-expiry",
