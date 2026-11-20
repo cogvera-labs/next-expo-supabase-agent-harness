@@ -13,8 +13,7 @@
 // Windows leg of the unit lane runs the identical assertions.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -22,6 +21,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 // was opaque to `knip --strict` (check-query-shapes precedent).
 import { STOP_HOOK_STEPS } from '../../template/base/tools/harness.config.mjs'
 import { loadStopChain, unionSteps } from '../../template/base/tools/lib/stop-chain.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TEMPLATE = fileURLToPath(new URL('../../template/base/', import.meta.url))
 
@@ -32,7 +32,7 @@ const TEMPLATE = fileURLToPath(new URL('../../template/base/', import.meta.url))
  *        step names; each becomes a `node mark-<name>.mjs` step that writes ran-<name>.
  */
 function fixture({ config, floor, corruptFloor }) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-stopfloor-'))
+  const dir = tempDir('epah-stopfloor-')
   cpSync(join(TEMPLATE, '.claude/hooks'), join(dir, '.claude/hooks'), { recursive: true })
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   // The hook resolves the union through the shared lib (0.7.0) — part of the rendered
@@ -178,7 +178,7 @@ test('unionSteps: subtraction is impossible — every floor step survives even a
 })
 
 test('loadStopChain mirrors the hook posture: missing/corrupt/shapeless floor is a NOTE, never a throw', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-stopchain-lib-'))
+  const dir = tempDir('epah-stopchain-lib-')
   const config = [['validate', 'node mark-validate.mjs']]
   const floorUrl = pathToFileURL(join(dir, 'stop.floor.json'))
 

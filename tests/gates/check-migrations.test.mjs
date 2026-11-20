@@ -9,10 +9,10 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-migrations.mjs', import.meta.url),
@@ -38,7 +38,7 @@ function git(dir, ...args) {
 // tree against HEAD (locally) exactly like a real checkout, so committed state
 // must come from a real git repo, not from file layout alone.
 function fixture({ migration = CLEAN_MIGRATION, migrationsDir = true, commit = true } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-miggate-'))
+  const dir = tempDir('epah-miggate-')
   if (migrationsDir) {
     mkdirSync(join(dir, MIGRATIONS), { recursive: true })
     if (migration !== null) writeFileSync(join(dir, MIGRATIONS, '0000_init.sql'), migration)
@@ -395,7 +395,7 @@ test('CI: an unresolvable diff base (no commits) fails CLOSED, never vacates the
 })
 
 test('CI posture via HARNESS_REQUIRE_TOOLCHAINS=1 (validate --ci-parity): the failed diff fails closed AND leaves one record naming the gate', () => {
-  const reportDir = join(mkdtempSync(join(tmpdir(), 'epah-miggate-parity-')), '0')
+  const reportDir = join(tempDir('epah-miggate-parity-'), '0')
   const r = runGate(fixture({ commit: false }), {
     ci: false,
     extraEnv: { HARNESS_REQUIRE_TOOLCHAINS: '1', HARNESS_PARITY_REPORT_DIR: reportDir },

@@ -11,12 +11,13 @@
 // that found nothing wrong, which is the failure mode this release is about.
 // SOURCE: template/base/tools/lib/live-controls.mjs
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { liveControls, singleSurfaceGates } from '../../template/base/tools/lib/live-controls.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SHIPPED_WORKFLOWS = fileURLToPath(
   new URL('../../template/base/github/workflows', import.meta.url),
@@ -24,7 +25,7 @@ const SHIPPED_WORKFLOWS = fileURLToPath(
 const SHIPPED_TOOLS = fileURLToPath(new URL('../../template/base/tools', import.meta.url))
 
 function workflowDir(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-live-'))
+  const dir = tempDir('epah-live-')
   mkdirSync(dir, { recursive: true })
   for (const [name, text] of Object.entries(files)) writeFileSync(join(dir, name), text)
   return dir

@@ -154,9 +154,11 @@ The integrator fills in Status.
 | 15 | `init --dry-run` prints "written: N file(s)" although it writes nothing | pending |
 | 16 | `template/base/tools/eslint-rules/index.mjs` names the three sanctioned transport throws; `check-migrations.mjs` and the stack's warrant regex use `YYYYMMDD-slug.md` ADR names | pending |
 
-Outside the protected paths, and left for a later change: the other test files that leave
-`mkdtemp` directories behind (#276) can clean up the way
-`tests/gates/check-plugin-manifest.test.mjs` now does, which left the largest trees.
+Outside the protected paths: tests make their temporary directories through
+`tests/helpers/temp-dir.mjs`, which removes them when the test file ends, and
+`tests/gates/test-temp-dirs.test.mjs` fails on a direct `mkdtemp` call under `tests/` (#276).
+Left for a protected-path change: `scripts/check-syntax.mjs` never removes the directory it
+makes, so each run of it still leaves one in the OS temp folder.
 
 Earlier records: [20261002-distribution](../20261002-distribution/README.md) and
 [20260813-harness-landscape.md](../20260813-harness-landscape.md).

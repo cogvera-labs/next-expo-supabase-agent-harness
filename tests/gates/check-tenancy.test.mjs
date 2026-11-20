@@ -9,11 +9,11 @@
 
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const GATE_SRC = join(ROOT, 'template/base/tools/check-tenancy.mjs')
@@ -237,7 +237,7 @@ ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;`
  *           configToml?: string | null, manifest?: any }} [opts]
  */
 function fixture({ migration = tenancyMigration(), config, rawConfig, configToml = null, manifest = null } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nesah-tenancy-'))
+  const dir = tempDir('nesah-tenancy-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   mkdirSync(join(dir, 'supabase/migrations'), { recursive: true })
   cpSync(GATE_SRC, join(dir, 'tools/check-tenancy.mjs'))

@@ -24,14 +24,14 @@
 // writes no stamp, and the step names that entry's format instead of counting it.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import * as gitDiff from '../../template/base/tools/lib/git-diff.mjs'
 import * as verdicts from '../../template/base/tools/lib/reviewer-verdicts.mjs'
 import { pathStateDigest } from '../../template/base/tools/lib/reviewer-verdicts.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const HOOK = fileURLToPath(
   new URL('../../template/base/.claude/hooks/subagent-verdict.mjs', import.meta.url),
@@ -42,7 +42,7 @@ const CHANGED = 'supabase/migrations/29990101_x.sql'
 
 /** A git repo carrying the shipped roster + triggers and one staged reviewer-owned file. */
 function fixture() {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-verdict-ps-'))
+  const dir = tempDir('epah-verdict-ps-')
   cpSync(join(TEMPLATE, '.claude/agents'), join(dir, '.claude/agents'), { recursive: true })
   mkdirSync(join(dir, 'tools'), { recursive: true })
   writeFileSync(join(dir, 'tools/reviewer-triggers.json'), JSON.stringify(TRIGGERS, null, 2))

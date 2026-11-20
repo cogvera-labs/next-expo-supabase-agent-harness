@@ -16,8 +16,7 @@
 // The real template/base tree is also exercised read-only on every OS.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readdirSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 import {
   planStack,
@@ -30,6 +29,7 @@ import {
   walkTemplate,
 } from '../../installer/lib/copy.mjs'
 import { PLACEHOLDERS, tokensIn } from '../../installer/lib/placeholders.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 // A complete answers map — one value per registered placeholder — so a rendered
 // tree that still shows {{...}} can only be an UNKNOWN (unregistered) token.
@@ -46,7 +46,7 @@ function treeFor(fixtureRoot) {
 }
 
 function makeFixture(prefix, files) {
-  const root = mkdtempSync(join(tmpdir(), prefix))
+  const root = tempDir(prefix)
   for (const [rel, data] of Object.entries(files)) {
     const abs = join(root, ...rel.split('/'))
     mkdirSync(join(abs, '..'), { recursive: true })
@@ -373,7 +373,7 @@ test('walkTemplate + renderEntry compose to exactly planTree on a fixture tree',
 })
 
 test('walkTemplate returns [] for an empty directory', (t) => {
-  const root = mkdtempSync(join(tmpdir(), 'tpah-copy-empty-'))
+  const root = tempDir('tpah-copy-empty-')
   const tree = treeFor(root)
   if (tree === null) {
     t.skip('tmpdir on a different drive than the repo — template-relative tree unreachable')

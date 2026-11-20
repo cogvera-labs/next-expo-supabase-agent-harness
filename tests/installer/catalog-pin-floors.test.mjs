@@ -15,12 +15,12 @@
 // missing, rather than the whole file failing to load.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import * as lib from '../../installer/lib/migrations.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const PARKED = '.harness/pending/pin-floors.json'
@@ -77,7 +77,7 @@ after(() => {
   for (const dir of made) rmSync(dir, { recursive: true, force: true })
 })
 const scratch = () => {
-  const dir = mkdtempSync(join(tmpdir(), 'harness-pinfloor-'))
+  const dir = tempDir('harness-pinfloor-')
   made.push(dir)
   return dir
 }

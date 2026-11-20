@@ -11,10 +11,10 @@ import { test, before } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 const GATE = fileURLToPath(new URL('../../template/base/tools/check-sources.mjs', import.meta.url))
@@ -46,7 +46,7 @@ function git(dir, ...args) {
 // seeded copy; one for tools/mcp/corpus/project.json writes the project corpus
 // (1.0.4); `corpus: null` omits tools/mcp/corpus/index.json altogether.
 function fixture({ files = {}, corpus = SHIPPED_CORPUS } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-srcgate-'))
+  const dir = tempDir('epah-srcgate-')
   git(dir, 'init', '-q')
   mkdirSync(join(dir, 'tools/mcp/corpus'), { recursive: true })
   if (corpus !== null) writeFileSync(join(dir, 'tools/mcp/corpus/index.json'), corpus)
@@ -75,7 +75,7 @@ function runGate(dir) {
 let scaffold
 
 before(() => {
-  scaffold = mkdtempSync(join(tmpdir(), 'epah-srcgate-scaffold-'))
+  scaffold = tempDir('epah-srcgate-scaffold-')
   const res = spawnSync(
     'node',
     [
@@ -641,7 +641,7 @@ test('RED: stripping all groups tags fails naming every uncovered decision group
 })
 
 test('RED: a missing corpus index is a broken provenance surface, not a pass', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-srcgate-'))
+  const dir = tempDir('epah-srcgate-')
   git(dir, 'init', '-q')
   mkdirSync(join(dir, 'apps/server/src'), { recursive: true })
   writeFileSync(

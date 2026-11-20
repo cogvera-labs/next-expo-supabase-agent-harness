@@ -15,8 +15,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 // Static relative specifiers, deliberately (0.8.0): the computed file:// dynamic
@@ -24,6 +23,7 @@ import { fileURLToPath } from 'node:url'
 // workaround a static specifier does not need (check-query-shapes precedent).
 import * as guardRules from '../../template/base/.claude/hooks/lib/guard-rules.mjs'
 import * as config from '../../template/base/tools/harness.config.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CHECKER = fileURLToPath(new URL('../../scripts/check-canary-coverage.mjs', import.meta.url))
 const ROOT_DIR = fileURLToPath(new URL('../..', import.meta.url))
@@ -166,7 +166,7 @@ function greenRegistry() {
  * @param {Record<string, Record<string, string> | null>} modules
  */
 function modulesFixture(modules) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-cancov-modules-'))
+  const dir = tempDir('epah-cancov-modules-')
   for (const [module, files] of Object.entries(modules)) {
     mkdirSync(join(dir, module), { recursive: true })
     if (files === null) continue
@@ -197,7 +197,7 @@ const TOOLCHAIN_STEPS = [
 ]
 `
 function factoryFixture({ scripts = ['check-alpha.mjs'], workflows = { 'ci.yml': ['build'] } } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-cancov-factory-'))
+  const dir = tempDir('epah-cancov-factory-')
   const scriptsDir = join(dir, 'scripts')
   mkdirSync(scriptsDir)
   for (const name of scripts) writeFileSync(join(scriptsDir, name), '// synthetic gate\n')
@@ -255,7 +255,7 @@ function run(registryPath, hookContractPath, { spawn = false, factory, hooksDir 
 
 /** Write a registry (+ contract) into a fresh tmp dir; returns their paths. */
 function fixture(registry, contract = CONTRACT_TEXT) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-cancov-'))
+  const dir = tempDir('epah-cancov-')
   const registryPath = join(dir, 'registry.json')
   const contractPath = join(dir, 'hook-contract.test.mjs')
   writeFileSync(registryPath, JSON.stringify(registry))
@@ -268,7 +268,7 @@ function fixture(registry, contract = CONTRACT_TEXT) {
  * call-site pin has something real to count. Returns the directory.
  */
 function hookDir(hooks) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-cancov-hooks-'))
+  const dir = tempDir('epah-cancov-hooks-')
   for (const [name, count] of Object.entries(hooks)) {
     writeFileSync(join(dir, name), `${'denyTool(1)\n'.repeat(count)}export const x = 1\n`)
   }
@@ -605,7 +605,7 @@ test('RED: a module workflow whose jobs: block holds no parseable job fails, nam
 
 test('RED: no module workflows at all fails closed, for an empty tree and a missing directory alike', () => {
   const empty = modulesFixture({ alpha: null, beta: null })
-  const missing = join(mkdtempSync(join(tmpdir(), 'epah-cancov-nomodules-')), 'absent')
+  const missing = join(tempDir('epah-cancov-nomodules-'), 'absent')
   for (const modulesDir of [empty, missing]) {
     const { registryPath, contractPath } = fixture(registryWithModuleLanes([]))
     const r = run(registryPath, contractPath, { modulesDir })

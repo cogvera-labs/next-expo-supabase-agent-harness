@@ -13,10 +13,9 @@
 // drift, so those tests name both findings.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { after, test } from 'node:test'
+import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import {
   SHELL_AND_WRITE_TOOLS,
@@ -25,6 +24,7 @@ import {
   pluginCopy,
   toolEntries,
 } from '../../scripts/lib/plugin-folder.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const REPO = fileURLToPath(new URL('../../', import.meta.url))
 const SCRIPT = join(REPO, 'scripts/check-plugin-manifest.mjs')
@@ -42,21 +42,6 @@ function cleanEnv() {
 function run(args) {
   const r = spawnSync(process.execPath, [SCRIPT, ...args], { encoding: 'utf8', env: cleanEnv() })
   return { code: r.status, out: `${r.stdout ?? ''}${r.stderr ?? ''}` }
-}
-
-// Every temporary tree this file makes, removed once when the file's tests end. Each surface
-// copy holds the whole plugin and the template's .claude/ (tens of megabytes), and until these
-// were removed every run left them all in the OS temp folder (#276); with several agents running
-// the suite at once, that filled a disk.
-const made = []
-after(() => {
-  for (const dir of made) rmSync(dir, { recursive: true, force: true })
-})
-/** @param {string} prefix */
-function tempDir(prefix) {
-  const dir = mkdtempSync(join(tmpdir(), prefix))
-  made.push(dir)
-  return dir
 }
 
 /** The live plugin surface, copied: the green baseline a single skew is measured against. */

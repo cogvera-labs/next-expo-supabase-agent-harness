@@ -16,11 +16,11 @@
 // SOURCE: template/base/tools/build-check.mjs (--web) · docs/harness/enforcement-tiers.md
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TOOLS = fileURLToPath(new URL('../../template/base/tools', import.meta.url))
 
@@ -30,7 +30,7 @@ const TOOLS = fileURLToPath(new URL('../../template/base/tools', import.meta.url
  * that omits it is proving what a half-finished build looks like.
  */
 function webFixture(files, { buildId = true } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-webbuild-'))
+  const dir = tempDir('epah-webbuild-')
   cpSync(join(TOOLS, 'lib'), join(dir, 'tools/lib'), { recursive: true })
   cpSync(join(TOOLS, 'build-check.mjs'), join(dir, 'tools/build-check.mjs'))
   for (const [rel, content] of Object.entries(files)) {

@@ -11,14 +11,14 @@
 // marker fixture.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { parseStepList, subtractExclusions } from '../../scripts/ci/run-stop-chain.mjs'
 import { STOP_HOOK_STEPS } from '../../template/base/tools/harness.config.mjs'
 import { loadStopChain } from '../../template/base/tools/lib/stop-chain.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const RUNNER = join(ROOT, 'scripts/ci/run-stop-chain.mjs')
@@ -143,7 +143,7 @@ test('every SHIPPED exclusion names a real union member, a reason, and a provenB
  * makes reviewer-verdicts EXECUTE with owed=[] instead of skipping.
  */
 function fixture() {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-runstop-'))
+  const dir = tempDir('epah-runstop-')
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   copyFileSync(VALIDATE, join(dir, 'tools/validate.mjs'))
   copyFileSync(STOP_LIB, join(dir, 'tools/lib/stop-chain.mjs'))

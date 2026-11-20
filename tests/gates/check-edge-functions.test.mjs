@@ -17,11 +17,11 @@
 //     and skips loudly otherwise (the selftest canary is its CI twin).
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { chmodSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { delimiter, dirname, join } from 'node:path'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const REPO = fileURLToPath(new URL('../../', import.meta.url))
 const GATE = join(REPO, 'template', 'base', 'tools', 'check-edge-functions.mjs')
@@ -42,7 +42,7 @@ after(() => {
 })
 
 function scratch(prefix) {
-  const dir = mkdtempSync(join(tmpdir(), prefix))
+  const dir = tempDir(prefix)
   made.push(dir)
   return dir
 }

@@ -32,8 +32,7 @@
 // template/migrations.json
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -49,6 +48,7 @@ import {
   withInstallToolchainPins,
   withNotesEventCatalog,
 } from '../../scripts/ci/upgrade-sweep.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const MIGRATIONS = JSON.parse(
   readFileSync(fileURLToPath(new URL('../../template/migrations.json', import.meta.url)), 'utf8'),
@@ -496,7 +496,7 @@ test('reconcileDataFlowExclusions only ever REMOVES: a stale exclusion goes, a r
 })
 
 test('createdTablesIn reads CREATE TABLE across a migrations dir, bare and schema-qualified', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-sweep-created-'))
+  const dir = tempDir('epah-sweep-created-')
   mkdirSync(join(dir, 'supabase/migrations'), { recursive: true })
   writeFileSync(
     join(dir, 'supabase/migrations/1_a.sql'),
@@ -517,7 +517,7 @@ test('createdTablesIn reads CREATE TABLE across a migrations dir, bare and schem
 // ── readTextOrNull and the CLI main block ────────────────────────────────────────
 
 test('readTextOrNull: absence is null, anything else surfaces', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-sweep-read-'))
+  const dir = tempDir('epah-sweep-read-')
   const file = join(dir, 'present.txt')
   writeFileSync(file, 'text\n')
   assert.equal(readTextOrNull(file), 'text\n')
@@ -536,7 +536,7 @@ const SWEEP_SCRIPT = fileURLToPath(new URL('../../scripts/ci/upgrade-sweep.mjs',
 
 /** A repo root holding ONLY migrations.json: every copy is a no-op, the in-place edits remain. */
 function sweepRepo(migrations) {
-  const repo = mkdtempSync(join(tmpdir(), 'epah-sweep-repo-'))
+  const repo = tempDir('epah-sweep-repo-')
   mkdirSync(join(repo, 'template'))
   writeFileSync(join(repo, 'template/migrations.json'), JSON.stringify(migrations))
   return repo
@@ -565,7 +565,7 @@ const AGENTS_BEFORE = [
 
 /** @param {{ full?: boolean }} opts  full=false plants only tools/harness.config.mjs */
 function sweepInstall({ full = true } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-sweep-install-'))
+  const dir = tempDir('epah-sweep-install-')
   mkdirSync(join(dir, 'tools'))
   writeFileSync(
     join(dir, 'tools/harness.config.mjs'),

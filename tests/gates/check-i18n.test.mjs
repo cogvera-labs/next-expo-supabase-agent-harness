@@ -21,12 +21,12 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(new URL('../../template/base/tools/check-i18n.mjs', import.meta.url))
 const TOOLS = dirname(GATE)
@@ -108,7 +108,7 @@ function fixture({
   allow = null,
   manifest = null,
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-i18n-'))
+  const dir = tempDir('epah-i18n-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   if (manifest !== null) {
     mkdirSync(join(dir, '.harness'), { recursive: true })
@@ -437,7 +437,7 @@ test('i18n: NO product surface at all — loud local skip, CI fail-closed', () =
   // 0.6.0 widened the subject from one surface to two, so the skip condition widened with
   // it: the gate steps aside only when NEITHER apps/mobile nor apps/web exists. A tree with
   // one of them present is a tree this gate has something to say about.
-  const dir = mkdtempSync(join(tmpdir(), 'epah-i18n-nosrc-'))
+  const dir = tempDir('epah-i18n-nosrc-')
   const local = runGate(dir, { ci: false })
   assert.equal(local.code, 0, local.out)
   assert.ok(local.out.includes('neither apps/mobile nor apps/web found'), local.out)

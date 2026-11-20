@@ -7,11 +7,11 @@
 // — a real emulator honoring a real flow — is the maestro-smoke selftest job's job.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { delimiter, dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const RUNNER = fileURLToPath(
   new URL('../../template/base/tools/check-e2e-device.mjs', import.meta.url),
@@ -86,7 +86,7 @@ const BUDGET_JSON = JSON.stringify({
 
 /** @param {{ behavior?: Record<string, any>, flows?: string[], files?: Record<string, string> }} [opts] */
 function fixture({ behavior = {}, flows = ['home', 'matrix'], files = {} } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-e2edevice-'))
+  const dir = tempDir('epah-e2edevice-')
   mkdirSync(join(dir, 'apps/mobile/src'), { recursive: true })
   mkdirSync(join(dir, 'tools'), { recursive: true })
   mkdirSync(join(dir, 'maestro/flows'), { recursive: true })

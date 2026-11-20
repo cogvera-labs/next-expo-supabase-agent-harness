@@ -7,12 +7,12 @@
 // SOURCE: scripts/lib/skip-verdict.mjs · .github/workflows/selftest.yml (macos-scaffold)
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { DATABASE_STEPS, judgeSkips, skipsByStep } from '../../scripts/lib/skip-verdict.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const RUNNER = fileURLToPath(new URL('../../scripts/ci/skip-verdict.mjs', import.meta.url))
 
@@ -88,7 +88,7 @@ test('a red validate is reported beside the skips', () => {
 })
 
 test('the runner exits 1 on the injected log and 0 on the green one', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'skip-verdict-'))
+  const dir = tempDir('skip-verdict-')
   const green = join(dir, 'green.log')
   const red = join(dir, 'red.log')
   writeFileSync(green, GREEN_LOG)

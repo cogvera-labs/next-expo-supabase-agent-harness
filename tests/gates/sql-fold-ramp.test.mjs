@@ -6,7 +6,7 @@
 // contract in-process, where the lib coverage floor can see it, with a stand-in gate script
 // whose twin reports a fixed list.
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { after, test } from 'node:test'
@@ -18,6 +18,7 @@ import {
   isTwin,
   withhold,
 } from '../../template/base/tools/lib/sql-fold-ramp.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 // A file: URL, never a path: a bare Windows path is not an import specifier.
 const LIB = new URL('../../template/base/tools/lib/sql-fold-ramp.mjs', import.meta.url).href
@@ -32,7 +33,7 @@ after(() => {
  * @param {string[]} twinFindings @param {string} [preamble]
  */
 function standInGate(twinFindings, preamble = '') {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-foldramp-'))
+  const dir = tempDir('epah-foldramp-')
   made.push(dir)
   const file = join(dir, 'check-standin.mjs')
   writeFileSync(

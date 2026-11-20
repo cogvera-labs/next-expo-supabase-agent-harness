@@ -15,19 +15,19 @@
 // timer is deliberately untested — proving it means hanging the suite for 10 minutes.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { chmodSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { delimiter, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { hashInputs } from '../../template/base/tools/lib/gate.mjs'
 import { STAMP_INPUTS } from '../../template/base/tools/lib/stamp-inputs.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(new URL('../../template/base/tools/check-e2e.mjs', import.meta.url))
 
 /** @param {{ surface?: boolean, jestExpo?: boolean, a11y?: boolean }} [opts] */
 function fixture({ surface = true, jestExpo = false, a11y = true } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-e2egate-'))
+  const dir = tempDir('epah-e2egate-')
   // Resolution boundary: a package.json without the dep, so createRequire can never
   // accidentally resolve a jest-expo from a parent directory.
   writeFileSync(join(dir, 'package.json'), '{"name":"fixture","private":true}\n')

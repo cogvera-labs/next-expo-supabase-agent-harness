@@ -16,11 +16,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { collectAnswers, parseSets } from '../../installer/lib/prompts.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const MOD = fileURLToPath(new URL('../../installer/lib/prompts.mjs', import.meta.url))
 
@@ -77,7 +77,7 @@ process.exit(0)
 // prompt (a re-prompt consumes an extra line). Returns the driver's captured
 // result plus the raw child streams for diagnostics.
 function drive({ spec, lines }) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-prompts-'))
+  const dir = tempDir('epah-prompts-')
   const driver = join(dir, 'driver.mjs')
   const resultPath = join(dir, 'result.json')
   writeFileSync(driver, DRIVER_SRC)

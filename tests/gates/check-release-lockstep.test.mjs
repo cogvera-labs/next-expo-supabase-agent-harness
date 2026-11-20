@@ -13,11 +13,11 @@
 // control that reds on somebody else's in-flight bump is a control people stop running.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCRIPT = fileURLToPath(new URL('../../scripts/check-release-lockstep.mjs', import.meta.url))
 
@@ -41,7 +41,7 @@ function cleanEnv(extra = {}) {
 
 /** @param {Record<string, string>} files @returns {string} the fixture root */
 function writeTree(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'nsah-lockstep-'))
+  const dir = tempDir('nsah-lockstep-')
   for (const [rel, content] of Object.entries(files)) {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })
     writeFileSync(join(dir, rel), content)

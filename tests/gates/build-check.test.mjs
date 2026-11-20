@@ -26,12 +26,10 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { delimiter, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -45,6 +43,7 @@ import {
   ratchetFindings,
   serializeBaseline,
 } from '../../template/base/tools/lib/bundle-measure.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TOOLS = fileURLToPath(new URL('../../template/base/tools', import.meta.url))
 
@@ -80,7 +79,7 @@ function fixture({
   nodeModules = true,
   exportExit = 0,
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-buildgate-'))
+  const dir = tempDir('epah-buildgate-')
   cpSync(join(TOOLS, 'lib'), join(dir, 'tools/lib'), { recursive: true })
   cpSync(join(TOOLS, 'build-check.mjs'), join(dir, 'tools/build-check.mjs'))
   if (nodeModules) mkdirSync(join(dir, 'node_modules'), { recursive: true })
@@ -356,7 +355,7 @@ test('warm stamp: green run records .harness/build.ok; editing the baseline inva
 // ── shared measuring lib (pure — no gate spawn, no shim) ─────────────────────
 /** @param {Record<string, string>} [files] */
 function distFixture(files = DIST_FILES) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-measure-'))
+  const dir = tempDir('epah-measure-')
   for (const [rel, content] of Object.entries(files)) {
     mkdirSync(join(dir, rel, '..'), { recursive: true })
     writeFileSync(join(dir, rel), content)

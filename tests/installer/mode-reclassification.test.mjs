@@ -16,11 +16,11 @@
 // a reviewed migration channel, and none exists on purpose.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const CLI = fileURLToPath(new URL('../../installer/cli.mjs', import.meta.url))
 const INVENTORY = 'tools/generated/action-inventory.json'
@@ -36,7 +36,7 @@ function run(args) {
 }
 
 function scaffold() {
-  const dir = join(mkdtempSync(join(tmpdir(), 'remode-')), 'app')
+  const dir = join(tempDir('remode-'), 'app')
   mkdirSync(dir, { recursive: true })
   const init = run(['init', '--dir', dir, '--yes',
     '--set', 'PROJECT_NAME=Fixture App',

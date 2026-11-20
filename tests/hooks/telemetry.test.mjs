@@ -28,18 +28,16 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
-  rmSync,
   statSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { delimiter, join, relative } from 'node:path'
-import { after, test } from 'node:test'
+import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { classifyVerdict } from '../../template/base/tools/lib/reviewer-verdicts.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const REPO = fileURLToPath(new URL('../../', import.meta.url))
 const TEMPLATE = join(REPO, 'template/base')
@@ -57,19 +55,6 @@ function cleanEnv() {
   for (const k of LEAKY) delete e[k]
   return e
 }
-
-// Every fixture directory this file makes, removed when the file finishes: each one holds a
-// copy of the hooks and tools/lib, and a shared machine's /tmp is not an archive.
-const made = []
-/** @param {string} prefix */
-function tempDir(prefix) {
-  const dir = mkdtempSync(join(tmpdir(), prefix))
-  made.push(dir)
-  return dir
-}
-after(() => {
-  for (const dir of made) rmSync(dir, { recursive: true, force: true })
-})
 
 /**
  * A rendered install layout: the shipped hooks and agents, the tools/lib the hooks import,

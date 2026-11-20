@@ -16,14 +16,12 @@ import { spawnSync } from 'node:child_process'
 import {
   copyFileSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
   rmSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import process from 'node:process'
 import { after, test } from 'node:test'
@@ -35,6 +33,7 @@ import {
   parseHeadings,
   specPath,
 } from '../../template/base/tools/lib/spec-anchor.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 const BASE = join(ROOT, 'template', 'base')
@@ -62,7 +61,7 @@ after(() => {
 
 /** A throwaway working directory with a specs/ folder, holding `files` (path -> text). */
 function fixture(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'spec-anchor-'))
+  const dir = tempDir('spec-anchor-')
   made.push(dir)
   mkdirSync(join(dir, 'specs'))
   for (const [rel, text] of Object.entries(files)) {

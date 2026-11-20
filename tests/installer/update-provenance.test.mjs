@@ -10,8 +10,7 @@
 // test has to be able to say which one it means.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { doctor } from '../../installer/commands/doctor.mjs'
@@ -20,6 +19,7 @@ import { init } from '../../installer/commands/init.mjs'
 import { planTree } from '../../installer/lib/copy.mjs'
 import { fileMode, sha256 } from '../../installer/lib/manifest.mjs'
 import { render, tokenSites } from '../../installer/lib/placeholders.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 import {
   VERSION,
   captureUpdate,
@@ -273,7 +273,7 @@ test('`enable` parks a forked owned module file and `disable` keeps it', async (
 })
 
 test('retrofit-MERGED settings are the installer\'s own non-release sha: the next update keeps them', async () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-prov-retrofit-'))
+  const dir = tempDir('epah-prov-retrofit-')
   writeFileSync(join(dir, 'package.json'), `${JSON.stringify({ name: 'their-app', version: '1.0.0', private: true })}\n`)
   writeFileSync(join(dir, 'pnpm-workspace.yaml'), "packages:\n  - 'apps/*'\n")
   mkdirSync(join(dir, 'apps/web'), { recursive: true })

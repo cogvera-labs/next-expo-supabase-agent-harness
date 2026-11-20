@@ -14,11 +14,11 @@
 // Every test below is a way the head can be lost while the turn still ends red.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TEMPLATE = fileURLToPath(new URL('../../template/base/', import.meta.url))
 
@@ -34,7 +34,7 @@ const noisy = (n) =>
  * @param {string[]} names
  */
 function fixture(names) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-stopspill-'))
+  const dir = tempDir('epah-stopspill-')
   cpSync(join(TEMPLATE, '.claude/hooks'), join(dir, '.claude/hooks'), { recursive: true })
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   cpSync(join(TEMPLATE, 'tools/lib/stop-chain.mjs'), join(dir, 'tools/lib/stop-chain.mjs'))
@@ -107,7 +107,7 @@ test('one file PER GATE — six simultaneous failures are six readable logs, not
 test('SHORT output is passed through untouched — no spill, no elision notice', () => {
   // The common case must not gain a file or a paragraph. A gate whose whole output fits is
   // reported exactly as before.
-  const dir = mkdtempSync(join(tmpdir(), 'epah-stopspill-short-'))
+  const dir = tempDir('epah-stopspill-short-')
   cpSync(join(TEMPLATE, '.claude/hooks'), join(dir, '.claude/hooks'), { recursive: true })
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   cpSync(join(TEMPLATE, 'tools/lib/stop-chain.mjs'), join(dir, 'tools/lib/stop-chain.mjs'))

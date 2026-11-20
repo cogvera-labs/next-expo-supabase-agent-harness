@@ -8,11 +8,11 @@
 
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-rls-manifest.mjs', import.meta.url),
@@ -114,7 +114,7 @@ function fixture({
   grantAllow = null,
   generated = true,
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'nesah-rlsgate-'))
+  const dir = tempDir('nesah-rlsgate-')
   mkdirSync(join(dir, 'tools'), { recursive: true })
   mkdirSync(join(dir, 'tests/rls'), { recursive: true })
   writeFileSync(join(dir, 'tools/rls-exempt.json'), exempt)

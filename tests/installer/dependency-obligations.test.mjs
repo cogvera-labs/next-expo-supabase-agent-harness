@@ -6,8 +6,7 @@
 // asserted here by its absence — pnpm-workspace.yaml and package.json are untouched, the
 // obligation self-clears once met, and the parked file is machine-readable.
 import assert from 'node:assert/strict'
-import { existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import {
@@ -15,6 +14,7 @@ import {
   applyDependencyObligations,
   unmetDependencyObligations,
 } from '../../installer/lib/migrations.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const MIGRATIONS = {
   '//': 'doc key, must be ignored',
@@ -42,7 +42,7 @@ const PKG_WITHOUT = JSON.stringify({ devDependencies: {} })
 // A fresh, private directory per call. mkdtemp never reuses a path, so a leftover from an
 // earlier run can never stand in for a fixture, and no other local user can pre-create it.
 function scratch() {
-  return mkdtempSync(join(tmpdir(), 'harness-oblig-'))
+  return tempDir('harness-oblig-')
 }
 
 test('an obligation from a FUTURE release is not demanded yet', () => {

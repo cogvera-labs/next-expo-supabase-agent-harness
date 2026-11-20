@@ -27,15 +27,14 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { delimiter, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-version-sync.mjs', import.meta.url),
@@ -106,7 +105,7 @@ function fixture({
   storePolicy,
   manifest,
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-versionsync-'))
+  const dir = tempDir('epah-versionsync-')
   const root = { name: 'root', private: true }
   if (version !== undefined) root.version = version
   if (packageManager !== undefined) root.packageManager = packageManager
@@ -282,7 +281,7 @@ function runGate(dir, { ci = true, bin, extraEnv = {} } = {}) {
 // run and every record the gate appended there.
 /** @param {string} dir @param {string} bin */
 function runUnderParity(dir, bin) {
-  const reportDir = join(mkdtempSync(join(tmpdir(), 'epah-vsync-parity-')), '0')
+  const reportDir = join(tempDir('epah-vsync-parity-'), '0')
   const r = runGate(dir, {
     bin,
     ci: false,
@@ -437,7 +436,7 @@ test('RED: a caret/tilde on any SDK-lockstep catalog tool reds naming the tool +
 })
 
 test('skip asymmetry: no root package.json → loud local SKIP (exit 0), CI fail-closed (exit 1)', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-versionsync-'))
+  const dir = tempDir('epah-versionsync-')
   const local = runGate(dir, { ci: false })
   assert.equal(local.code, 0, local.out)
   assert.ok(local.out.includes('SKIPPED'), local.out)
@@ -777,7 +776,7 @@ test('DOCS-SYNC at 0.7.0: the version-sync Target discharges through the iosTool
   // with "STILL scans one product surface" — a floor changes no scan root, which is why
   // the row now declares its evidence via the `closes:` probe instead.
   const base = fileURLToPath(new URL('../../template/base', import.meta.url))
-  const dir = mkdtempSync(join(tmpdir(), 'epah-versionsync-docs-'))
+  const dir = tempDir('epah-versionsync-docs-')
   cpSync(join(base, 'tools'), join(dir, 'tools'), { recursive: true })
   cpSync(join(base, '.claude/agents'), join(dir, '.claude/agents'), { recursive: true })
   cpSync(join(base, 'github/workflows'), join(dir, '.github/workflows'), { recursive: true })

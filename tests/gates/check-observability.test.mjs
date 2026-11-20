@@ -16,8 +16,7 @@
 // executed proof exists before the release that meets it.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -28,6 +27,7 @@ import {
   REQUIRED_VENDOR_FLOOR,
   vendorFor,
 } from '../../template/base/tools/lib/observability.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-observability.mjs', import.meta.url),
@@ -62,7 +62,7 @@ const SINK_ROW = {
  * @param {{ policy?: any, edit?: (p: any) => void, files?: Record<string, string>, manifest?: { harnessVersion: string, baseVersion: string }, includeStack?: boolean, noInnocent?: boolean }} [opts]
  */
 function fixture({ policy, edit, files = {}, manifest, includeStack = false, noInnocent = false } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-observability-'))
+  const dir = tempDir('epah-observability-')
   mkdirSync(join(dir, 'tools/lib'), { recursive: true })
   cpSync(join(TOOLS, 'lib'), join(dir, 'tools/lib'), { recursive: true })
   if (includeStack) {

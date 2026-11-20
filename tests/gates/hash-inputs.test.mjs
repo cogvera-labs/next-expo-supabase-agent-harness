@@ -8,10 +8,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { hashInputs } from '../../template/base/tools/lib/gate.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 // The fixed vector tree: stable relative names and contents, including a
 // binary file and a nested sibling pair that exercises the sorted walk.
@@ -31,7 +31,7 @@ const VECTOR_INPUTS = ['vec', 'top.txt', 'ghost.md']
 const VECTOR_DIGEST = 'd31eaa3c611db222ad6b0474f4ce798923d7842ec6d86340f1b54cc1c2d94de4'
 
 function materialize(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-hashinputs-'))
+  const dir = tempDir('epah-hashinputs-')
   for (const [rel, content] of Object.entries(files)) {
     mkdirSync(join(dir, rel, '..'), { recursive: true })
     writeFileSync(join(dir, rel), content)

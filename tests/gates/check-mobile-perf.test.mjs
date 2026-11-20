@@ -8,11 +8,11 @@
 // artifact = loud local skip, absent artifact under HARNESS_PERF_LANE=1 = fail closed).
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const GATE = fileURLToPath(
   new URL('../../template/base/tools/check-mobile-perf.mjs', import.meta.url),
@@ -52,7 +52,7 @@ function fixture({
   results,
   manifest,
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-mobileperf-'))
+  const dir = tempDir('epah-mobileperf-')
   mkdirSync(join(dir, 'apps/mobile/src'), { recursive: true })
   mkdirSync(join(dir, 'tools'), { recursive: true })
   mkdirSync(join(dir, 'maestro/flows'), { recursive: true })

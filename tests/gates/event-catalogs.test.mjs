@@ -14,14 +14,14 @@
 // SOURCE: template/base/tools/lib/event-catalogs.mjs
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import * as eventCatalogs from '../../template/base/tools/lib/event-catalogs.mjs'
 import { CATALOG_EXPORT, catalogOf, discoverVerticals } from '../../template/base/tools/lib/event-catalogs.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const SCAFFOLD_SLICE = fileURLToPath(
   new URL(
@@ -41,7 +41,7 @@ after(() => {
  * @param {Record<string, unknown>} files
  */
 function root(files = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-event-catalogs-'))
+  const dir = tempDir('epah-event-catalogs-')
   made.push(dir)
   for (const [rel, content] of Object.entries(files)) {
     mkdirSync(dirname(join(dir, rel)), { recursive: true })

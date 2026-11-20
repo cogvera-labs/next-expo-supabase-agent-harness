@@ -13,12 +13,12 @@
 // — absence-as-pending-forever is the silent-skip shape this poller exists to refuse.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { delimiter, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { judgeRuns, timeoutReport } from '../../scripts/ci/wait-for-workflows.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const POLLER = fileURLToPath(new URL('../../scripts/ci/wait-for-workflows.mjs', import.meta.url))
 const SHA = 'a'.repeat(40)
@@ -97,7 +97,7 @@ const PATH_KEY = Object.keys(process.env).find((k) => k.toUpperCase() === 'PATH'
  * @param {Record<string, object[]>} [scripted] keyed `<wf>.<n>` for poll n (0-based)
  */
 function fakeGh(steady, scripted = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'epah-waitwf-'))
+  const dir = tempDir('epah-waitwf-')
   const bin = join(dir, 'bin')
   mkdirSync(bin)
   const stub = join(dir, 'gh-stub.mjs')

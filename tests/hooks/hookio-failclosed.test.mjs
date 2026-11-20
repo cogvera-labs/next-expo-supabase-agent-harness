@@ -13,10 +13,10 @@
 import { test, before } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 const TEMPLATE = fileURLToPath(new URL('../../template/base/', import.meta.url))
 // Fixtures import the shipped module directly (not a copy) via a file:// URL so this
@@ -32,13 +32,13 @@ let seq = 0
 before(() => {
   // Rendered install layout, like hook-contract.test.mjs: the posttool hooks import
   // ../../tools/lib/provenance-rules.mjs relative to .claude/hooks/.
-  proj = mkdtempSync(join(tmpdir(), 'epah-hookio-'))
+  proj = tempDir('epah-hookio-')
   cpSync(join(TEMPLATE, '.claude'), join(proj, '.claude'), { recursive: true })
   mkdirSync(join(proj, 'tools'), { recursive: true })
   cpSync(join(TEMPLATE, 'tools/lib'), join(proj, 'tools/lib'), { recursive: true })
   mkdirSync(join(proj, 'apps/server/src'), { recursive: true })
   mkdirSync(join(proj, 'packages/schema/drizzle'), { recursive: true })
-  fixDir = mkdtempSync(join(tmpdir(), 'epah-hookio-fx-'))
+  fixDir = tempDir('epah-hookio-fx-')
 })
 
 // Spawn a one-off fixture module that imports the shipped hookio and does `body`.
@@ -146,7 +146,7 @@ test('fast-check never blocks: exits 0 on a .ts edit even when biome cannot run'
 test('source-check fails CLOSED (exit 2) when the provenance-rules module is broken', () => {
   // The dynamic import of ../../tools/lib/provenance-rules.mjs happens AFTER hookio
   // installs its handlers; a broken (or missing) rules module must BLOCK, not exit 1.
-  const bad = mkdtempSync(join(tmpdir(), 'epah-hookio-badrules-'))
+  const bad = tempDir('epah-hookio-badrules-')
   cpSync(join(TEMPLATE, '.claude'), join(bad, '.claude'), { recursive: true })
   mkdirSync(join(bad, 'tools/lib'), { recursive: true })
   writeFileSync(join(bad, 'tools/lib/provenance-rules.mjs'), 'this is not valid javascript {{{\n')
