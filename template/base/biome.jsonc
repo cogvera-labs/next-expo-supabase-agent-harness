@@ -23,6 +23,10 @@
       // this artifact: its import list is one line per route, so ANY change to how the import
       // organizer sorts specifiers would rewrite the file and read as "a route moved".
       "!**/apps/web/lib/routes.generated.ts",
+      // Next's own declaration file, which `next dev` and `next build` rewrite in a style this
+      // formatter rejects. A project gitignores it, and this line covers one that still
+      // tracks it: the format step must not fail on a file the dev server wrote.
+      "!**/apps/web/next-env.d.ts",
       // Installer-written manifest (JSON.stringify shape, hash-verified by doctor).
       "!**/.harness/manifest.json",
       // An Edge Function's lockfile (1.1.0), written by deno and read `--frozen` by

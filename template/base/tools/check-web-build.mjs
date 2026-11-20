@@ -33,14 +33,22 @@
 // is left for Next to load, because the process environment outranks every file and a
 // placeholder must never build over a value the project configured.
 //
-// THE BUILD REWRITES A COMMITTED FILE. `next build` rewrites apps/web/next-env.d.ts with
-// imports of its own `.next` output, and the committed copy exists precisely so a cold
-// `tsc -b` works before any build (see its header). It sits inside the `apps/web` stamp
-// input, so left rewritten it would dirty the tree and miss the stamp on every run. The step
-// restores the committed bytes after the build, green or red.
+// THE ROOT ENV FILE RANKS BELOW A PLACEHOLDER. apps/web/next.config.ts loads the project
+// root's env file, the developer's local values, and never over a variable that is already
+// set. The placeholders are set before the build starts, so a root file that is not filled
+// in yet cannot red this step. A name the root file sets beyond the placeholder keys does
+// reach the build, which is why that file is a stamp input (lib/stamp-inputs.mjs).
+//
+// THE BUILD WRITES A FILE THE STAMP READS. `next build` writes apps/web/next-env.d.ts with
+// imports of its own `.next` output. Next owns that file and a project gitignores it, but it
+// sits inside the `apps/web` stamp input, so a copy the build left behind would miss the
+// stamp on the next run. The step puts the file back as it found it after the build, green
+// or red: removed where there was none, and with its earlier bytes where there was one. The
+// second case is the dev server's copy, or the committed copy of a project that still
+// tracks the file, which the build would otherwise leave modified.
 // SOURCE: docs/harness/README.md (stamped gates) [corpus: harness/doctrine]
 // SOURCE: docs/harness/README.md (skip-local / fail-closed-CI asymmetry) [corpus: harness/doctrine]
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import {
   commandFailureOutput,
   fail,
@@ -128,16 +136,19 @@ function failureDetail(output) {
 }
 
 /**
- * Run the build, restoring the committed next-env.d.ts afterwards whatever the outcome.
+ * Run the build, putting next-env.d.ts back as it was before, whatever the outcome.
  * @param {NodeJS.ProcessEnv} env
  * @returns {string | null} the failure output, or null on a green build
  */
 function compile(env) {
-  let committed = null
+  // The bytes the file held, `null` where there was no file, and `undefined` where it could
+  // not be read: only a file known to have been absent is removed again.
+  /** @type {Buffer | null | undefined} */
+  let before
   try {
-    committed = readFileSync(NEXT_ENV_FILE)
-  } catch {
-    // Not committed here: nothing to restore.
+    before = readFileSync(NEXT_ENV_FILE)
+  } catch (e) {
+    before = /** @type {NodeJS.ErrnoException} */ (e).code === 'ENOENT' ? null : undefined
   }
   try {
     runCmd(BUILD, { env })
@@ -145,7 +156,8 @@ function compile(env) {
   } catch (e) {
     return commandFailureOutput(e)
   } finally {
-    if (committed !== null) writeFileSync(NEXT_ENV_FILE, committed)
+    if (before === null) rmSync(NEXT_ENV_FILE, { force: true })
+    else if (before !== undefined) writeFileSync(NEXT_ENV_FILE, before)
   }
 }
 

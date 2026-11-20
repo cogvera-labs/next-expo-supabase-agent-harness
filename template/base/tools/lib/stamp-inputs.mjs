@@ -63,15 +63,18 @@ export const STAMP_INPUTS = {
   // every workspace package the app bundles (transpilePackages compiles their raw source), the
   // base tsconfig both extend, the workspace layout, and the lockfile that fixes every
   // resolution. `.next` and each package's `dist` are STAMP_EXCLUDES, so neither the build's
-  // own output nor `types`' tsc -b output churns it; the step restores the committed
-  // next-env.d.ts the build rewrites, which is what lets a second run hit. The environment is
-  // not hashed: the step prints the placeholder keys it filled instead.
+  // own output nor `types`' tsc -b output churns it; the step puts next-env.d.ts, which the
+  // build writes, back as it found it, which is what lets a second run hit. The project
+  // root's env file is an input too: apps/web/next.config.ts loads it, so a name it sets
+  // reaches the build. Where there is none, as in CI, the path is hashed as missing. The
+  // process environment is not hashed: the step prints the placeholder keys it filled instead.
   'web-compile': withMachinery('tools/check-web-build.mjs', [
     'apps/web',
     'packages',
     'tsconfig.base.json',
     'pnpm-workspace.yaml',
     'pnpm-lock.yaml',
+    '.env',
   ]),
   // contract inventory regen-diff (action + event inventories) + tsconfig project-
   // references sync + the G18 bounded-wire-string sweep (its reviewed allow list is an
