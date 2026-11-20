@@ -10,15 +10,16 @@
 // Windows and macOS.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { after, test } from 'node:test'
+import { test } from 'node:test'
 import { pathToFileURL } from 'node:url'
 import { loadCorpus, pageSourcePaths, sitePages } from '../../docs-site/src/harness-docs/corpus.mjs'
 import { PAGE_TITLE_MAX, TITLE_MAX, TITLE_SUFFIX, documentTitle, llmsTxtLink, setDocumentTitle, verificationTags, wholeTitle } from '../../docs-site/src/harness-docs/head.mjs'
 import { lastCommitDates, lastmodByUrl } from '../../docs-site/src/harness-docs/page-dates.mjs'
 import { firstH1 } from '../../docs-site/src/harness-docs/site-index.mjs'
+import { tempDir } from '../helpers/temp-dir.mjs'
 
 // ---- the <title> ---------------------------------------------------------------------
 
@@ -96,17 +97,8 @@ test('a whole tag pasted as a code, a padded code and an unknown service fail be
 
 // ---- the sitemap's <lastmod> -----------------------------------------------------------
 
-// A private directory per fixture, removed when the file is done.
-const made = []
-after(() => {
-  for (const dir of made) rmSync(dir, { recursive: true, force: true })
-})
-
-function scratch() {
-  const dir = mkdtempSync(join(tmpdir(), 'harness-docs-site-'))
-  made.push(dir)
-  return dir
-}
+// A private directory per fixture. The helper removes it when the file is done.
+const scratch = () => tempDir('harness-docs-site-')
 
 // A fixture's git commands must reach the fixture alone, whatever repository the run was started from.
 const NO_GIT_ENV = Object.fromEntries(Object.entries(process.env).filter(([name]) => !name.startsWith('GIT_')))
