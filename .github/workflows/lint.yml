@@ -305,6 +305,16 @@ jobs:
         env:
           HARNESS_TEST_REQUIRE_TYPESCRIPT: '1'
         run: node --test tests/gates/edge-function-split.test.mjs
+      # The first run of the two apps: each dev server's configuration loads the project
+      # root's env file, and Next's own next-env.d.ts stays out of git and out of the format
+      # step. The web cases compile next.config.ts with the root's own `typescript`, and the
+      # format case runs the root's own Biome, which installer-unit never installs: there
+      # those cases SKIP loudly by name. This job has the root toolchain, and
+      # HARNESS_TEST_REQUIRE_TYPESCRIPT=1 turns a missing compiler or binary into a failure.
+      - name: machinery-first-run (the root env file reaches both apps, and next-env.d.ts stays untracked; with the root toolchain)
+        env:
+          HARNESS_TEST_REQUIRE_TYPESCRIPT: '1'
+        run: node --test tests/gates/root-env-file.test.mjs tests/gates/next-env-file.test.mjs
       # Evals A and B (2.1.0, #188): the model-free harnesses for the Single Home detector.
       # Eval A's development split and eval B's frozen pre-dogfood fixture run through #186's
       # sweep, which reads TypeScript through the root's own `typescript`: installer-unit skips

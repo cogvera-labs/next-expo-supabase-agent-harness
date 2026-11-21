@@ -1,5 +1,24 @@
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import type { NextConfig } from 'next'
 import { authenticatedCacheHeaders, staticSecurityHeaders } from './lib/security-headers'
+
+// THE ENV FILE IS AT THE PROJECT ROOT, AND NEXT DOES NOT LOOK THERE. `.env.example` is
+// copied to `.env` beside it, one file for both apps, and Next reads env files from the
+// app's own directory only. So this file loads the root one. Next evaluates it for
+// `next dev`, `next build` and `next start`, before any app code runs and before a
+// NEXT_PUBLIC_ value is compiled into a bundle.
+//
+// The root file ranks last. process.loadEnvFile never replaces a variable that is already
+// set, and Next has read apps/web/.env* by the time it evaluates this file: the shell or
+// the CI job wins, then an env file in apps/web, then the root file. Where no root file
+// exists, as in CI and in a deployment (it is gitignored), nothing is loaded.
+//
+// Next watches its own env files and not this one: restart `next dev` after changing it.
+// SOURCE: https://nextjs.org/docs/app/guides/environment-variables (Next loads env files
+// from the app directory; a variable already in the environment outranks every file)
+const ROOT_ENV_FILE = join(__dirname, '..', '..', '.env')
+if (existsSync(ROOT_ENV_FILE)) process.loadEnvFile(ROOT_ENV_FILE)
 
 // The narrowest shape of webpack's config this file touches. Next types its `webpack`
 // callback parameter as `any` (it re-exports webpack's own loose config type), which

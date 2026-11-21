@@ -81,6 +81,12 @@ That turn's Stop hook sends the agent back while any gate, the RLS tests include
 [First run](https://cogvera-labs.github.io/next-expo-supabase-agent-harness/runbooks/first-run/)
 shows the turn with the local stack running and without it.
 
+To run the apps, copy `.env.example` to `.env` in the project root and fill in the local
+values (`pnpm db:up` prints the URL and the keys). Then start the web app with `pnpm dev:web`,
+which also serves the tRPC API the mobile app calls, and the mobile app with
+`pnpm dev:mobile`. [Run the apps](docs/getting-started.md#run-the-apps) lists the values
+each app needs.
+
 <details>
 <summary>Install globally, pin a release, or answer the prompts up front</summary>
 

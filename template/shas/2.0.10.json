@@ -615,6 +615,9 @@
     ],
     "biome.jsonc": [
       {
+        "sha256": "74917066f4010a5b035869311456990ef02ea493ae5c8ce88b31997d6ad4ac8e"
+      },
+      {
         "sha256": "f6664d3ae92655aa63f91fde45c469e3876ef985ed7aa7b71ef5fcbac87b40f2"
       }
     ],
@@ -739,6 +742,19 @@
           ],
           [
             155990,
+            "SECURITY_TXT_EXPIRES"
+          ]
+        ]
+      },
+      {
+        "sha256": "811bc038c27be79e735a3415195d7531ff1f5e1945b078d0d572e2284b498191",
+        "sites": [
+          [
+            29511,
+            "SECURITY_OWNERS"
+          ],
+          [
+            156634,
             "SECURITY_TXT_EXPIRES"
           ]
         ]
@@ -938,6 +954,9 @@
     "docs/runbooks/local-development.md": [
       {
         "sha256": "21edbbbfaaa47869d628fc479db009eb3941151f50d61dc84ddc9f414c36d5da"
+      },
+      {
+        "sha256": "39397f689778f4e4f037a08b21aa0ead19fa9decc6e18cf55a2680937765adb2"
       }
     ],
     "docs/runbooks/log-forwarding.md": [
@@ -1470,6 +1489,9 @@
     ],
     "tools/check-web-build.mjs": [
       {
+        "sha256": "5cb3c838df2bf8fd2b93612b8e43477b7d095009dc89dd5bc37816f6cd893d06"
+      },
+      {
         "sha256": "c1bb6cf49c7a50935bccc79d94c61f2938c5a4f72b3db099a8915c4d572e3160"
       }
     ],
@@ -1924,6 +1946,9 @@
       }
     ],
     "tools/lib/stamp-inputs.mjs": [
+      {
+        "sha256": "6050dea2343eeed4317aceb9f89c4e5bfa455627d675c81bbd6d74a48c437a6a"
+      },
       {
         "sha256": "a85d4d8bd4a6d70e9a13fae9380f7fa4c2d79690962754ea91d3d0092acd02db"
       }
@@ -2609,6 +2634,9 @@
     ],
     "apps/web/next.config.ts": [
       {
+        "sha256": "5f86a6d0f39e61f216b7b2b805b5f7e045ef020184210320fd040adf99160353"
+      },
+      {
         "sha256": "6b169adc2a0882fc88564d51c5af3eee275d79cb31d274058c369e47047b9ffd"
       }
     ],
@@ -2620,6 +2648,9 @@
     "apps/web/tsconfig.json": [
       {
         "sha256": "64e8d1c40edf409b831d743fb92a87546be8866ea5f770ad8ffb5c548ea5ddfd"
+      },
+      {
+        "sha256": "b14a4d8ea9b6925d2ae274c393dace6c894358e4a55d19608549023784134b37"
       }
     ],
     "maestro/flows/matrix.yaml": [

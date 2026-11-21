@@ -14,11 +14,17 @@ before mobile if you want the tRPC path live.
   `packageManager` pin). If `corepack` is not on your PATH (Node.js 25 and later no longer
   bundle it), run `npm install -g corepack` first.
 - `pnpm install` once at the root.
-- `cp .env.example .env` and fill in the local values. The web (`NEXT_PUBLIC_*`) and
-  mobile (`EXPO_PUBLIC_*`) publishable keys are printed by `pnpm db:up` /
-  `supabase status`; the URLs default to the local ports in the table below. See
-  `.env.example` for the blast-radius doctrine on each class — no real credential
-  belongs in that file.
+- `cp .env.example .env` at the project root and fill in the local values. Both dev
+  servers read that one file: `apps/web/next.config.ts` loads it for Next, and
+  `apps/mobile/metro.config.js` loads its `EXPO_PUBLIC_*` names for the Expo CLI. Next
+  and the Expo CLI read env files from the app's own folder only, so it is the
+  `ROOT_ENV_FILE` lines at the top of those two files that do it: where a project's
+  copies lack them, neither app reads the root file. A variable set in the shell, or an
+  env file in `apps/web` or `apps/mobile`, outranks it, and neither dev server reads it
+  again while it runs, so restart after a change. The web (`NEXT_PUBLIC_*`) and mobile
+  (`EXPO_PUBLIC_*`) publishable keys are printed by `pnpm db:up` / `supabase status`;
+  the URLs default to the local ports in the table below. See `.env.example` for the
+  blast-radius doctrine on each class — no real credential belongs in that file.
 
 ## 1. Start the backend — `pnpm db:up`
 
@@ -30,8 +36,14 @@ First run pulls images and applies every migration in `supabase/migrations/` plu
 `supabase/seed.sql`. When it finishes it prints the API URL and the **anon /
 publishable key** and **service-role key** — copy the publishable key into the
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE` slots in
-`.env` (the service-role key belongs only in an Edge Function, never in either app —
-see `.env.example` block (a)). Re-print anytime with `supabase status`.
+`.env`, and the service-role key into `SUPABASE_SERVICE_ROLE_KEY`. The web app checks
+every name in blocks (a) and (b) of `.env.example` on its first request and answers 500
+until all are set, so the local service-role key and `SUPABASE_DB_URL` have to be there
+too. No code in either app may use that key: it belongs only in an Edge Function (see
+`.env.example` block (a)). Leave block (d), the Upstash pair, commented out unless you
+use Upstash: a name that is set but empty there makes the tRPC API answer 500, and
+`web-compile` fail. If your `.env` has the two names with no value, comment them out.
+Re-print anytime with `supabase status`.
 
 - `pnpm db:reset` — drop, re-migrate, re-seed (the fastest way back to a known state).
 - `pnpm db:types` — regenerate the committed Supabase type mirror after a schema
@@ -46,10 +58,10 @@ pnpm dev:web    # next dev — the App Router UI AND the tRPC router at /api/trp
 ```
 
 `apps/web` is both the web UI and the API host: it mounts the framework-neutral
-`@app/api` router at `/api/trpc/[trpc]`. It reads the `NEXT_PUBLIC_*` values from
-`.env`. Default origin is `http://127.0.0.1:3000` — this is the committed
-`WEB_ORIGIN` default that `app.config.ts` also bakes into the mobile build's `extra`,
-so the two agree out of the box.
+`@app/api` router at `/api/trpc/[trpc]`. It reads the `NEXT_PUBLIC_*` values and the
+server-only block from the root `.env`. Default origin is `http://127.0.0.1:3000` —
+this is the committed `WEB_ORIGIN` default that `app.config.ts` also bakes into the
+mobile build's `extra`, so the two agree out of the box.
 
 ## 3. Start the mobile app — `pnpm dev:mobile`
 
@@ -57,7 +69,8 @@ so the two agree out of the box.
 pnpm dev:mobile # expo start — Metro bundler + the dev client
 ```
 
-`apps/mobile` reads its `EXPO_PUBLIC_*` values and signs in **directly** against
+`apps/mobile` reads its `EXPO_PUBLIC_*` values from the same root `.env` (no other
+name in that file reaches the bundler) and signs in **directly** against
 Supabase Auth. Its reads and writes go through the tRPC router the web app serves
 (Class-B, the default); only a vertical that opts into Class-A reads straight from
 Supabase through its `./client`. So keep `pnpm dev:web` running: without it, sign-in

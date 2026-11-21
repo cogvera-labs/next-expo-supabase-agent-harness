@@ -9,6 +9,11 @@ coverage/
 # ignores it for the same reason): without this line the first `pnpm build` in a fresh
 # scaffold leaves a few thousand generated files staged for the next `git add -A`.
 .next/
+# Next's own declaration file. `next dev` and `next build` each rewrite it, in different
+# shapes, so a tracked copy is a modified file after every run of either, and Next asks for
+# it to be ignored. apps/web/tsconfig.json names the types it references, so a clean clone
+# typechecks without it.
+next-env.d.ts
 
 # expo / metro artifacts
 .expo/

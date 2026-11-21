@@ -459,7 +459,7 @@ jobs:
           fi
           git checkout -q -- apps/web/app/providers.tsx
           [ -z "$(git status --porcelain apps/web)" ] \
-            || { git status --porcelain apps/web; echo '::error::CANARY: a failed web build left apps/web dirty — the committed next-env.d.ts must be restored'; exit 1; }
+            || { git status --porcelain apps/web; echo '::error::CANARY: a failed web build left apps/web dirty — the step must leave apps/web as it found it'; exit 1; }
           echo 'canary OK: web-compile went red on a server-only import types could not see'
       - name: 'Canary 36: every orgs state test id removed from apps/web/e2e → route-manifest must FAIL naming orgs'
         working-directory: ${{ runner.temp }}/canary
@@ -1236,8 +1236,9 @@ jobs:
         working-directory: .selftest/boot
         # 1.1.0 (#77): the cold --min-floor run above ran a real `next build` and recorded the
         # web-compile stamp, so the warm run must ride it instead of building again. `next build`
-        # rewrites the committed apps/web/next-env.d.ts and the step restores it; a dirty
-        # apps/web would be a defect of its own and would also miss this stamp on every run.
+        # writes apps/web/next-env.d.ts, which the scaffold gitignores, and the step puts it back
+        # as it found it: a copy left behind would miss this stamp on every run, and a dirty
+        # apps/web would be a defect of its own.
         run: |
           if grep -E '^web-compile: STAMPED.*inputs unchanged' warm-validate.log; then
             echo 'web-compile stamp engaged on the warm run: OK'
@@ -1248,7 +1249,7 @@ jobs:
           dirty="$(git status --porcelain apps/web)"
           if [ -n "$dirty" ]; then
             echo "$dirty"
-            echo '::error::two validate runs left apps/web dirty — the web build must restore the committed next-env.d.ts'
+            echo '::error::two validate runs left apps/web dirty — the web build step must leave apps/web as it found it'
             exit 1
           fi
           echo 'apps/web is clean after two validate runs: OK'

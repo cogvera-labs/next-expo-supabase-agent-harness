@@ -112,7 +112,9 @@ Source: no script of its own; the step runs `pnpm exec biome ci .` with
 Formatting, import organization, read-only (CI-grade `ci`, not `check --write`).
 Fix with `pnpm format`. Generated-but-committed artifacts (the design-tokens adapters,
 the Supabase type mirror, the committed contract inventories) are excluded —
-byte-stability there belongs to their regen-diff gates.
+byte-stability there belongs to their regen-diff gates. So is `apps/web/next-env.d.ts`,
+which Next rewrites on every `next dev` and `next build` in its own style: the project
+gitignores it, and the exclusion covers a project that still tracks it.
 **Anti-vacuity:** mis-indent any `.ts` file → FAIL naming the file.
 
 ### 2. gate-integrity — `node tools/check-gate-integrity.mjs`
@@ -1894,17 +1896,22 @@ lane ran `next build`. It compiles only: the client-bundle purity scan stays in 
 (`build-check.mjs --web`), which reads a real build's `.next/static`.
 
 Stamped, which is what makes a full Next build affordable in a chain every turn ends on.
-The inputs are `apps/web`, `packages`, `tsconfig.base.json`, `pnpm-workspace.yaml` and
-`pnpm-lock.yaml` plus the machinery; `.next` and `dist` are never hashed; CI never honours
+The inputs are `apps/web`, `packages`, `tsconfig.base.json`, `pnpm-workspace.yaml`,
+`pnpm-lock.yaml` and the project root's `.env` (hashed as missing where there is none) plus
+the machinery; `.next` and `dist` are never hashed; CI never honours
 a stamp, so `static` builds on every pull request. The binary runs through `exec`, never a
 `package.json` script an agent could redefine, and `--webpack` matches the seeded script.
 It runs after `types`, whose `tsc -b` emits the declarations Next's own type check reads:
 run alone on a fresh clone it reds with TS6305 and names that command. For each Supabase key
 the build needs that neither the caller nor an `apps/web/.env*` file sets, it supplies the
 `web-build` job's placeholder, byte for byte, and prints which keys it filled (the stamp
-hashes files, not the environment). The build rewrites the committed
-`apps/web/next-env.d.ts`, and the step restores it, so the tree stays clean and a second run
-stamp-hits. Skips loudly without `apps/web` or `node_modules`; fails closed in CI.
+hashes files, not the environment). A placeholder outranks the root `.env` that
+`apps/web/next.config.ts` loads, so a copy of `.env.example` that is not filled in yet cannot
+red the step; a name that file sets beyond the placeholder keys does reach the build. The
+build writes `apps/web/next-env.d.ts`, which Next manages and the project gitignores, and
+the step puts it back as it found it: removed where there was none, restored where there
+was one (a project that still tracks the file would otherwise be left with it modified). So
+a second run stamp-hits. Skips loudly without `apps/web` or `node_modules`; fails closed in CI.
 
 Shipped **ramped** (`minVersion 1.1.0`, `until 1.2.0`): `update` injects the step into an
 existing chain, so below that baseVersion a failed build was a NOTE carrying the output,

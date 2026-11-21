@@ -32,6 +32,8 @@ const QUALITY_GATE = fileURLToPath(
 )
 const STAMP = join('.harness', 'web-compile.ok')
 const NEXT_ENV = join('apps', 'web', 'next-env.d.ts')
+/** The project root's env file, as a path relative to the fixture. */
+const ROOT_ENV = '.env'
 const COMMITTED_NEXT_ENV = '/// <reference types="next" />\n// committed on purpose\n'
 const PATH_KEY = Object.keys(process.env).find((k) => k.toUpperCase() === 'PATH') ?? 'PATH'
 
@@ -65,18 +67,20 @@ function webBuildJobEnv() {
 const PLACEHOLDERS = webBuildJobEnv()
 
 /**
- * A scaffold-shaped tree: apps/web with a committed next-env.d.ts, a workspace package, the
- * root files the stamp hashes, and node_modules. Every knob can remove one of them.
- * @param {{ web?: boolean, nodeModules?: boolean, manifest?: { baseVersion: string, harnessVersion: string } }} [knobs]
+ * A scaffold-shaped tree: apps/web with a next-env.d.ts already in it (a project that tracks
+ * the file, or one whose dev server has run), a workspace package, the root files the stamp
+ * hashes, and node_modules. Every knob can remove one of them; `nextEnv: false` is a clean
+ * clone, where Next has written nothing yet.
+ * @param {{ web?: boolean, nextEnv?: boolean, nodeModules?: boolean, manifest?: { baseVersion: string, harnessVersion: string } }} [knobs]
  */
-function fixture({ web = true, nodeModules = true, manifest } = {}) {
+function fixture({ web = true, nextEnv = true, nodeModules = true, manifest } = {}) {
   const dir = tempDir('epah-webcompile-')
   made.push(dir)
   if (web) {
     mkdirSync(join(dir, 'apps/web/app'), { recursive: true })
     writeFileSync(join(dir, 'apps/web/package.json'), '{ "name": "web", "private": true }\n')
     writeFileSync(join(dir, 'apps/web/app/page.tsx'), 'export default function P() {\n  return null\n}\n')
-    writeFileSync(join(dir, NEXT_ENV), COMMITTED_NEXT_ENV)
+    if (nextEnv) writeFileSync(join(dir, NEXT_ENV), COMMITTED_NEXT_ENV)
   }
   mkdirSync(join(dir, 'packages/kernel/src'), { recursive: true })
   writeFileSync(join(dir, 'packages/kernel/src/index.ts'), 'export const x = 1\n')
@@ -219,9 +223,10 @@ test('GREEN: an exit 0 records the stamp, and unchanged inputs then hit it', () 
   assert.equal(buildCalls(dir), 1, 'a stamp hit must not build again')
 })
 
-test('the committed next-env.d.ts is restored after the build, so the stamp can hit at all', () => {
-  // `next build` rewrites apps/web/next-env.d.ts, which is committed and sits inside the
-  // `apps/web` stamp input: left rewritten, the tree is dirty and the stamp misses forever.
+test('a next-env.d.ts that was there before the build is restored after it, so the stamp can hit at all', () => {
+  // `next build` rewrites apps/web/next-env.d.ts, which sits inside the `apps/web` stamp
+  // input: left rewritten, the stamp misses forever, and a project that still tracks the file
+  // is left with it modified.
   const dir = fixture()
   armPnpm(dir)
   runGate(dir)
@@ -233,6 +238,61 @@ test('the committed next-env.d.ts is restored after the build, so the stamp can 
   runGate(red)
   assert.equal(buildCalls(red), 1)
   assert.equal(readFileSync(join(red, NEXT_ENV), 'utf8'), COMMITTED_NEXT_ENV)
+})
+
+test('a next-env.d.ts the build created is removed again, so a clean clone hits the stamp on its second run', () => {
+  // A project gitignores the file, so a clean clone has none. The stamp is taken before the
+  // build: a copy the build left behind would be a new input on the next run.
+  const dir = fixture({ nextEnv: false })
+  armPnpm(dir)
+  const first = runGate(dir)
+  assert.equal(first.code, 0, first.out)
+  assert.equal(buildCalls(dir), 1, 'the build ran, and so wrote the file')
+  assert.equal(existsSync(join(dir, NEXT_ENV)), false, 'the file the build wrote must be gone again')
+  const second = runGate(dir)
+  assert.match(second.out, /^web-compile: STAMPED — inputs unchanged since last green run/m, second.out)
+  assert.equal(buildCalls(dir), 1, 'a stamp hit must not build again')
+  // …on a failed build too.
+  const red = fixture({ nextEnv: false })
+  armPnpm(red, { exit: 1, message: 'Failed to compile.' })
+  runGate(red)
+  assert.equal(buildCalls(red), 1)
+  assert.equal(existsSync(join(red, NEXT_ENV)), false)
+})
+
+test('the project root env file is a stamp input: writing one, or changing it, re-runs the build', () => {
+  // apps/web/next.config.ts loads that file, so a name it sets reaches the build. A stamp
+  // that did not read it would stay green over an environment the build never saw.
+  const dir = fixture()
+  armPnpm(dir)
+  runGate(dir)
+  assert.match(runGate(dir).out, /^web-compile: STAMPED/m, 'no root file: the second run hits')
+  writeFileSync(join(dir, ROOT_ENV), 'UPSTASH_REDIS_REST_URL=https://one.example\n')
+  const appeared = runGate(dir)
+  assert.doesNotMatch(appeared.out, /STAMPED/, appeared.out)
+  assert.equal(buildCalls(dir), 2, 'a root env file that appears must re-run the build')
+  assert.match(runGate(dir).out, /^web-compile: STAMPED/m, 'unchanged, it hits again')
+  writeFileSync(join(dir, ROOT_ENV), 'UPSTASH_REDIS_REST_URL=https://two.example\n')
+  const changed = runGate(dir)
+  assert.doesNotMatch(changed.out, /STAMPED/, changed.out)
+  assert.equal(buildCalls(dir), 3, 'a changed root env file must re-run the build')
+})
+
+test('a placeholder outranks the root env file, so a copy that is not filled in cannot red the step', () => {
+  // The config never loads the root file over a variable that is already set, and the step
+  // sets its placeholders before the build starts. Unlike a key in an apps/web env file, a
+  // key the root file names is therefore still filled: an example copied and left empty is
+  // the first thing a new project has there.
+  const dir = fixture()
+  armPnpm(dir)
+  writeFileSync(join(dir, ROOT_ENV), 'NEXT_PUBLIC_SUPABASE_URL=\nSUPABASE_DB_URL=\n')
+  const r = runGate(dir)
+  assert.equal(r.code, 0, r.out)
+  const seen = buildEnv(dir)
+  assert.equal(seen.NEXT_PUBLIC_SUPABASE_URL, PLACEHOLDERS.NEXT_PUBLIC_SUPABASE_URL)
+  assert.equal(seen.SUPABASE_DB_URL, PLACEHOLDERS.SUPABASE_DB_URL)
+  const line = r.out.split('\n').find((l) => l.startsWith('web-compile: placeholder env')) ?? ''
+  assert.ok(line.includes('NEXT_PUBLIC_SUPABASE_URL') && line.includes('SUPABASE_DB_URL'), line)
 })
 
 test('an edit under apps/web re-runs the build, and so does an edit under packages', () => {

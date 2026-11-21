@@ -138,10 +138,28 @@ messages for both cases and what the next turn reports.
 
 ## Run the apps
 
-Copy `.env.example` to `.env` and fill in the publishable key that `pnpm db:up` prints. Then
-start the web app with `pnpm dev:web`, which also serves the tRPC API, and the mobile app with
-`pnpm dev:mobile`. [Local development](../template/base/docs/runbooks/local-development.md)
-explains the order and how a phone reaches your machine.
+Copy `.env.example` to `.env` in the project root and fill in the local values. Both dev
+servers read that one file: `apps/web/next.config.ts` loads it for the web app, and
+`apps/mobile/metro.config.js` loads its `EXPO_PUBLIC_` names for the mobile app. A variable
+set in your shell, or an env file in `apps/web` or `apps/mobile`, takes precedence over it.
+
+- **The web app** needs every name in blocks (a) and (b) of the example file:
+  `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_DB_URL`, `NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE` and `NEXT_PUBLIC_WEB_ORIGIN`. It checks them on the
+  first request and answers 500 until all are set; the dev server's log names the ones
+  that are missing. `pnpm db:up` prints the URL and both keys, and the comment above each
+  name in the example file gives its local default.
+- **The mobile app** needs `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE`
+  from block (c). `EXPO_PUBLIC_WEB_ORIGIN` may stay empty: the app then calls the origin
+  committed in `app.config.ts`.
+- **Block (d)**, the Upstash pair, ships commented out. Leave it that way unless you use
+  Upstash: the web app's API answers 500 when one of the two names is set but empty.
+
+Then start the web app with `pnpm dev:web`, which also serves the tRPC API the mobile app
+calls, and the mobile app with `pnpm dev:mobile`. Neither dev server watches the root file,
+so restart it after you change a value.
+[Local development](../template/base/docs/runbooks/local-development.md) explains the order
+and how a phone reaches your machine.
 
 ## Next steps
 
