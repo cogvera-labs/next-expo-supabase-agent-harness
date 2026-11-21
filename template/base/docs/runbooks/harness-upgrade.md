@@ -4885,6 +4885,84 @@ through 2.0.8 seeded 2.6.2), and a Biome older than the schema prints an informa
 diagnostic saying that the configuration schema version does not match the CLI version. It
 does not fail `format`. Raising `@biomejs/biome` to 2.6.7 in the catalog clears it.
 
+## 2.0.10 — a patch: two native packages held off releases that drop React Native 0.86
+
+**No ramp here applies to any install.** 2.0.10 opens no ramp and moves no deadline. The
+population 2.0.0 reds is restated in this release's record, and the 1.1.0 and 2.0.0 sections
+above are still the sweep for an install below 1.1.0.
+
+**What `update` plants.** Owned files, re-planted when your copy still matches a released
+sha: `tools/framework-floor.json`, `tools/lib/planted-shas.json` (it now knows this
+release's `tools/eol.json`), this runbook, and the hooks under `.claude/hooks/` (their
+version stamps). Nothing is withheld, and no seeded file changes on an existing install, so
+the two lines below are yours to add.
+
+### Hold `react-native-reanimated` at 4.7.2 and `react-native-worklets` at 0.13.1
+
+No package in your project declares `react-native-reanimated`. It arrives as a peer of
+`react-native-css-interop`, which NativeWind brings, so an install takes the newest
+release, and Expo links it into the native build. 4.8.0, published on 2026-11-19, supports
+React Native 0.87 to 0.89 and needs `react-native-worklets` 0.14, which supports the same
+three. Your project is on 0.86, so the Android build stops with
+`Your installed version of React Native (0.86.2) is not compatible with installed version
+of Reanimated (4.8.0)`. No gate builds the native app, so `pnpm validate` does not show it.
+The iOS build was not tried.
+
+Your lockfile decides whether you have it:
+
+```
+grep -nE 'react-native-reanimated@4\.8\.|react-native-worklets@0\.14\.' pnpm-lock.yaml
+```
+
+No output means the lockfile holds an earlier pair, and nothing changes until a dependency
+update or a regenerated lockfile resolves them again. A project that 2.0.9 or an earlier
+release scaffolded, and that first ran `pnpm install` after 4.8.0 was published, has the
+broken pair. Hold both either way, so that neither can arrive:
+
+```
+# in pnpm-workspace.yaml, above `catalog:` (under your own `overrides:` key if you have one)
+#   overrides:
+#     react-native-reanimated: 4.7.2
+#     react-native-worklets: 0.13.1
+pnpm install && git add pnpm-lock.yaml pnpm-workspace.yaml
+pnpm validate
+```
+
+Run the `grep` again: it now prints nothing. 4.7.2 and 0.13.1 are the last releases of each
+that support 0.86. `pnpm-workspace.yaml` is seeded, so `update` does not touch it, and no
+gate reads the two lines: nothing reds on an install that has not added them. Do not use
+`update --refresh-seeded pnpm-workspace.yaml` to take them: it replaces your whole catalog
+with the template's. Lift the hold when you move to a React Native line that a newer release
+of each supports.
+
+### `tools/eol.json` and `tools/framework-floor.json` re-reviewed
+
+Both registers were re-read on 2026-11-20, and neither changed a row. The `next` floor stays
+at 16.4.5 and 15.5.29. `tools/framework-floor.json` is harness-owned, so `update` refreshes
+it, and with it the review window, which now runs to 2026-12-20. The window that 2.0.8 and
+2.0.9 planted ends on 2026-12-08, and after that date your scheduled `floor-review` job reds
+on the lapsed window until you take this release.
+
+The end-of-life register is re-reviewed to 2026-12-21. The registry sweep found the same six
+deprecations, none in the production closure, and both supported sets are unchanged. The
+register is seeded, so `update` does not deliver the review. A register from 2.0.4 to 2.0.7
+lapsed on 2026-11-20, one from 2.0.8 or 2.0.9 lapses on 2026-12-09, and your scheduled
+`floor-review` job reds on a lapsed register whichever release you run. Two ways to clear
+it:
+
+```
+# if you have never edited tools/eol.json: take the harness's register
+# (overwrites when untouched, parks on drift)
+npx next-expo-supabase-agent-harness@latest update --refresh-seeded tools/eol.json
+
+# if you have your own rows: run pnpm install, re-read them against what it resolves,
+# and move reviewedOn and reviewedUntil yourself
+```
+
+From 2.0.7 or earlier, read the 2.0.8 section's `tools/eol.json` re-reviewed first: the
+refreshed register no longer lists `react-native` 0.85. From 2.0.3 or earlier, read the
+2.0.4 section's as well: it has no `uuid` row.
+
 ## RECOVERY — when an `update` is interrupted or fails
 
 Every real `update` (0.9.0+) records the pre-update state of every path it

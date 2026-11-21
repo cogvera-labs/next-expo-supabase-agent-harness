@@ -565,8 +565,9 @@ test('the GROWN list: the newest released tag is in VINTAGES, judged as the bump
     'v2.0.6',
     'v2.0.7',
     'v2.0.8',
+    'v2.0.9',
   ]
-  assert.deepEqual(checkVintages(tags, '2.0.9'), [])
+  assert.deepEqual(checkVintages(tags, '2.0.10'), [])
 
   // And the defect shape it guards: the list stopped at 0.9.0 — exactly the forgotten-entry
   // red the bump would otherwise be the first to surface. The comparison underneath is

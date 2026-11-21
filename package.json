@@ -1,6 +1,6 @@
 {
   "name": "next-expo-supabase-agent-harness",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "A Next.js + Expo (React Native) monorepo starter on Supabase with a Claude Code harness: hooks that send the agent back to work while a quality gate fails.",
   "license": "Apache-2.0",
   "author": "Cogvera Labs",
