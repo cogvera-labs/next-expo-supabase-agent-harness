@@ -1465,5 +1465,38 @@
       ],
       "why": "2.0.9 opens no escape and closes none. The population above is 2.0.0's, restated because a direct hop from any of these vintages crosses 2.0.0's record: the 1.1.0 fleet falls due as it does at 2.0.0, and the documented sweep (docs/runbooks/harness-upgrade.md, the 1.1.0 and 2.0.0 sections; scripts/ci/upgrade-sweep.mjs SWEEPS['1.1.0'] and SWEEPS['2.0.0']) is what clears it. A 1.1.0, 2.0.0, 2.0.1, 2.0.2, 2.0.3, 2.0.4, 2.0.5, 2.0.6, 2.0.7 or 2.0.8 install meets nothing that expires. Read the count off `node scripts/ci/ramp-expectations.mjs <base> 2.0.9`, never off this paragraph."
     }
+  },
+  "2.0.10": {
+    "//": [
+      "2.0.10 — a patch: the seeded workspace file holds two native packages off releases that the scaffold's React Native cannot build with, and two dated registers are re-reviewed with no row added or removed. The version bump changes the nine hook version stamps and the upgrade runbook, both OWNED and re-planted by `update` when sha-unmodified. A patch opens no ramp and moves no deadline, so the record carries no removed/renamed/configSteps/seedOnInitOnly/seededSourceFixes/dependencyObligations and no rampExtensions, and scripts/ci/upgrade-sweep.mjs needs no SWEEPS['2.0.10'] entry: nothing is withheld.",
+      "THE SEEDED WORKSPACE FILE HOLDS REACT-NATIVE-REANIMATED AT 4.7.2 AND REACT-NATIVE-WORKLETS AT 0.13.1. pnpm-workspace.yaml is SEEDED and never rewritten by `update`, so only a new scaffold gets the two lines, which sit under `overrides:` above the catalog. No workspace package declares either package: react-native-css-interop, which NativeWind brings, names react-native-reanimated as a peer, the scaffold ships no lockfile, and pnpm installs the newest release of an undeclared peer on every fresh install. react-native-reanimated 4.8.0, published on 2026-11-19, supports React Native 0.87 to 0.89 and needs react-native-worklets 0.14, which supports the same three. The scaffold is on 0.86 through Expo SDK 57, so a fresh install made since then takes 4.8.0, and its Android build stops at reanimated's assertMinimalReactNativeVersionTask; the iOS build was not tried. 4.7.2 and 0.13.1 are the last releases of each that support 0.86. The hold is an override and not a catalog entry because no package has a range to pin, and an override holds the whole dependency graph. An existing install keeps its own file and its own lockfile: it has the fault only once its lockfile resolves the broken pair, and this release's runbook section (OWNED) gives the grep that tells, and the two lines to add. No gate builds the native app and none reads the override, so `pnpm validate` is green on a project with the fault, `update` parks nothing, and nothing reds on an install whose lockfile holds an earlier pair. On one that holds the broken pair, the jobs of the shipped quality-gate.yml that build the Android app (native, mobile-e2e and perf-lane: nightly, on dispatch, and on a pull request that changes what each watches) run the Gradle build that stops on it; they were not run on such a project. The two packages are not rows in scripts/ci/catalog-holds.json: the upgrade lane, which applies that register to earlier baselines, builds no native app. Nothing is withheld and no ramp opens.",
+      "TOOLS/EOL.JSON AND TOOLS/FRAMEWORK-FLOOR.JSON ARE RE-REVIEWED, AND NO ROW IS ADDED OR REMOVED. Both were re-read on 2026-11-20, before the 2.0.8 windows end on 2026-12-08 and 2026-12-09. The framework floor (OWNED, re-planted when sha-unmodified) stays at next 16.4.5 and 15.5.29: on the review date upstream had published no advisory since 2026-11-03, so no advisory row is added, and its window moves to 2026-11-20..2026-12-20. The end-of-life register (SEEDED, never rewritten by `update`) moves its window to 2026-11-20..2026-12-21: the registry sweep found the same six deprecations, none in the production closure, and both supported sets are unchanged, Expo's 58/57/56 and react-native's 0.88/0.87/0.86. A fresh scaffold gets both reviews. tools/lib/planted-shas.json (OWNED, re-planted when sha-unmodified) gains the new register's sha, so gate-integrity knows an untracked copy of it as one a release planted. An existing install gets the floor's window through `update` and keeps its own end-of-life register, and so its own dates: a register from 2.0.4 to 2.0.7 lapsed on 2026-11-20, one from 2.0.8 or 2.0.9 lapses on 2026-12-09, and the scheduled floor-review job reds on a lapsed one until the install moves the window. This release's runbook section (OWNED) names `update --refresh-seeded tools/eol.json` for an untouched register and the review by hand for an edited one. No floor moves and no supported set changes, so no verdict moves on any install. Nothing is withheld and no ramp opens."
+    ],
+    "rampExpiry": {
+      "//": "COMPUTED by scripts/check-ramp-ledger.mjs at version 2.0.10 and copied from its output, never typed. The vintage list is identical to 2.0.9's, and 2.0.0's, for the reason 1.0.4's was identical to 1.0.3's: a patch closes no new escape, but a direct hop from an old vintage crosses 2.0.0's record and meets its expiries on arrival, so the population is restated rather than inherited by implication.",
+      "affects": [
+        "0.1.3",
+        "0.2.0",
+        "0.2.1",
+        "0.3.0",
+        "0.4.0",
+        "0.5.0",
+        "0.6.0",
+        "0.7.0",
+        "0.8.0",
+        "0.9.0",
+        "0.9.5",
+        "0.9.9",
+        "0.10.0",
+        "0.11.0",
+        "0.11.1",
+        "1.0.0",
+        "1.0.1",
+        "1.0.2",
+        "1.0.3",
+        "1.0.4"
+      ],
+      "why": "2.0.10 opens no escape and closes none. The population above is 2.0.0's, restated because a direct hop from any of these vintages crosses 2.0.0's record: the 1.1.0 fleet falls due as it does at 2.0.0, and the documented sweep (docs/runbooks/harness-upgrade.md, the 1.1.0 and 2.0.0 sections; scripts/ci/upgrade-sweep.mjs SWEEPS['1.1.0'] and SWEEPS['2.0.0']) is what clears it. A 1.1.0, 2.0.0, 2.0.1, 2.0.2, 2.0.3, 2.0.4, 2.0.5, 2.0.6, 2.0.7, 2.0.8 or 2.0.9 install meets nothing that expires. Read the count off `node scripts/ci/ramp-expectations.mjs <base> 2.0.10`, never off this paragraph."
+    }
   }
 }

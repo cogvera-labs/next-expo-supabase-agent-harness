@@ -1,7 +1,7 @@
 {
   "name": "next-expo-supabase-agent-harness",
   "description": "Subagents, slash commands and skills for Next.js, Expo (React Native) and Supabase monorepos: RLS migration authoring, security and accessibility reviewers, vertical-slice and mobile-UI skills. It carries no hooks.",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "license": "Apache-2.0",
   "homepage": "https://cogvera-labs.github.io/next-expo-supabase-agent-harness/",
   "repository": "https://github.com/cogvera-labs/next-expo-supabase-agent-harness",

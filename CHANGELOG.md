@@ -47,6 +47,138 @@ holds it:
 | [0.1.1](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#011--2026-07-19) | 2026-07-19 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
 | [0.1.0](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md#010--2026-07-18) | 2026-07-18 | [docs/changelog/0.x.md](https://github.com/cogvera-labs/next-expo-supabase-agent-harness/blob/main/docs/changelog/0.x.md) |
 
+## [2.0.10] — 2026-11-21
+
+**A patch: a new project's Android app builds again.** `react-native-reanimated` 4.8.0,
+published on 2026-11-19, supports React Native 0.87 to 0.89, and the scaffold is on 0.86. No
+package declares it, so every fresh install since then takes it, and the project's Android
+build stops at reanimated's version check while `pnpm validate` stays green. 2.0.10 holds
+`react-native-reanimated` at 4.7.2 and `react-native-worklets` at 0.13.1 in the seeded
+`pnpm-workspace.yaml`. It also re-reviews four dated registers ahead of their dates, and
+carries the changes to the README, the documentation site and the factory's own tests since
+2.0.9. No gate is added, the chain length does not change, and no ramp opens or moves. The
+`template/migrations.json` record withholds nothing and restates 2.0.0's `rampExpiry`
+population. `scripts/lib/ramp-sites.mjs` `VINTAGES` grows by `2.0.9`.
+
+**An existing install adds the two lines by hand.** `pnpm-workspace.yaml` is seeded, so
+`update` leaves it alone. An install has the fault only once its lockfile resolves
+`react-native-reanimated` 4.8.0, and `pnpm validate` is green either way: the fault shows
+wherever the Android app is built, which in a project's CI is the `native`, `mobile-e2e` and
+`perf-lane` jobs of `quality-gate.yml`. The check and the remedy are in
+`docs/runbooks/harness-upgrade.md`, 2.0.10 section.
+
+### Fixed
+
+- **A new project's Android app builds again.** `react-native-reanimated` 4.8.0, published
+  on 2026-11-19, supports React Native 0.87 to 0.89, and the scaffold is on 0.86 through
+  Expo SDK 57. No package declares it: it is a peer of `react-native-css-interop`, which
+  NativeWind brings, so every fresh install took the newest release and the Android build
+  stopped at reanimated's version check, while `pnpm validate` stayed green. The seeded
+  `pnpm-workspace.yaml` now pins `react-native-reanimated` 4.7.2 and `react-native-worklets`
+  0.13.1 under `overrides:`, the last release of each that supports 0.86.
+  `tests/gates/override-held-releases.test.mjs` holds the two overrides and the two Renovate
+  rules that skip the broken releases. This repository's scheduled `maestro-smoke` lane, its
+  only lane that builds the native app, found the fault on 2026-11-20; dispatched on the
+  branch that added the hold, it built the app and passed its flows and journeys. In a
+  project, the `native`, `mobile-e2e` and `perf-lane` jobs of `quality-gate.yml` run the
+  same Gradle build; they were not run on a project with the broken pair. The iOS build was
+  not tried. **The file is seeded, so `update` does not change an existing project's
+  copy**; the upgrade runbook has the two lines.
+- **The factory's `format` step runs Biome once per template tree.** Run once from
+  `template/base`, Biome 2.6.7 read the trees it reached by `../` without the
+  configuration's Tailwind parser option and reported parse errors in CSS that parses in a
+  scaffold. Each tree is now checked from inside itself with `template/base`'s
+  configuration, under Biome 2.5.15 and 2.6.7 alike. Factory only: nothing changes for an
+  install.
+- **The factory's tests remove the temporary directories they make.** Every test makes its
+  directories through `tests/helpers/temp-dir.mjs`, which removes them when the test file
+  ends, and a test in `tests/gates` fails on a direct `mkdtemp` call under `tests/`. Until
+  now every run of the suite left its directories in the OS temp folder. Factory only:
+  nothing changes for an install.
+- **`scripts/check-syntax.mjs` removes the temporary directory it makes.** The script
+  copies each JavaScript `.tmpl` file into a directory under the OS temp folder to check it,
+  and left that directory behind on every run, in the factory's Stop gate among them. It now
+  removes it when it exits. Factory only: nothing changes for an install.
+
+### Changed
+
+- **Four dated registers are re-reviewed on 2026-11-20, ahead of their dates.** The `next`
+  floor stays at 16.4.5 and 15.5.29: upstream has published no advisory since 2026-11-03,
+  and OSV reports none against either floor or against 16.4.6. Its window now runs to
+  2026-12-20, and its `why` records that security releases for Next.js 15 end on 2027-01-31.
+  `tools/eol.json` runs to 2026-12-21: the registry sweep over a fresh strict-tier scaffold
+  found the same six deprecations, none in the production closure, and both product tables
+  are unchanged. **The register is seeded, so `update` does not deliver that review.**
+  `conformance-supabase-grants-arrival` is re-dated to 2026-12-20: no public source says
+  either announced date has landed, and Supabase said on 2026-10-27 that the cloud default
+  had not changed and that a revised timeline would follow.
+  `conformance-ai-act-transitional` is re-dated to 2026-12-31: the negative holds on the
+  wording of Art. 50(2), read twelve days before the transitional period ends.
+  `design/CONFORMANCE-FACTS.md` §1 and §5 record both re-reads and their sources.
+- **The README's first screen says what the project is and who it is for.** The heading
+  describes the project instead of repeating the package name, a paragraph states the fit
+  and its two limits, three rows of links send a reader starting an app, one here for the
+  hooks and one checking the claims to the right sections, and a badge shows the `selftest`
+  workflow's result on `main`. Docs only: nothing changes for an install.
+- **The documentation site tells a search engine more about each page.** A page's `<title>`
+  ends with a shorter suffix, so none is cut in a search result; the FAQ, the comparison and
+  the glossary have titles that say what they cover; each sitemap entry carries the commit
+  date of its page's source file; every page links the site's `llms.txt`; and
+  `docs-site/astro.config.mjs` has a place for the Google Search Console and Bing
+  verification codes. Docs site only: nothing changes for an install.
+- **The factory's dev dependencies move.** The root toolchain takes Biome 2.6.7, the minor
+  the template's catalog already pins, with knip 6.45.1, `@types/node` 26.6.6 and `globals`
+  17.14.0; pnpm moves to 11.28.11 for the root and the docs site; and the `minimatch`
+  override moves from 11.0.3 to 11.0.8. `scripts/sbom-additions.json` has a reviewed row for
+  each component the root lockfile adds over v2.0.9, and `scripts/check-sbom-drift.mjs`
+  judges those rows at this release. Factory only: none of it is in the npm package.
+
+### What stays open
+
+- **The hold on `react-native-reanimated` and `react-native-worklets` stands** until a
+  release of each that supports the scaffold's React Native is chosen. In this repository
+  only the scheduled device lane builds the native app, so an upstream release that breaks
+  the build is found a day later, not on a pull request. Whether Renovate reads `overrides:`
+  in a `pnpm-workspace.yaml` was not verified: if it does not, the two rules do nothing, and
+  the test still fails on any change to the override.
+- **An install is not told that its lockfile holds a held release.** `update` names a pin
+  floor and `doctor` warns until it is met, but neither knows a release to stay off, so the
+  two overrides above, like 2.0.9's two catalog pins, reach an existing install only through
+  the runbook.
+- **The documented first run of the dev servers still fails.** The docs say to copy
+  `.env.example` to `.env` at the project root, and neither `pnpm dev:web` nor
+  `pnpm dev:mobile` reads that file, so the web app answers 500 on every route (#315). One
+  run of `pnpm dev:web` also rewrites the tracked `apps/web/next-env.d.ts`, which reds
+  `format` (#316). A fix for both is in review (#318). Until it ships, Next and the Expo CLI
+  read a copy of the file placed in `apps/web` and in `apps/mobile`. In the `apps/web` copy,
+  delete the `UPSTASH_REDIS_REST_URL=` and `UPSTASH_REDIS_REST_TOKEN=` lines unless both
+  have values: present and empty, as the example ships them, they make `/api/trpc` answer
+  500 and `web-compile` fail. `git checkout apps/web/next-env.d.ts` puts the tracked file
+  back.
+- **The device lane's dropped-frame cap fails on emulator noise (#322).** Between 2026-11-18
+  and 2026-11-20 the lane failed twice on `listScrollFrameDropMax`, on trees where nothing
+  about scrolling had changed, and a re-run of the same commit passed. The issue has each
+  run's measurement. `tools/interaction-budget.json` is unchanged in this release.
+- **`react-native` 0.89 is due on 2026-12-07**, and when it ships the vendor's table moves
+  0.86, which the scaffold pins through Expo SDK 57, to Unsupported. The next `tools/eol.json`
+  review has to drop 0.86, which reds the template's own pin unless the catalog has moved to
+  SDK 58 first.
+- **The shipped text still dates Supabase's default-grants change to projects created on or
+  after 2026-10-30**, which matches neither the announcement nor the platform.
+- **The dated registers fall due again in the second half of December 2026.** In
+  `scripts/obligations.json` the Supabase grants row is dated 2026-12-20, and the AI Act
+  transitional row and the CRA harmonised-standards row 2026-12-31. The review windows of
+  `tools/framework-floor.json` and `tools/eol.json` end on 2026-12-20 and 2026-12-21, and
+  the Claude Code advisory snapshot in `tools/cc-floor.json` is due by 2026-12-23. The
+  scheduled lanes red on each until it is re-read.
+- **`check-claims` does not read `docs/` or the docs site**, and `pages.yml` does not build a
+  pull request that touches `docs/`. Both are follow-ups in
+  `design/research/20261118-discoverability-and-trust/README.md`, "Plan and status".
+- **CI's `supabase start` can fail with a host port already in use (#320).** It happened on
+  three pull requests on 2026-11-20, in the `bootstrap-linux` and `demo-eject` jobs. Where
+  the log was read, rate-limited image pulls came first; whether they cause it is not
+  established. A re-run cleared it each time.
+
 ## [2.0.9] — 2026-11-19
 
 **A patch: a new scaffold passes its own gates again.** Every release through 2.0.8 seeded

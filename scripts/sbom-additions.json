@@ -448,229 +448,229 @@
     {
       "purl": "pkg:npm/%40biomejs/biome@2.6.7",
       "reason": "Direct bump of the root devDependency from 2.5.15 to 2.6.7 (Renovate dev-dependencies group), a minor from the 2.5 line to the 2.6 line the shipped catalog already pins. Published with an npm provenance attestation; no install script. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40biomejs/cli-android-arm64@2.6.7",
       "reason": "Platform binary of @biomejs/biome 2.6.7, moving in lockstep with the direct bump from 2.5.15; only the host platform's binary installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40biomejs/cli-android-x64@2.6.7",
       "reason": "Platform binary of @biomejs/biome 2.6.7, moving in lockstep with the direct bump from 2.5.15; only the host platform's binary installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40biomejs/cli-darwin-arm64@2.6.7",
       "reason": "Platform binary of @biomejs/biome 2.6.7, moving in lockstep with the direct bump from 2.5.15; only the host platform's binary installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40biomejs/cli-darwin-x64@2.6.7",
       "reason": "Platform binary of @biomejs/biome 2.6.7, moving in lockstep with the direct bump from 2.5.15; only the host platform's binary installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40biomejs/cli-linux-arm64-musl@2.6.7",
       "reason": "Platform binary of @biomejs/biome 2.6.7, moving in lockstep with the direct bump from 2.5.15; only the host platform's binary installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40biomejs/cli-linux-arm64@2.6.7",
       "reason": "Platform binary of @biomejs/biome 2.6.7, moving in lockstep with the direct bump from 2.5.15; only the host platform's binary installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40biomejs/cli-linux-x64-musl@2.6.7",
       "reason": "Platform binary of @biomejs/biome 2.6.7, moving in lockstep with the direct bump from 2.5.15; only the host platform's binary installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40biomejs/cli-linux-x64@2.6.7",
       "reason": "Platform binary of @biomejs/biome 2.6.7, moving in lockstep with the direct bump from 2.5.15; only the host platform's binary installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40biomejs/cli-win32-arm64@2.6.7",
       "reason": "Platform binary of @biomejs/biome 2.6.7, moving in lockstep with the direct bump from 2.5.15; only the host platform's binary installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40biomejs/cli-win32-x64@2.6.7",
       "reason": "Platform binary of @biomejs/biome 2.6.7, moving in lockstep with the direct bump from 2.5.15; only the host platform's binary installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40isaacs/nonrecursive-glob-match@1.1.0",
       "reason": "Transitive of minimatch 11.0.8 (the override in pnpm-workspace.yaml), which raises its range from ^1.0.3 to ^1.1.0: a minor of the one-path-portion matcher minimatch 11 delegates to, from minimatch's own maintainer. No install script, and no npm provenance attestation. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-android-arm-eabi@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-android-arm64@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-darwin-arm64@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-darwin-x64@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-freebsd-x64@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-linux-arm-gnueabihf@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-linux-arm-musleabihf@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-linux-arm64-gnu@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-linux-arm64-musl@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-linux-ppc64-gnu@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-linux-riscv64-gnu@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-linux-riscv64-musl@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-linux-s390x-gnu@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-linux-x64-gnu@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-linux-x64-musl@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-openharmony-arm64@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-win32-arm64-msvc@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-win32-ia32-msvc@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-parser/binding-win32-x64-msvc@0.156.0",
       "reason": "Platform binding of oxc-parser 0.156.0, moving in lockstep with it under knip 6.45.1 (the direct bump from 6.42.1); per-platform bindings are optional and only the host one installs. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40oxc-project/types@0.156.0",
       "reason": "Transitive of knip 6.45.1 (the direct bump from 6.42.1) via oxc-parser 0.156.0, which depends on @oxc-project/types ^0.156.0 and moves in lockstep with it. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/%40types/node@26.6.6",
       "reason": "Direct bump of the root devDependency from 26.6.5 to 26.6.6 (Renovate dev-dependencies group); type declarations only, nothing executes. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/globals@17.14.0",
       "reason": "Direct bump of the root devDependency from 17.13.0 to 17.14.0 (Renovate dev-dependencies group), a minor inside the 17.x line; a data-only package. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/knip@6.45.1",
       "reason": "Direct bump of the root devDependency from 6.42.1 to 6.45.1 (Renovate dev-dependencies group), three minors inside the 6.x line. No install script, and no npm provenance attestation. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/minimatch@11.0.8",
       "reason": "Arrives through the override 'minimatch@<11.0.1': 11.0.8 in pnpm-workspace.yaml, which Renovate moved from 11.0.3 (dev-dependencies group): patches inside the 11.0 line from the same maintainer. The override stands for GHSA-g3hv-75wg-m249, as the minimatch-11-override row in scripts/obligations.json records, and ESLint lints this repository on it as it did on 11.0.3. Published with an npm provenance attestation; no install script. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/oxc-parser@0.156.0",
       "reason": "Transitive of knip 6.45.1 (the direct bump from 6.42.1), which raises its oxc-parser range from ^0.154.0 to ^0.156.0; knip uses it to parse sources. Published with an npm provenance attestation; no install script. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     },
     {
       "purl": "pkg:npm/unbash@6.0.4",
       "reason": "Transitive of knip 6.45.1 (the direct bump from 6.42.1), which raises its unbash range from ^6.0.0 to ^6.0.4; a patch inside the 6.0 line of a package published by knip's own maintainer. No install script, and no npm provenance attestation. No advisory is recorded against it in OSV on the review date.",
-      "release": "2.0.9",
+      "release": "2.0.10",
       "reviewedOn": "2026-11-18"
     }
   ]
