@@ -62,8 +62,10 @@ population. `scripts/lib/ramp-sites.mjs` `VINTAGES` grows by `2.0.9`.
 
 **An existing install adds the two lines by hand.** `pnpm-workspace.yaml` is seeded, so
 `update` leaves it alone. An install has the fault only once its lockfile resolves
-`react-native-reanimated` 4.8.0, and no gate reds on it either way. The check and the remedy
-are in `docs/runbooks/harness-upgrade.md`, 2.0.10 section.
+`react-native-reanimated` 4.8.0, and `pnpm validate` is green either way: the fault shows
+wherever the Android app is built, which in a project's CI is the `native`, `mobile-e2e` and
+`perf-lane` jobs of `quality-gate.yml`. The check and the remedy are in
+`docs/runbooks/harness-upgrade.md`, 2.0.10 section.
 
 ### Fixed
 
@@ -75,11 +77,13 @@ are in `docs/runbooks/harness-upgrade.md`, 2.0.10 section.
   `pnpm-workspace.yaml` now pins `react-native-reanimated` 4.7.2 and `react-native-worklets`
   0.13.1 under `overrides:`, the last release of each that supports 0.86.
   `tests/gates/override-held-releases.test.mjs` holds the two overrides and the two Renovate
-  rules that skip the broken releases. The scheduled `maestro-smoke` lane, the only one that
-  builds the native app, found the fault on 2026-11-20; dispatched on the branch that added
-  the hold, it built the app and passed its flows and journeys. The iOS build was not tried.
-  **The file is seeded, so `update` does not change an existing project's copy**; the
-  upgrade runbook has the two lines.
+  rules that skip the broken releases. This repository's scheduled `maestro-smoke` lane, its
+  only lane that builds the native app, found the fault on 2026-11-20; dispatched on the
+  branch that added the hold, it built the app and passed its flows and journeys. In a
+  project, the `native`, `mobile-e2e` and `perf-lane` jobs of `quality-gate.yml` run the
+  same Gradle build; they were not run on a project with the broken pair. The iOS build was
+  not tried. **The file is seeded, so `update` does not change an existing project's
+  copy**; the upgrade runbook has the two lines.
 - **The factory's `format` step runs Biome once per template tree.** Run once from
   `template/base`, Biome 2.6.7 read the trees it reached by `../` without the
   configuration's Tailwind parser option and reported parse errors in CSS that parses in a
@@ -92,9 +96,9 @@ are in `docs/runbooks/harness-upgrade.md`, 2.0.10 section.
   now every run of the suite left its directories in the OS temp folder. Factory only:
   nothing changes for an install.
 - **`scripts/check-syntax.mjs` removes the temporary directory it makes.** The script
-  copies each `.tmpl` file into a directory under the OS temp folder to check it, and left
-  that directory behind on every run, in the factory's Stop gate among them. It now removes
-  it when it exits. Factory only: nothing changes for an install.
+  copies each JavaScript `.tmpl` file into a directory under the OS temp folder to check it,
+  and left that directory behind on every run, in the factory's Stop gate among them. It now
+  removes it when it exits. Factory only: nothing changes for an install.
 
 ### Changed
 
@@ -132,9 +136,11 @@ are in `docs/runbooks/harness-upgrade.md`, 2.0.10 section.
 ### What stays open
 
 - **The hold on `react-native-reanimated` and `react-native-worklets` stands** until a
-  release of each that supports the scaffold's React Native is chosen. Only the scheduled
-  device lane builds the native app, so a release that breaks it is found a day later, not
-  on the pull request.
+  release of each that supports the scaffold's React Native is chosen. In this repository
+  only the scheduled device lane builds the native app, so an upstream release that breaks
+  the build is found a day later, not on a pull request. Whether Renovate reads `overrides:`
+  in a `pnpm-workspace.yaml` was not verified: if it does not, the two rules do nothing, and
+  the test still fails on any change to the override.
 - **An install is not told that its lockfile holds a held release.** `update` names a pin
   floor and `doctor` warns until it is met, but neither knows a release to stay off, so the
   two overrides above, like 2.0.9's two catalog pins, reach an existing install only through
@@ -144,8 +150,11 @@ are in `docs/runbooks/harness-upgrade.md`, 2.0.10 section.
   `pnpm dev:mobile` reads that file, so the web app answers 500 on every route (#315). One
   run of `pnpm dev:web` also rewrites the tracked `apps/web/next-env.d.ts`, which reds
   `format` (#316). A fix for both is in review (#318). Until it ships, Next and the Expo CLI
-  read a copy of the file placed in `apps/web` and in `apps/mobile`, and
-  `git checkout apps/web/next-env.d.ts` puts the tracked file back.
+  read a copy of the file placed in `apps/web` and in `apps/mobile`. In the `apps/web` copy,
+  delete the `UPSTASH_REDIS_REST_URL=` and `UPSTASH_REDIS_REST_TOKEN=` lines unless both
+  have values: present and empty, as the example ships them, they make `/api/trpc` answer
+  500 and `web-compile` fail. `git checkout apps/web/next-env.d.ts` puts the tracked file
+  back.
 - **The device lane's dropped-frame cap fails on emulator noise (#322).** Between 2026-11-18
   and 2026-11-20 the lane failed twice on `listScrollFrameDropMax`, on trees where nothing
   about scrolling had changed, and a re-run of the same commit passed. The issue has each
@@ -159,7 +168,8 @@ are in `docs/runbooks/harness-upgrade.md`, 2.0.10 section.
 - **The dated registers fall due again in the second half of December 2026.** In
   `scripts/obligations.json` the Supabase grants row is dated 2026-12-20, and the AI Act
   transitional row and the CRA harmonised-standards row 2026-12-31. The review windows of
-  `tools/framework-floor.json` and `tools/eol.json` end on 2026-12-20 and 2026-12-21. The
+  `tools/framework-floor.json` and `tools/eol.json` end on 2026-12-20 and 2026-12-21, and
+  the Claude Code advisory snapshot in `tools/cc-floor.json` is due by 2026-12-23. The
   scheduled lanes red on each until it is re-read.
 - **`check-claims` does not read `docs/` or the docs site**, and `pages.yml` does not build a
   pull request that touches `docs/`. Both are follow-ups in

@@ -4906,6 +4906,11 @@ React Native 0.87 to 0.89 and needs `react-native-worklets` 0.14, which supports
 three. Your project is on 0.86, so the Android build stops with
 `Your installed version of React Native (0.86.2) is not compatible with installed version
 of Reanimated (4.8.0)`. No gate builds the native app, so `pnpm validate` does not show it.
+The jobs of your `quality-gate.yml` that build the Android app do: `native` runs
+`assembleDebug` nightly, on dispatch, and on a pull request that changes `pnpm-lock.yaml`,
+`pnpm-workspace.yaml` or another file it watches, and `mobile-e2e` and `perf-lane` build it
+too. Those jobs were not run on a project with the broken pair. The harness's own device
+lane, which runs `mobile-e2e`'s build command on a new project, is where the build stopped.
 The iOS build was not tried.
 
 Your lockfile decides whether you have it:
@@ -4928,20 +4933,21 @@ pnpm install && git add pnpm-lock.yaml pnpm-workspace.yaml
 pnpm validate
 ```
 
-Run the `grep` again: it now prints nothing. 4.7.2 and 0.13.1 are the last releases of each
-that support 0.86. `pnpm-workspace.yaml` is seeded, so `update` does not touch it, and no
-gate reads the two lines: nothing reds on an install that has not added them. Do not use
-`update --refresh-seeded pnpm-workspace.yaml` to take them: it replaces your whole catalog
-with the template's. Lift the hold when you move to a React Native line that a newer release
-of each supports.
+Run the `grep` again: it now prints nothing. The pull request that adds the lines changes
+both files the `native` job watches, so that job builds the app on it. 4.7.2 and 0.13.1 are
+the last releases of each that support 0.86. `pnpm-workspace.yaml` is seeded, so `update`
+does not touch it, and no gate reads the two lines: nothing reds on an install whose
+lockfile holds an earlier pair. Do not use `update --refresh-seeded pnpm-workspace.yaml` to
+take them: it replaces your whole catalog with the template's. Lift the hold when you move
+to a React Native line that a newer release of each supports.
 
 ### `tools/eol.json` and `tools/framework-floor.json` re-reviewed
 
-Both registers were re-read on 2026-11-20, and neither changed a row. The `next` floor stays
-at 16.4.5 and 15.5.29. `tools/framework-floor.json` is harness-owned, so `update` refreshes
-it, and with it the review window, which now runs to 2026-12-20. The window that 2.0.8 and
-2.0.9 planted ends on 2026-12-08, and after that date your scheduled `floor-review` job reds
-on the lapsed window until you take this release.
+Both registers were re-read on 2026-11-20, and no row was added or removed. The `next` floor
+stays at 16.4.5 and 15.5.29. `tools/framework-floor.json` is harness-owned, so `update`
+refreshes it, and with it the review window, which now runs to 2026-12-20. The window that
+2.0.8 and 2.0.9 planted ends on 2026-12-08, and after that date your scheduled
+`floor-review` job reds on the lapsed window until you take this release.
 
 The end-of-life register is re-reviewed to 2026-12-21. The registry sweep found the same six
 deprecations, none in the production closure, and both supported sets are unchanged. The

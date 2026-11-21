@@ -59,7 +59,8 @@ claude            # Claude Code: ask for one small change
 > NativeWind brings, so an install takes the newest release. 4.8.0 supports React Native 0.87
 > to 0.89, and the project is on 0.86, so the Android build stops with
 > `Your installed version of React Native (0.86.2) is not compatible with installed version of
-> Reanimated (4.8.0)`. The gates do not build the native app, so `pnpm validate` stays green.
+> Reanimated (4.8.0)`. The gates do not build the native app, so `pnpm validate` stays green;
+> the `native`, `mobile-e2e` and `perf-lane` jobs of `quality-gate.yml` build it in CI.
 > 2.0.10 holds the last pair that supports 0.86 in a new project's `pnpm-workspace.yaml`. In
 > an earlier one, check what your lockfile holds:
 >
