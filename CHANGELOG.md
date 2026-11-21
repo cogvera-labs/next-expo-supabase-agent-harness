@@ -146,10 +146,10 @@ are in `docs/runbooks/harness-upgrade.md`, 2.0.10 section.
   `format` (#316). A fix for both is in review (#318). Until it ships, Next and the Expo CLI
   read a copy of the file placed in `apps/web` and in `apps/mobile`, and
   `git checkout apps/web/next-env.d.ts` puts the tracked file back.
-- **The device lane's dropped-frame cap fails on emulator noise (#322).**
-  `listScrollFrameDropMax` in `tools/interaction-budget.json` is 12, and the lane's runs from
-  2026-11-18 to 2026-11-20 measured 2 to 17 on trees where nothing about scrolling had
-  changed; two of the five failed. The file is unchanged in this release.
+- **The device lane's dropped-frame cap fails on emulator noise (#322).** Between 2026-11-18
+  and 2026-11-20 the lane failed twice on `listScrollFrameDropMax`, on trees where nothing
+  about scrolling had changed, and a re-run of the same commit passed. The issue has each
+  run's measurement. `tools/interaction-budget.json` is unchanged in this release.
 - **`react-native` 0.89 is due on 2026-12-07**, and when it ships the vendor's table moves
   0.86, which the scaffold pins through Expo SDK 57, to Unsupported. The next `tools/eol.json`
   review has to drop 0.86, which reds the template's own pin unless the catalog has moved to
