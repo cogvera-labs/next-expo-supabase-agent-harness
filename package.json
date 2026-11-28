@@ -16,7 +16,7 @@
     "next-expo-supabase-agent-harness": "installer/cli.mjs"
   },
   "type": "module",
-  "packageManager": "pnpm@11.28.11",
+  "packageManager": "pnpm@11.29.0",
   "engines": {
     "node": ">=22"
   },
@@ -65,13 +65,13 @@
     "provenance"
   ],
   "devDependencies": {
-    "@biomejs/biome": "2.6.7",
+    "@biomejs/biome": "2.6.8",
     "@eslint/js": "9.39.5",
     "@types/node": "26.6.6",
     "eslint": "9.39.5",
     "eslint-plugin-sonarjs": "4.2.2",
     "globals": "17.14.0",
-    "knip": "6.45.1",
+    "knip": "6.48.0",
     "typescript": "6.0.3"
   }
 }
